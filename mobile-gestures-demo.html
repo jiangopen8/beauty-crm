@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>移动端手势功能演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding-bottom: 50px;
+        }
+
+        /* 顶部导航 */
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 5px;
+        }
+
+        .navbar h1 {
+            font-size: 18px;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 10px 0;
+        }
+
+        .sidebar-menu li {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .sidebar-menu li:hover {
+            background: #f8f9fa;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* 主内容区 */
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .section p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-group input.error,
+        .form-group textarea.error,
+        .form-group select.error {
+            border-color: #e74c3c;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn:active {
+            background: #2980b9;
+        }
+
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        table tbody tr {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        table tbody tr:active {
+            background: #f0f0f0;
+        }
+
+        /* 提示信息 */
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #7f8c8d;
+        }
+
+        .info-box ul li {
+            margin-bottom: 5px;
+        }
+
+        /* 上下文菜单动画 */
+        .context-menu {
+            animation: menuFadeIn 0.2s ease;
+        }
+
+        @keyframes menuFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .context-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-menu-item:active {
+            background: #f0f0f0;
+        }
+
+        /* 成功消息 */
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="navbar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <h1>移动端手势演示</h1>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>导航菜单</h2>
+            <p style="font-size: 12px; opacity: 0.8; margin-top: 5px;">向左滑动关闭</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li>首页</li>
+            <li>客户管理</li>
+            <li>订单管理</li>
+            <li>案例管理</li>
+            <li>任务管理</li>
+            <li>设置</li>
+        </ul>
+    </div>
+
+    <!-- 侧边栏遮罩 -->
+    <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <!-- 功能说明 -->
+        <div class="section">
+            <h2>手势功能说明</h2>
+            <div class="info-box">
+                <h3>1. 侧边栏滑动</h3>
+                <ul>
+                    <li>从屏幕左边缘向右滑动：打开侧边栏</li>
+                    <li>在侧边栏上向左滑动：关闭侧边栏</li>
+                    <li>滑动距离需超过50px才触发</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>2. 输入框自动滚动</h3>
+                <ul>
+                    <li>点击任意输入框时自动滚动到视口中央</li>
+                    <li>防止被移动键盘遮挡</li>
+                    <li>支持平滑滚动动画</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>3. 表单验证增强</h3>
+                <ul>
+                    <li>输入时实时显示错误提示</li>
+                    <li>提交时自动滚动到第一个错误字段</li>
+                    <li>支持必填、邮箱、手机号等验证</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>4. 长按菜单</h3>
+                <ul>
+                    <li>在表格行上长按（500ms）显示菜单</li>
+                    <li>支持震动反馈</li>
+                    <li>菜单项包括：查看、编辑、删除</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 表单测试 -->
+        <div class="section">
+            <h2>表单验证测试</h2>
+            <p>尝试填写以下表单，体验实时验证和自动滚动功能</p>
+            <form id="testForm">
+                <div class="form-group">
+                    <label>姓名 *</label>
+                    <input type="text" name="name" required placeholder="请输入姓名">
+                </div>
+
+                <div class="form-group">
+                    <label>手机号 *</label>
+                    <input type="tel" name="phone" required placeholder="请输入11位手机号">
+                </div>
+
+                <div class="form-group">
+                    <label>邮箱 *</label>
+                    <input type="email" name="email" required placeholder="请输入邮箱地址">
+                </div>
+
+                <div class="form-group">
+                    <label>密码 *</label>
+                    <input type="password" name="password" required minlength="6" placeholder="至少6个字符">
+                </div>
+
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea name="note" placeholder="选填，试试点击这里看自动滚动效果"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>性别 *</label>
+                    <select name="gender" required>
+                        <option value="">请选择</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn">提交表单</button>
+
+                <div class="success-message" id="successMessage">
+                    表单提交成功！
+                </div>
+            </form>
+        </div>
+
+        <!-- 表格测试 -->
+        <div class="section">
+            <h2>长按菜单测试</h2>
+            <p>在下面的表格行上长按（约0.5秒）可以显示操作菜单</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>客户姓名</th>
+                            <th>手机号</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-id="1">
+                            <td>张三</td>
+                            <td>13800138001</td>
+                            <td>活跃</td>
+                        </tr>
+                        <tr data-id="2">
+                            <td>李四</td>
+                            <td>13800138002</td>
+                            <td>潜在</td>
+                        </tr>
+                        <tr data-id="3">
+                            <td>王五</td>
+                            <td>13800138003</td>
+                            <td>活跃</td>
+                        </tr>
+                        <tr data-id="4">
+                            <td>赵六</td>
+                            <td>13800138004</td>
+                            <td>流失</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 占位内容 -->
+        <div class="section">
+            <h2>更多内容</h2>
+            <p>这是一些占位内容，用于测试滚动功能。</p>
+            <p>当页面较长时，输入框自动滚动功能会更加明显。</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        </div>
+
+        <div class="section">
+            <h2>使用说明</h2>
+            <p><strong>移动设备访问：</strong></p>
+            <p>1. 在移动设备上打开此页面</p>
+            <p>2. 或使用浏览器开发者工具切换到移动设备模式（F12）</p>
+            <p>3. 刷新页面以启用手势功能</p>
+            <br>
+            <p><strong>集成到现有页面：</strong></p>
+            <p>在页面底部引入 mobile-gestures.js 即可：</p>
+            <p><code>&lt;script src="js/mobile-gestures.js"&gt;&lt;/script&gt;</code></p>
+        </div>
+    </div>
+
+    <!-- 引入手势脚本 -->
+    <script src="js/mobile-gestures.js"></script>
+
+    <script>
+        // 侧边栏切换（备用点击方式）
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // 表单提交处理
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 显示成功消息
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.add('show');
+
+            // 3秒后隐藏
+            setTimeout(function() {
+                successMsg.classList.remove('show');
+            }, 3000);
+
+            console.log('表单提交成功');
+        });
+
+        // 监听上下文菜单事件
+        document.addEventListener('contextmenu-action', function(e) {
+            const action = e.detail.action;
+            const element = e.detail.element;
+            const id = element.dataset.id;
+
+            console.log('执行操作:', action, '数据ID:', id);
+
+            // 根据不同操作执行相应逻辑
+            switch(action) {
+                case 'view':
+                    alert('查看详情 - ID: ' + id);
+                    break;
+                case 'edit':
+                    alert('编辑 - ID: ' + id);
+                    break;
+                case 'delete':
+                    if (confirm('确定要删除这条记录吗？')) {
+                        element.style.opacity = '0.5';
+                        setTimeout(function() {
+                            element.remove();
+                        }, 300);
+                    }
+                    break;
+            }
+        });
+
+        // 侧边栏菜单点击
+        document.querySelectorAll('.sidebar-menu li').forEach(function(item) {
+            item.addEventListener('click', function() {
+                console.log('菜单点击:', this.textContent);
+                closeSidebar();
+            });
+        });
+
+        // 显示设备信息
+        console.log('设备信息:');
+        console.log('- User Agent:', navigator.userAgent);
+        console.log('- 屏幕宽度:', window.innerWidth);
+        console.log('- 屏幕高度:', window.innerHeight);
+        console.log('- 是否支持触摸:', 'ontouchstart' in window);
+        console.log('- 是否支持震动:', 'vibrate' in navigator);
+    </script>
+</body>
+</html>

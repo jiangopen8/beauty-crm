@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户详情测试页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">客户数据勾稽关系测试</h1>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">数据检查结果</h2>
+            <div id="results" class="space-y-4"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">客户列表</h2>
+            <div id="customerList" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultsDiv = document.getElementById('results');
+            const customerListDiv = document.getElementById('customerList');
+
+            let html = '<div class="space-y-4">';
+
+            // 1. 检查客户数据
+            const customers = db.getCustomers();
+            html += `<div class="border-l-4 border-blue-500 pl-4">
+                <h3 class="font-bold">✓ 客户数量: ${customers.length}</h3>
+                <p class="text-sm text-gray-600 mt-1">客户IDs: ${customers.map(c => c.id).join(', ')}</p>
+            </div>`;
+
+            // 2. 检查订单数据
+            const orders = db.getOrders();
+            html += `<div class="border-l-4 border-green-500 pl-4">
+                <h3 class="font-bold">✓ 订单数量: ${orders.length}</h3>
+                <p class="text-sm text-gray-600 mt-1">订单关联客户IDs: ${orders.map(o => o.customerId).join(', ')}</p>
+            </div>`;
+
+            // 3. 检查任务数据
+            const tasks = db.getTasks();
+            html += `<div class="border-l-4 border-purple-500 pl-4">
+                <h3 class="font-bold">✓ 任务数量: ${tasks.length}</h3>
+                <p class="text-sm text-gray-600 mt-1">任务关联客户IDs: ${[...new Set(tasks.map(t => t.customerId))].join(', ')}</p>
+            </div>`;
+
+            // 4. 检查勾稽关系
+            let mismatches = [];
+            orders.forEach(order => {
+                const customer = db.getCustomerById(order.customerId);
+                if (!customer) {
+                    mismatches.push(`订单 ${order.id} 关联的客户 ${order.customerId} 不存在`);
+                }
+            });
+
+            tasks.forEach(task => {
+                const customer = db.getCustomerById(task.customerId);
+                if (!customer) {
+                    mismatches.push(`任务 ${task.id} 关联的客户 ${task.customerId} 不存在`);
+                }
+            });
+
+            if (mismatches.length > 0) {
+                html += `<div class="border-l-4 border-red-500 pl-4">
+                    <h3 class="font-bold text-red-600">✗ 发现勾稽关系问题:</h3>
+                    <ul class="list-disc list-inside text-sm text-red-600 mt-2">
+                        ${mismatches.map(m => `<li>${m}</li>`).join('')}
+                    </ul>
+                </div>`;
+            } else {
+                html += `<div class="border-l-4 border-green-500 pl-4">
+                    <h3 class="font-bold text-green-600">✓ 数据勾稽关系正常</h3>
+                </div>`;
+            }
+
+            // 5. 测试 URLUtils
+            const testId = 'cust_1';
+            const testUrl = `customer-detail.html?id=${testId}`;
+            html += `<div class="border-l-4 border-yellow-500 pl-4">
+                <h3 class="font-bold">URL测试</h3>
+                <p class="text-sm text-gray-600 mt-1">测试URL: <code>${testUrl}</code></p>
+                <p class="text-sm text-gray-600 mt-1">当前URL参数: ${window.location.search || '(无)'}</p>
+                <p class="text-sm text-gray-600 mt-1">URLUtils.getParam('id'): ${URLUtils.getParam('id') || '(null)'}</p>
+            </div>`;
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+
+            // 显示客户列表
+            let customerListHtml = '';
+            customers.forEach(customer => {
+                const customerOrders = db.getOrdersByCustomerId(customer.id);
+                const customerTasks = db.getTasksByCustomerId(customer.id);
+
+                customerListHtml += `
+                    <div class="border rounded-lg p-4 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold">${customer.name} (${customer.phone})</h3>
+                                <p class="text-sm text-gray-600">
+                                    ID: ${customer.id} |
+                                    订单: ${customerOrders.length}个 |
+                                    任务: ${customerTasks.length}个
+                                </p>
+                            </div>
+                            <a href="customer-detail.html?id=${customer.id}"
+                               class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                查看详情
+                            </a>
+                        </div>
+                        ${customerOrders.length > 0 ? `
+                        <div class="mt-2 text-xs text-gray-500">
+                            订单IDs: ${customerOrders.map(o => o.id).join(', ')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            customerListDiv.innerHTML = customerListHtml;
+
+            // 打印到控制台
+            console.log('===== 数据检查报告 =====');
+            console.log('客户数量:', customers.length);
+            console.log('订单数量:', orders.length);
+            console.log('任务数量:', tasks.length);
+            console.log('客户数据:', customers);
+            console.log('订单数据:', orders);
+            console.log('任务数据:', tasks);
+            console.log('勾稽关系问题:', mismatches.length > 0 ? mismatches : '无问题');
+        });
+    </script>
+</body>
+</html>

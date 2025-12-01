@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美业客户洞察 CRM - 方案模板管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 卡片悬停效果 */
+        .template-card {
+            transition: all 0.3s ease;
+        }
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 模态框动画 */
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 字段项样式 */
+        .field-item {
+            transition: all 0.2s ease;
+        }
+
+        .field-item:hover {
+            background-color: #f9fafb;
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 分类标签样式 */
+        .category-profile { background: #eef2ff; color: #4338ca; }
+        .category-behavior { background: #dcfce7; color: #166534; }
+        .category-plan { background: #fef3c7; color: #92400e; }
+        .category-other { background: #fed7aa; color: #9a3412; }
+
+        /* 预览模态框样式 */
+        .preview-field {
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">方案模板管理</h1>
+                        <p class="text-sm md:text-base text-gray-600">定义灵活的客户信息采集结构,支持客户资料、行为记录和方案模板</p>
+                    </div>
+                    <button onclick="openCreateModal()" class="flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span class="font-medium">创建模板</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 分类筛选标签 -->
+            <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-2">
+                <div class="flex gap-2 overflow-x-auto pb-2">
+                    <button onclick="filterCategory('all')" id="filter-all" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap bg-purple-600 text-white">
+                        全部模板
+                    </button>
+                    <button onclick="filterCategory('profile')" id="filter-profile" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        客户信息资料
+                    </button>
+                    <button onclick="filterCategory('behavior')" id="filter-behavior" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        客户行为模板
+                    </button>
+                    <button onclick="filterCategory('plan')" id="filter-plan" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        方案模板
+                    </button>
+                    <button onclick="filterCategory('other')" id="filter-other" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        其他表单
+                    </button>
+                </div>
+            </div>
+
+            <!-- 模板列表 -->
+            <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <!-- 模板卡片将通过 JavaScript 动态生成 -->
+            </div>
+
+            <!-- 空状态 -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <div class="w-24 h-24 mx-auto mb-4 text-gray-300">
+                    <i data-lucide="layers" class="w-full h-full"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">暂无模板</h3>
+                <p class="text-gray-500 mb-6">点击上方按钮创建您的第一个模板</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 创建/编辑模板模态框 -->
+    <div id="templateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 modal-overlay">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden modal-content">
+                <!-- 模态框头部 -->
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
+                    <h2 id="modalTitle" class="text-xl font-bold text-white">创建新模板</h2>
+                    <button onclick="closeModal()" class="text-white hover:text-gray-200 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- 模态框内容 -->
+                <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                    <!-- 基本信息 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="info" class="w-5 h-5 mr-2 text-purple-600"></i>
+                            基本信息
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    模板名称 <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 头皮检测分析">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    所属分类 <span class="text-red-500">*</span>
+                                </label>
+                                <select id="templateCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+                                    <option value="profile">客户信息资料</option>
+                                    <option value="behavior">客户行为模板</option>
+                                    <option value="plan">方案模板</option>
+                                    <option value="other">其他表单</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    模板描述
+                                </label>
+                                <textarea id="templateDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="描述此模板用于收集什么数据..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 字段定义 -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="list" class="w-5 h-5 mr-2 text-purple-600"></i>
+                                字段定义
+                            </h3>
+                            <button onclick="addField()" class="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>添加字段</span>
+                            </button>
+                        </div>
+
+                        <div id="fieldsList" class="space-y-3">
+                            <!-- 字段项将通过 JavaScript 动态生成 -->
+                        </div>
+
+                        <div id="noFieldsMessage" class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <i data-lucide="layers" class="w-12 h-12 mx-auto text-gray-400 mb-2"></i>
+                            <p class="text-gray-500 text-sm">暂无字段,点击"添加字段"开始配置</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模态框底部 -->
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t border-gray-200">
+                    <button onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button onclick="saveTemplate()" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md">
+                        保存模板
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 modal-overlay">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden modal-content">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">模板预览</h2>
+                    <button onclick="closePreviewModal()" class="text-white hover:text-gray-200 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                    <div id="previewContent"></div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end border-t border-gray-200">
+                    <button onclick="closePreviewModal()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // ==================== 数据管理 ====================
+
+        // 字段类型映射
+        const FIELD_TYPES = {
+            text: '单行文本',
+            number: '数字',
+            select: '下拉单选',
+            date: '日期',
+            textarea: '多行文本',
+            boolean: '布尔值(是/否)'
+        };
+
+        // 分类映射
+        const CATEGORIES = {
+            profile: { label: '客户信息资料', class: 'category-profile', icon: 'user' },
+            behavior: { label: '客户行为模板', class: 'category-behavior', icon: 'activity' },
+            plan: { label: '方案模板', class: 'category-plan', icon: 'clipboard' },
+            other: { label: '其他表单模板', class: 'category-other', icon: 'file-text' }
+        };
+
+        // 模拟数据存储
+        let templates = [
+            {
+                id: 'tpl_001',
+                name: '头皮检测分析',
+                category: 'profile',
+                description: '用于记录客户头皮健康状况和诊断结果',
+                schema: [
+                    { key: 'scalp_type', label: '头皮类型', type: 'select', options: ['油性', '干性', '混合性', '敏感性'], required: true },
+                    { key: 'hair_density', label: '发量密度', type: 'select', options: ['稀疏', '正常', '浓密'], required: true },
+                    { key: 'scalp_condition', label: '头皮状况', type: 'textarea', required: false },
+                    { key: 'detection_date', label: '检测日期', type: 'date', required: true }
+                ]
+            },
+            {
+                id: 'tpl_002',
+                name: '减重方案',
+                category: 'plan',
+                description: '为客户定制的减重护理方案',
+                schema: [
+                    { key: 'target_weight', label: '目标体重(kg)', type: 'number', required: true },
+                    { key: 'current_weight', label: '当前体重(kg)', type: 'number', required: true },
+                    { key: 'plan_duration', label: '方案周期(天)', type: 'number', required: true },
+                    { key: 'treatment_frequency', label: '护理频率', type: 'select', options: ['每天', '每周2次', '每周3次', '每周4次'], required: true },
+                    { key: 'special_notes', label: '特殊说明', type: 'textarea', required: false }
+                ]
+            },
+            {
+                id: 'tpl_003',
+                name: '体重记录',
+                category: 'behavior',
+                description: '客户每日体重变化跟踪',
+                schema: [
+                    { key: 'record_date', label: '记录日期', type: 'date', required: true },
+                    { key: 'weight', label: '体重(kg)', type: 'number', required: true },
+                    { key: 'body_fat', label: '体脂率(%)', type: 'number', required: false },
+                    { key: 'notes', label: '备注', type: 'textarea', required: false }
+                ]
+            }
+        ];
+
+        let currentTemplate = null;
+        let currentFilter = 'all';
+
+        // ==================== 初始化 ====================
+
+        function init() {
+            renderTemplates();
+            lucide.createIcons();
+        }
+
+        // ==================== 渲染函数 ====================
+
+        function renderTemplates() {
+            const grid = document.getElementById('templates-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            const filteredTemplates = currentFilter === 'all'
+                ? templates
+                : templates.filter(t => t.category === currentFilter);
+
+            if (filteredTemplates.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                grid.innerHTML = filteredTemplates.map(template => createTemplateCard(template)).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        function createTemplateCard(template) {
+            const category = CATEGORIES[template.category];
+            return `
+                <div class="template-card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 relative group">
+                    <!-- 操作按钮 -->
+                    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="previewTemplate('${template.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="预览">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="editTemplate('${template.id}')" class="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors" title="编辑">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteTemplate('${template.id}')" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors" title="删除">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- 图标和标题 -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 ${category.class} rounded-xl">
+                            <i data-lucide="${category.icon}" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-gray-800 truncate" title="${template.name}">${template.name}</h3>
+                            <p class="text-xs text-gray-400 font-mono truncate">${template.id}</p>
+                        </div>
+                    </div>
+
+                    <!-- 分类标签 -->
+                    <div class="mb-4">
+                        <span class="inline-block px-2 py-1 text-xs rounded-lg ${category.class} font-semibold">
+                            ${category.label}
+                        </span>
+                    </div>
+
+                    <!-- 描述 -->
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+                        ${template.description || '暂无描述'}
+                    </p>
+
+                    <!-- 字段预览 -->
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase">字段预览</h4>
+                            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">${template.schema.length} 个字段</span>
+                        </div>
+                        <div class="space-y-1">
+                            ${template.schema.slice(0, 3).map(field => `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700 truncate max-w-[60%]">${field.label}</span>
+                                    <span class="text-gray-400 font-mono">${FIELD_TYPES[field.type]}</span>
+                                </div>
+                            `).join('')}
+                            ${template.schema.length > 3 ? `
+                                <div class="text-center text-xs text-gray-400 pt-1 italic">
+                                    + ${template.schema.length - 3} 更多字段
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== 分类筛选 ====================
+
+        function filterCategory(category) {
+            currentFilter = category;
+
+            // 更新按钮样式
+            document.querySelectorAll('.category-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-600', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+            });
+
+            const activeBtn = document.getElementById(`filter-${category}`);
+            activeBtn.classList.add('bg-purple-600', 'text-white');
+            activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+
+            renderTemplates();
+        }
+
+        // ==================== 模态框操作 ====================
+
+        function openCreateModal() {
+            currentTemplate = null;
+            document.getElementById('modalTitle').textContent = '创建新模板';
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateCategory').value = 'profile';
+            document.getElementById('templateDescription').value = '';
+            document.getElementById('fieldsList').innerHTML = '';
+            document.getElementById('noFieldsMessage').classList.remove('hidden');
+            document.getElementById('templateModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function editTemplate(id) {
+            const template = templates.find(t => t.id === id);
+            if (!template) return;
+
+            currentTemplate = template;
+            document.getElementById('modalTitle').textContent = '编辑模板';
+            document.getElementById('templateName').value = template.name;
+            document.getElementById('templateCategory').value = template.category;
+            document.getElementById('templateDescription').value = template.description;
+
+            // 渲染字段
+            const fieldsList = document.getElementById('fieldsList');
+            fieldsList.innerHTML = template.schema.map((field, index) => createFieldItem(field, index)).join('');
+            document.getElementById('noFieldsMessage').classList.add('hidden');
+
+            document.getElementById('templateModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('templateModal').classList.add('hidden');
+        }
+
+        // ==================== 字段管理 ====================
+
+        function addField() {
+            const fieldsList = document.getElementById('fieldsList');
+            const index = fieldsList.children.length;
+            const newField = {
+                key: `field_${Date.now()}`,
+                label: '新字段',
+                type: 'text',
+                required: false
+            };
+
+            fieldsList.insertAdjacentHTML('beforeend', createFieldItem(newField, index));
+            document.getElementById('noFieldsMessage').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        function createFieldItem(field, index) {
+            return `
+                <div class="field-item p-4 bg-gray-50 rounded-xl border border-gray-200 relative" data-index="${index}">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600 rounded-l-xl"></div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <!-- 显示标签 -->
+                        <div class="md:col-span-3">
+                            <label class="text-xs text-gray-500 mb-1 block">显示标签</label>
+                            <input type="text" value="${field.label}"
+                                onchange="updateFieldProperty(${index}, 'label', this.value)"
+                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="字段名称">
+                        </div>
+
+                        <!-- 数据库键 -->
+                        <div class="md:col-span-3">
+                            <label class="text-xs text-gray-500 mb-1 block">数据库键</label>
+                            <input type="text" value="${field.key}"
+                                onchange="updateFieldProperty(${index}, 'key', this.value)"
+                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg font-mono text-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="field_key">
+                        </div>
+
+                        <!-- 类型 -->
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-gray-500 mb-1 block">类型</label>
+                            <select onchange="updateFieldProperty(${index}, 'type', this.value)"
+                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                ${Object.entries(FIELD_TYPES).map(([value, label]) =>
+                                    `<option value="${value}" ${field.type === value ? 'selected' : ''}>${label}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+
+                        <!-- 选项 (仅下拉框显示) -->
+                        <div class="md:col-span-3 ${field.type === 'select' ? '' : 'hidden'}" id="options-${index}">
+                            <label class="text-xs text-gray-500 mb-1 block">选项 (逗号分隔)</label>
+                            <input type="text" value="${field.options ? field.options.join(',') : ''}"
+                                onchange="updateFieldProperty(${index}, 'options', this.value.split(','))"
+                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="选项1,选项2">
+                        </div>
+
+                        <!-- 必填 -->
+                        <div class="md:col-span-1 flex items-center justify-center pt-4">
+                            <label class="flex items-center gap-2 cursor-pointer" title="必填项">
+                                <input type="checkbox" ${field.required ? 'checked' : ''}
+                                    onchange="updateFieldProperty(${index}, 'required', this.checked)"
+                                    class="rounded text-purple-600 focus:ring-purple-500">
+                                <span class="text-xs font-bold text-red-500">*</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 删除按钮 -->
+                    <button onclick="removeField(${index})"
+                        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        title="删除字段">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateFieldProperty(index, property, value) {
+            // 如果改变类型,更新选项显示
+            if (property === 'type') {
+                const optionsDiv = document.getElementById(`options-${index}`);
+                if (optionsDiv) {
+                    if (value === 'select') {
+                        optionsDiv.classList.remove('hidden');
+                    } else {
+                        optionsDiv.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        function removeField(index) {
+            const fieldsList = document.getElementById('fieldsList');
+            const fieldItems = fieldsList.querySelectorAll('.field-item');
+            if (fieldItems[index]) {
+                fieldItems[index].remove();
+            }
+
+            // 如果没有字段了,显示提示
+            if (fieldsList.children.length === 0) {
+                document.getElementById('noFieldsMessage').classList.remove('hidden');
+            }
+        }
+
+        // ==================== 保存模板 ====================
+
+        function saveTemplate() {
+            const name = document.getElementById('templateName').value.trim();
+            const category = document.getElementById('templateCategory').value;
+            const description = document.getElementById('templateDescription').value.trim();
+
+            if (!name) {
+                showNotification('请输入模板名称', 'error');
+                return;
+            }
+
+            // 收集字段数据
+            const fieldItems = document.querySelectorAll('.field-item');
+            const schema = Array.from(fieldItems).map(item => {
+                const index = item.dataset.index;
+                const inputs = item.querySelectorAll('input, select');
+                return {
+                    label: inputs[0].value,
+                    key: inputs[1].value,
+                    type: inputs[2].value,
+                    options: inputs[2].value === 'select' ? inputs[3].value.split(',').filter(o => o.trim()) : undefined,
+                    required: inputs[inputs.length - 1].checked
+                };
+            });
+
+            if (schema.length === 0) {
+                showNotification('请至少添加一个字段', 'error');
+                return;
+            }
+
+            const template = {
+                id: currentTemplate ? currentTemplate.id : `tpl_${Date.now()}`,
+                name,
+                category,
+                description,
+                schema
+            };
+
+            if (currentTemplate) {
+                // 编辑现有模板
+                const index = templates.findIndex(t => t.id === currentTemplate.id);
+                templates[index] = template;
+                showNotification('模板更新成功', 'success');
+            } else {
+                // 创建新模板
+                templates.push(template);
+                showNotification('模板创建成功', 'success');
+            }
+
+            closeModal();
+            renderTemplates();
+        }
+
+        // ==================== 删除模板 ====================
+
+        function deleteTemplate(id) {
+            if (!confirm('确定要删除此模板吗?相关联的数据可能无法正确显示。')) {
+                return;
+            }
+
+            templates = templates.filter(t => t.id !== id);
+            showNotification('模板已删除', 'success');
+            renderTemplates();
+        }
+
+        // ==================== 预览模板 ====================
+
+        function previewTemplate(id) {
+            const template = templates.find(t => t.id === id);
+            if (!template) return;
+
+            const category = CATEGORIES[template.category];
+            const content = `
+                <div class="space-y-6">
+                    <!-- 模板信息 -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="p-3 ${category.class} rounded-xl">
+                                <i data-lucide="${category.icon}" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">${template.name}</h3>
+                                <p class="text-sm text-gray-500">${template.id}</p>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="inline-block px-3 py-1 text-sm rounded-lg ${category.class} font-semibold">
+                                ${category.label}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 text-sm">${template.description || '暂无描述'}</p>
+                    </div>
+
+                    <!-- 字段列表 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">字段列表 (${template.schema.length} 个)</h4>
+                        <div class="space-y-3">
+                            ${template.schema.map(field => `
+                                <div class="preview-field">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="font-medium text-gray-900">${field.label}</span>
+                                                ${field.required ? '<span class="text-red-500 text-xs font-bold">* 必填</span>' : ''}
+                                            </div>
+                                            <div class="text-xs text-gray-500 font-mono">键值: ${field.key}</div>
+                                        </div>
+                                        <span class="text-sm text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">
+                                            ${FIELD_TYPES[field.type]}
+                                        </span>
+                                    </div>
+                                    ${field.type === 'select' && field.options ? `
+                                        <div class="mt-2 text-xs text-gray-600">
+                                            <span class="font-medium">选项:</span> ${field.options.join(', ')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('previewContent').innerHTML = content;
+            document.getElementById('previewModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        // ==================== 通知系统 ====================
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-orange-500'
+            };
+
+            notification.className = `fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-right`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ==================== 用户菜单和侧边栏 ====================
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // ==================== 初始化 ====================
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

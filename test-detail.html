@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">测试诊断页面</h1>
+
+        <div class="space-y-4">
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-900 mb-2">1. 检查 db.js</h2>
+                <button onclick="testDB()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    测试数据库
+                </button>
+                <div id="db-result" class="mt-2 text-sm"></div>
+            </div>
+
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-900 mb-2">2. 检查客户数据</h2>
+                <button onclick="testCustomers()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    加载客户列表
+                </button>
+                <div id="customers-result" class="mt-2 text-sm"></div>
+            </div>
+
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-900 mb-2">3. 测试客户详情跳转</h2>
+                <div id="customer-links" class="space-y-2"></div>
+            </div>
+
+            <div class="p-4 bg-orange-50 rounded-lg">
+                <h2 class="font-semibold text-orange-900 mb-2">4. LocalStorage 数据</h2>
+                <button onclick="showStorage()" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                    查看存储数据
+                </button>
+                <div id="storage-result" class="mt-2 text-sm max-h-60 overflow-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        function testDB() {
+            const result = document.getElementById('db-result');
+            try {
+                if (typeof db === 'undefined') {
+                    result.innerHTML = '<span class="text-red-600">❌ db.js 未加载!</span>';
+                    return;
+                }
+                result.innerHTML = '<span class="text-green-600">✅ db.js 加载成功!</span>';
+            } catch (error) {
+                result.innerHTML = `<span class="text-red-600">❌ 错误: ${error.message}</span>`;
+            }
+        }
+
+        function testCustomers() {
+            const result = document.getElementById('customers-result');
+            const linksDiv = document.getElementById('customer-links');
+
+            try {
+                const customers = db.getCustomers();
+
+                if (!customers || customers.length === 0) {
+                    result.innerHTML = '<span class="text-yellow-600">⚠️ 没有客户数据,正在生成...</span>';
+                    db.generateDemoCustomers(3);
+                    const newCustomers = db.getCustomers();
+                    result.innerHTML = `<span class="text-green-600">✅ 已生成 ${newCustomers.length} 个客户</span>`;
+                } else {
+                    result.innerHTML = `<span class="text-green-600">✅ 找到 ${customers.length} 个客户</span>`;
+                }
+
+                // 显示客户链接
+                const customers2 = db.getCustomers();
+                linksDiv.innerHTML = customers2.map(c => `
+                    <a href="customer-detail.html?id=${c.id}"
+                       class="block p-3 bg-white border border-gray-200 rounded hover:border-purple-500 hover:shadow transition-all">
+                        <div class="font-medium text-gray-900">${c.name}</div>
+                        <div class="text-sm text-gray-600">ID: ${c.id}</div>
+                        <div class="text-xs text-purple-600 mt-1">点击查看详情 →</div>
+                    </a>
+                `).join('');
+
+            } catch (error) {
+                result.innerHTML = `<span class="text-red-600">❌ 错误: ${error.message}</span>`;
+                console.error(error);
+            }
+        }
+
+        function showStorage() {
+            const result = document.getElementById('storage-result');
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('beauty_crm_'));
+
+            if (keys.length === 0) {
+                result.innerHTML = '<span class="text-yellow-600">⚠️ 没有数据</span>';
+                return;
+            }
+
+            result.innerHTML = keys.map(key => {
+                const data = localStorage.getItem(key);
+                let preview = data;
+                if (data.length > 100) {
+                    preview = data.substring(0, 100) + '...';
+                }
+                return `
+                    <div class="mb-2 p-2 bg-white rounded border border-gray-200">
+                        <div class="font-medium text-gray-900">${key}</div>
+                        <div class="text-xs text-gray-600 mt-1 break-all">${preview}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 自动运行测试
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testDB();
+                testCustomers();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清除数据</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">清除本地数据</h1>
+        <p class="text-gray-600 mb-6">点击下方按钮清除所有本地存储的客户数据，然后重新加载演示数据。</p>
+
+        <button onclick="clearAndReload()" class="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium">
+            清除数据并重新加载
+        </button>
+
+        <div id="status" class="mt-4 text-center text-sm"></div>
+    </div>
+
+    <script>
+        function clearAndReload() {
+            try {
+                // 清除客户数据
+                localStorage.removeItem('customers');
+
+                // 显示成功消息
+                const status = document.getElementById('status');
+                status.className = 'mt-4 text-center text-sm text-green-600 font-medium';
+                status.textContent = '✓ 数据已清除！正在跳转到客户管理页面...';
+
+                // 延迟后跳转
+                setTimeout(() => {
+                    window.location.href = 'customers.html';
+                }, 1500);
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.className = 'mt-4 text-center text-sm text-red-600 font-medium';
+                status.textContent = '✗ 清除失败: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

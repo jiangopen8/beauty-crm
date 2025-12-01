@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美业客户洞察 CRM - 客户管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+            .mobile-grid-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+        }
+
+        /* 卡片悬停效果 */
+        .customer-card {
+            transition: all 0.3s ease;
+        }
+        .customer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 视图切换按钮 */
+        .view-btn.active {
+            background-color: #667eea;
+            color: white;
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        /* 状态样式 */
+        .status-active { background-color: #10b981; color: white; }
+        .status-pending { background-color: #f59e0b; color: white; }
+        .status-inactive { background-color: #6b7280; color: white; }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 渐变背景 */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 模态框动画 */
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 列表视图样式 */
+        .list-view .customer-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s;
+        }
+
+        .list-view .customer-item:hover {
+            background-color: #f9fafb;
+        }
+
+        /* 高亮搜索结果 */
+        .highlight {
+            background-color: #fef3c7;
+            font-weight: 600;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 批量操作栏 */
+        .batch-actions {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 头像颜色 */
+        .avatar-purple { background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); }
+        .avatar-blue { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
+        .avatar-green { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); }
+        .avatar-orange { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+        .avatar-pink { background: linear-gradient(135deg, #ec4899 0%, #f97316 100%); }
+
+        /* 详情按钮链接样式 */
+        .detail-link {
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .detail-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">0</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">0</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">0</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">活跃客户</span>
+                            <span class="font-semibold text-blue-600" id="activeCustomers">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full" id="sidebar-customer-count">0</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+
+                <!-- 系统状态信息 (移动端显示) -->
+                <div class="md:hidden mt-8 pt-6 border-t border-gray-200">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>系统状态</span>
+                            <span class="flex items-center space-x-1">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>正常</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">客户管理</h1>
+                        <p class="text-sm md:text-base text-gray-600">管理和维护客户信息，提供个性化服务</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="exportCustomers()" class="flex items-center px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                            <span class="hidden sm:inline">导出</span>
+                        </button>
+                        <button onclick="showAddCustomerModal()" class="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                            添加客户
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索和筛选栏 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 mb-4">
+                    <div class="relative md:col-span-2">
+                        <input type="text" id="searchInput" placeholder="搜索姓名或手机号..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" oninput="filterCustomers()">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" onchange="filterCustomers()">
+                        <option value="">全部状态</option>
+                        <option value="active">活跃客户</option>
+                        <option value="pending">待跟进</option>
+                        <option value="inactive">沉睡客户</option>
+                    </select>
+                    <select id="tagFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" onchange="filterCustomers()">
+                        <option value="">全部标签</option>
+                        <option value="减重">减重</option>
+                        <option value="护肤">护肤</option>
+                        <option value="抗衰">抗衰</option>
+                        <option value="美白">美白</option>
+                        <option value="祛斑">祛斑</option>
+                    </select>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="resetFilters()" class="flex items-center px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1"></i>
+                            重置
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600 hidden md:inline">视图切换:</span>
+                        <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+                            <button onclick="switchView('grid')" id="gridViewBtn" class="view-btn active px-3 py-2 text-sm transition-colors">
+                                <i data-lucide="grid" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="switchView('list')" id="listViewBtn" class="view-btn px-3 py-2 text-sm border-l border-gray-300 transition-colors">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量操作栏 -->
+            <div id="batchActionsBar" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="selectAll" class="mr-2 w-4 h-4 text-purple-600 rounded" onchange="toggleSelectAll()">
+                            <span class="text-gray-700 text-sm">全选</span>
+                        </label>
+                        <span class="text-gray-600 text-sm">已选择 <span id="selectedCount" class="font-semibold text-purple-600">0</span> 位客户</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="batchEdit()" class="flex items-center px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i data-lucide="edit" class="w-4 h-4 mr-1"></i>
+                            批量编辑
+                        </button>
+                        <button onclick="batchExport()" class="flex items-center px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            批量导出
+                        </button>
+                        <button onclick="batchDelete()" class="flex items-center px-3 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                            <i data-lucide="trash" class="w-4 h-4 mr-1"></i>
+                            批量删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 客户列表 - 网格视图 -->
+            <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                <!-- 客户卡片将通过JavaScript动态生成 -->
+            </div>
+
+            <!-- 客户列表 - 列表视图 -->
+            <div id="listView" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 text-left">
+                                    <input type="checkbox" id="selectAllList" class="w-4 h-4 text-purple-600 rounded" onchange="toggleSelectAll()">
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">客户信息</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">手机号</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">标签</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">状态</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">最后联系</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listViewBody" class="divide-y divide-gray-200">
+                            <!-- 列表数据将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div id="emptyState" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                <i data-lucide="users" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">暂无客户</h3>
+                <p class="text-gray-500 mb-6">开始添加您的第一位客户吧</p>
+                <button onclick="showAddCustomerModal()" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                    添加客户
+                </button>
+            </div>
+
+            <!-- 分页 -->
+            <div id="pagination" class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+                <div class="text-gray-600 text-sm">
+                    显示 <span class="font-semibold text-purple-600" id="showingStart">0</span>-<span class="font-semibold text-purple-600" id="showingEnd">0</span> 条，共 <span class="font-semibold text-purple-600" id="totalCount">0</span> 条记录
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="previousPage()" id="prevPageBtn" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <div id="pageNumbers" class="flex space-x-2">
+                        <!-- 页码按钮将通过JavaScript动态生成 -->
+                    </div>
+                    <button onclick="nextPage()" id="nextPageBtn" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加/编辑客户模态框 -->
+    <div id="customerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-overlay">
+        <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-content">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-900" id="modalTitle">添加客户</h2>
+                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <form id="customerForm" class="p-6 space-y-4">
+                <input type="hidden" id="customerId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">姓名 <span class="text-red-500">*</span></label>
+                        <input type="text" id="customerName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入姓名">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">手机号 <span class="text-red-500">*</span></label>
+                        <input type="tel" id="customerPhone" required pattern="^1[3-9]\d{9}$" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入手机号">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                        <select id="customerGender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="女">女</option>
+                            <option value="男">男</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">年龄</label>
+                        <input type="number" id="customerAge" min="1" max="150" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入年龄">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">客户来源</label>
+                        <select id="customerSource" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="朋友介绍">朋友介绍</option>
+                            <option value="线上推广">线上推广</option>
+                            <option value="自然到店">自然到店</option>
+                            <option value="老客户">老客户</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">客户状态</label>
+                        <select id="customerStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="active">活跃客户</option>
+                            <option value="pending">待跟进</option>
+                            <option value="inactive">沉睡客户</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">客户标签</label>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button type="button" onclick="toggleTag('减重')" class="tag-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:border-purple-500 hover:bg-purple-50 transition-colors" data-tag="减重">减重</button>
+                        <button type="button" onclick="toggleTag('护肤')" class="tag-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:border-purple-500 hover:bg-purple-50 transition-colors" data-tag="护肤">护肤</button>
+                        <button type="button" onclick="toggleTag('抗衰')" class="tag-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:border-purple-500 hover:bg-purple-50 transition-colors" data-tag="抗衰">抗衰</button>
+                        <button type="button" onclick="toggleTag('美白')" class="tag-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:border-purple-500 hover:bg-purple-50 transition-colors" data-tag="美白">美白</button>
+                        <button type="button" onclick="toggleTag('祛斑')" class="tag-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:border-purple-500 hover:bg-purple-50 transition-colors" data-tag="祛斑">祛斑</button>
+                    </div>
+                    <input type="hidden" id="customerTags" value="">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                    <textarea id="customerNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="输入备注信息..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeCustomerModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 客户详情模态框 -->
+    <div id="customerDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-overlay">
+        <div class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto modal-content">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-900">客户详情</h2>
+                <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="customerDetailContent" class="p-6">
+                <!-- 详情内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 全局变量
+        let customers = [];
+        let filteredCustomers = [];
+        let selectedCustomers = new Set();
+        let currentView = 'grid';
+        let currentPage = 1;
+        let pageSize = 12;
+        let selectedTags = [];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 如果没有客户数据,初始化演示数据
+            const existingCustomers = StorageManager.get('customers');
+            if (!existingCustomers || existingCustomers.length === 0) {
+                initDemoCustomers();
+                initDemoOrders();
+                initDemoTasks();
+            }
+
+            loadCustomers();
+            updateStats();
+            checkURLParams();
+        });
+
+        // 检查URL参数
+        function checkURLParams() {
+            const action = URLUtils.getParam('action');
+            if (action === 'add') {
+                showAddCustomerModal();
+            }
+        }
+
+        // 加载客户数据
+        function loadCustomers() {
+            // 从存储中获取客户数据
+            const storedCustomers = StorageManager.get('customers', []);
+
+            if (storedCustomers && storedCustomers.length > 0) {
+                // 转换数据格式以适配页面显示
+                customers = storedCustomers.map(customer => {
+                    const basicInfo = customer.data?.tpl_basic_info || {};
+
+                    return {
+                        id: customer.id,
+                        name: customer.name,
+                        phone: customer.phone,
+                        gender: basicInfo.gender || '女',
+                        age: basicInfo.age || 0,
+                        source: basicInfo.customer_source || '未知',
+                        status: customer.status || 'active',
+                        tags: customer.tags || [],
+                        notes: customer.notes || '',
+                        createdAt: customer.createdAt,
+                        lastContact: customer.createdAt
+                    };
+                });
+            } else {
+                customers = [];
+            }
+
+            filterCustomers();
+        }
+
+        // 初始化演示客户数据
+        function initDemoCustomers() {
+            const now = new Date().toISOString();
+            const daysAgo = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+            const demoCustomers = [
+                {
+                    id: StringUtils.uuid(),
+                    name: '张小姐',
+                    phone: '13800138001',
+                    orgId: 'org_default',
+                    createdAt: now,
+                    data: {
+                        tpl_basic_info: {
+                            gender: '女',
+                            age: 28,
+                            customer_source: '朋友介绍',
+                            vip_level: '银卡会员',
+                            consultation_notes: '对减重项目很感兴趣，已完成初次咨询'
+                        }
+                    },
+                    tags: ['减重', '护肤'],
+                    status: 'active',
+                    notes: '对减重项目很感兴趣，已完成初次咨询',
+                    chatHistory: [
+                        {
+                            role: 'user',
+                            content: '我想了解一下减重方案',
+                            timestamp: daysAgo(2)
+                        },
+                        {
+                            role: 'assistant',
+                            content: '您好！根据您的情况，我建议您可以从基础代谢测试开始，了解您的身体组成情况。我们有专业的仪器可以测量体脂率、肌肉量等数据。',
+                            timestamp: daysAgo(2)
+                        }
+                    ],
+                    diagnosisHistory: [
+                        {
+                            weight: 68.5,
+                            bodyFat: 32.5,
+                            muscleMass: 42.3,
+                            bmi: 25.8,
+                            visceralFat: 10,
+                            bmr: 1280,
+                            notes: '初次测量数据',
+                            timestamp: daysAgo(3),
+                            diagnosis: {
+                                overall: '体重偏高，体脂率超标',
+                                bodyComposition: '体脂率明显偏高，需要通过有氧运动和饮食控制来降低体脂率',
+                                recommendations: [
+                                    '建议控制每日热量摄入在1200-1500卡路里',
+                                    '每周进行3-4次有氧运动，每次30-45分钟',
+                                    '增加有氧运动频率，如快走、游泳、骑行等',
+                                    '减少高糖高脂食物摄入，增加蔬菜和优质蛋白'
+                                ],
+                                riskLevel: 'medium'
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: StringUtils.uuid(),
+                    name: '王女士',
+                    phone: '13800138002',
+                    orgId: 'org_default',
+                    createdAt: daysAgo(7),
+                    data: {
+                        tpl_basic_info: {
+                            gender: '女',
+                            age: 35,
+                            customer_source: '线上推广',
+                            vip_level: '金卡会员',
+                            consultation_notes: '高端客户，对抗衰项目有较高要求'
+                        }
+                    },
+                    tags: ['抗衰', '美白'],
+                    status: 'active',
+                    notes: '高端客户，对抗衰项目有较高要求',
+                    chatHistory: [
+                        {
+                            role: 'user',
+                            content: '你们有哪些抗衰老项目？',
+                            timestamp: daysAgo(5)
+                        },
+                        {
+                            role: 'assistant',
+                            content: '我们提供多种抗衰方案，包括光电项目、注射类项目和日常护理。可以根据您的需求定制个性化方案。建议先做个皮肤检测。',
+                            timestamp: daysAgo(5)
+                        }
+                    ],
+                    diagnosisHistory: []
+                },
+                {
+                    id: StringUtils.uuid(),
+                    name: '李小姐',
+                    phone: '13800138003',
+                    orgId: 'org_default',
+                    createdAt: daysAgo(3),
+                    data: {
+                        tpl_basic_info: {
+                            gender: '女',
+                            age: 32,
+                            customer_source: '自然到店',
+                            vip_level: '普通会员',
+                            consultation_notes: '需要跟进，了解祛斑方案'
+                        }
+                    },
+                    tags: ['祛斑', '护肤'],
+                    status: 'pending',
+                    notes: '需要跟进，了解祛斑方案',
+                    chatHistory: [],
+                    diagnosisHistory: []
+                },
+                {
+                    id: StringUtils.uuid(),
+                    name: '陈女士',
+                    phone: '13800138004',
+                    orgId: 'org_default',
+                    createdAt: daysAgo(30),
+                    data: {
+                        tpl_basic_info: {
+                            gender: '女',
+                            age: 42,
+                            customer_source: '老客户',
+                            vip_level: '钻石会员',
+                            consultation_notes: '老客户，定期做护理'
+                        }
+                    },
+                    tags: ['抗衰', '护肤'],
+                    status: 'active',
+                    notes: '老客户，定期做护理',
+                    chatHistory: [
+                        {
+                            role: 'user',
+                            content: '下次预约什么时候合适？',
+                            timestamp: daysAgo(8)
+                        },
+                        {
+                            role: 'assistant',
+                            content: '根据您上次护理的时间，建议在本周五或下周一预约。您看哪个时间更方便呢？',
+                            timestamp: daysAgo(8)
+                        },
+                        {
+                            role: 'user',
+                            content: '下周一上午10点可以吗？',
+                            timestamp: daysAgo(8)
+                        },
+                        {
+                            role: 'assistant',
+                            content: '好的，已为您预约下周一上午10点。请提前10分钟到店即可。',
+                            timestamp: daysAgo(8)
+                        }
+                    ],
+                    diagnosisHistory: [
+                        {
+                            weight: 58.2,
+                            bodyFat: 26.8,
+                            muscleMass: 38.5,
+                            bmi: 22.1,
+                            visceralFat: 8,
+                            bmr: 1185,
+                            notes: '定期体检数据',
+                            timestamp: daysAgo(15),
+                            diagnosis: {
+                                overall: '体重正常',
+                                bodyComposition: '体脂率略高于标准，建议通过运动和合理饮食来改善',
+                                recommendations: [
+                                    '保持规律运动习惯，每周至少3次有氧运动'
+                                ],
+                                riskLevel: 'low'
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: StringUtils.uuid(),
+                    name: '刘小姐',
+                    phone: '13800138005',
+                    orgId: 'org_default',
+                    createdAt: daysAgo(90),
+                    data: {
+                        tpl_basic_info: {
+                            gender: '女',
+                            age: 26,
+                            customer_source: '线上推广',
+                            vip_level: '普通会员',
+                            consultation_notes: '很久没有联系，需要回访'
+                        }
+                    },
+                    tags: ['减重', '美白'],
+                    status: 'inactive',
+                    notes: '很久没有联系，需要回访',
+                    chatHistory: [],
+                    diagnosisHistory: []
+                },
+                {
+                    id: StringUtils.uuid(),
+                    name: '赵女士',
+                    phone: '13800138006',
+                    orgId: 'org_default',
+                    createdAt: daysAgo(14),
+                    data: {
+                        tpl_basic_info: {
+                            gender: '女',
+                            age: 38,
+                            customer_source: '朋友介绍',
+                            vip_level: '银卡会员',
+                            consultation_notes: '朋友介绍过来，体验感很好'
+                        }
+                    },
+                    tags: ['护肤', '美白'],
+                    status: 'active',
+                    notes: '朋友介绍过来，体验感很好',
+                    chatHistory: [
+                        {
+                            role: 'user',
+                            content: '我朋友推荐我来做护肤',
+                            timestamp: daysAgo(14)
+                        },
+                        {
+                            role: 'assistant',
+                            content: '欢迎光临！很高兴您的朋友推荐我们。我们可以先为您做个免费的皮肤检测，了解您的肤质和需求，再为您制定合适的护理方案。',
+                            timestamp: daysAgo(14)
+                        }
+                    ],
+                    diagnosisHistory: []
+                }
+            ];
+
+            StorageManager.set('customers', demoCustomers);
+        }
+
+        // 初始化演示订单数据
+        function initDemoOrders() {
+            const daysAgo = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+            // 获取客户数据来关联订单
+            const customers = StorageManager.get('customers', []);
+            if (customers.length === 0) return;
+
+            const demoOrders = [
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    customerId: customers[0].id, // 张小姐
+                    customerName: customers[0].name,
+                    orderNumber: 'ORD' + DateUtils.format(new Date(), 'YYYYMMDD') + '001',
+                    items: [
+                        {
+                            planTemplateId: 'plan_weight_loss_basic',
+                            planTemplateName: '减重基础方案',
+                            quantity: 1,
+                            unitPrice: 3500,
+                            totalPrice: 3500,
+                            specs: '90天减重管理服务'
+                        }
+                    ],
+                    totalAmount: 3500,
+                    discountAmount: 0,
+                    finalAmount: 3500,
+                    status: 'in_progress',
+                    paymentMethod: '微信支付',
+                    paymentTime: daysAgo(2),
+                    notes: '客户目标减重10kg，已开始执行',
+                    createdAt: daysAgo(2),
+                    updatedAt: new Date().toISOString(),
+                    createdBy: 'admin'
+                },
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    customerId: customers[3].id, // 陈女士
+                    customerName: customers[3].name,
+                    orderNumber: 'ORD' + DateUtils.format(new Date(Date.now() - 20*24*60*60*1000), 'YYYYMMDD') + '002',
+                    items: [
+                        {
+                            planTemplateId: 'plan_skin_care',
+                            planTemplateName: '高端护肤套餐',
+                            quantity: 1,
+                            unitPrice: 5800,
+                            totalPrice: 5800,
+                            specs: '12次护理服务'
+                        }
+                    ],
+                    totalAmount: 5800,
+                    discountAmount: 580,
+                    finalAmount: 5220,
+                    status: 'completed',
+                    paymentMethod: '会员卡',
+                    paymentTime: daysAgo(20),
+                    notes: '钻石会员九折优惠',
+                    createdAt: daysAgo(20),
+                    updatedAt: daysAgo(1),
+                    createdBy: 'admin'
+                }
+            ];
+
+            StorageManager.set('orders', demoOrders);
+        }
+
+        // 初始化演示任务数据
+        function initDemoTasks() {
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0];
+            const daysAgo = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+            // 获取客户和订单数据来关联任务
+            const customers = StorageManager.get('customers', []);
+            const orders = StorageManager.get('orders', []);
+            if (customers.length === 0) return;
+
+            const demoTasks = [
+                // 张小姐的任务（减重方案）
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    orderId: orders.length > 0 ? orders[0].id : null,
+                    customerId: customers[0].id,
+                    customerName: customers[0].name,
+                    type: 'meal',
+                    title: '饮食打卡 - 今日',
+                    description: '记录三餐饮食，拍照上传',
+                    status: 'pending',
+                    frequency: 'daily',
+                    scheduledDate: today,
+                    scheduledTime: '20:00',
+                    reminderEnabled: true,
+                    createdAt: daysAgo(2),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    orderId: orders.length > 0 ? orders[0].id : null,
+                    customerId: customers[0].id,
+                    customerName: customers[0].name,
+                    type: 'exercise',
+                    title: '运动打卡 - 今日',
+                    description: '完成40分钟有氧运动',
+                    status: 'pending',
+                    frequency: 'daily',
+                    scheduledDate: today,
+                    scheduledTime: '18:00',
+                    reminderEnabled: true,
+                    createdAt: daysAgo(2),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    orderId: orders.length > 0 ? orders[0].id : null,
+                    customerId: customers[0].id,
+                    customerName: customers[0].name,
+                    type: 'measurement',
+                    title: '本周体重测量',
+                    description: '每周一早晨空腹测量体重、体脂',
+                    status: 'in_progress',
+                    frequency: 'weekly',
+                    scheduledDate: today,
+                    scheduledTime: '08:00',
+                    reminderEnabled: true,
+                    createdAt: daysAgo(2),
+                    updatedAt: new Date().toISOString()
+                },
+                // 陈女士的任务
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    orderId: orders.length > 1 ? orders[1].id : null,
+                    customerId: customers[3].id,
+                    customerName: customers[3].name,
+                    type: 'appointment',
+                    title: '护理预约提醒',
+                    description: '下周一上午10点护理预约',
+                    status: 'pending',
+                    frequency: 'once',
+                    scheduledDate: new Date(Date.now() + 5*24*60*60*1000).toISOString().split('T')[0],
+                    scheduledTime: '10:00',
+                    reminderEnabled: true,
+                    createdAt: daysAgo(8),
+                    updatedAt: daysAgo(8)
+                },
+                {
+                    id: StringUtils.uuid(),
+                    orgId: 'org_default',
+                    orderId: orders.length > 1 ? orders[1].id : null,
+                    customerId: customers[3].id,
+                    customerName: customers[3].name,
+                    type: 'followup',
+                    title: '护理后回访',
+                    description: '上次护理效果回访',
+                    status: 'completed',
+                    frequency: 'once',
+                    scheduledDate: daysAgo(2),
+                    scheduledTime: '15:00',
+                    reminderEnabled: false,
+                    completedAt: daysAgo(2),
+                    createdAt: daysAgo(5),
+                    updatedAt: daysAgo(2)
+                }
+            ];
+
+            StorageManager.set('tasks', demoTasks);
+        }
+
+        // 筛选客户
+        function filterCustomers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const tagFilter = document.getElementById('tagFilter').value;
+
+            filteredCustomers = customers.filter(customer => {
+                const matchSearch = !searchTerm ||
+                    customer.name.toLowerCase().includes(searchTerm) ||
+                    customer.phone.includes(searchTerm);
+
+                const matchStatus = !statusFilter || customer.status === statusFilter;
+
+                const matchTag = !tagFilter || customer.tags.includes(tagFilter);
+
+                return matchSearch && matchStatus && matchTag;
+            });
+
+            currentPage = 1;
+            renderCustomers();
+            updatePagination();
+        }
+
+        // 重置筛选
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('tagFilter').value = '';
+            filterCustomers();
+        }
+
+        // 渲染客户列表
+        function renderCustomers() {
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageCustomers = filteredCustomers.slice(start, end);
+
+            if (filteredCustomers.length === 0) {
+                document.getElementById('gridView').classList.add('hidden');
+                document.getElementById('listView').classList.add('hidden');
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('pagination').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('pagination').classList.remove('hidden');
+
+            if (currentView === 'grid') {
+                renderGridView(pageCustomers);
+            } else {
+                renderListView(pageCustomers);
+            }
+
+            // 重新初始化图标
+            lucide.createIcons();
+        }
+
+        // 渲染网格视图
+        function renderGridView(pageCustomers) {
+            const gridView = document.getElementById('gridView');
+            gridView.innerHTML = '';
+
+            pageCustomers.forEach(customer => {
+                const card = createCustomerCard(customer);
+                gridView.appendChild(card);
+            });
+
+            document.getElementById('gridView').classList.remove('hidden');
+            document.getElementById('listView').classList.add('hidden');
+        }
+
+        // 创建客户卡片
+        function createCustomerCard(customer) {
+            const card = document.createElement('div');
+            card.className = 'customer-card bg-white rounded-lg shadow-sm border border-gray-200 p-6';
+
+            const avatarColors = ['avatar-purple', 'avatar-blue', 'avatar-green', 'avatar-orange', 'avatar-pink'];
+            const avatarColor = avatarColors[customer.name.charCodeAt(0) % avatarColors.length];
+
+            const statusConfig = {
+                active: { text: '活跃', class: 'status-active' },
+                pending: { text: '待跟进', class: 'status-pending' },
+                inactive: { text: '沉睡', class: 'status-inactive' }
+            };
+
+            const status = statusConfig[customer.status] || { text: '未知', class: 'status-inactive' };
+
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" class="customer-checkbox w-4 h-4 text-purple-600 rounded" data-customer-id="${customer.id}" onchange="updateSelectedCount()">
+                        <div class="w-12 h-12 ${avatarColor} rounded-full flex items-center justify-center">
+                            <span class="text-white text-lg font-medium">${customer.name.charAt(0)}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">${customer.name}</h3>
+                            <p class="text-sm text-gray-500">${StringUtils.maskPhone(customer.phone)}</p>
+                        </div>
+                    </div>
+                    <span class="tag ${status.class}">${status.text}</span>
+                </div>
+                <div class="space-y-2 text-sm text-gray-600 mb-4">
+                    <div class="flex justify-between">
+                        <span>性别:</span>
+                        <span class="font-medium">${customer.gender}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>年龄:</span>
+                        <span class="font-medium">${customer.age}岁</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>来源:</span>
+                        <span class="font-medium">${customer.source}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>最后联系:</span>
+                        <span class="font-medium">${DateUtils.fromNow(customer.lastContact)}</span>
+                    </div>
+                </div>
+                ${customer.tags && customer.tags.length > 0 ? `
+                <div class="mb-4">
+                    <div class="flex flex-wrap gap-1">
+                        ${customer.tags.map(tag => `<span class="tag bg-purple-100 text-purple-800">${tag}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                    <a href="customer-detail.html?id=${customer.id}" class="flex items-center text-purple-600 hover:text-purple-700 text-sm font-medium transition-colors detail-link">
+                        <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                        查看详情
+                    </a>
+                    <div class="flex space-x-2">
+                        <button onclick="editCustomer('${customer.id}')" class="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteCustomer('${customer.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                            <i data-lucide="trash" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 渲染列表视图
+        function renderListView(pageCustomers) {
+            const listViewBody = document.getElementById('listViewBody');
+            listViewBody.innerHTML = '';
+
+            const statusConfig = {
+                active: { text: '活跃', class: 'status-active' },
+                pending: { text: '待跟进', class: 'status-pending' },
+                inactive: { text: '沉睡', class: 'status-inactive' }
+            };
+
+            pageCustomers.forEach(customer => {
+                const status = statusConfig[customer.status] || { text: '未知', class: 'status-inactive' };
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <input type="checkbox" class="customer-checkbox w-4 h-4 text-purple-600 rounded" data-customer-id="${customer.id}" onchange="updateSelectedCount()">
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">${customer.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">${customer.name}</div>
+                                <div class="text-sm text-gray-500">${customer.gender} · ${customer.age}岁</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">${StringUtils.maskPhone(customer.phone)}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-1">
+                            ${customer.tags.slice(0, 2).map(tag => `<span class="tag bg-purple-100 text-purple-800">${tag}</span>`).join('')}
+                            ${customer.tags.length > 2 ? `<span class="tag bg-gray-100 text-gray-800">+${customer.tags.length - 2}</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="tag ${status.class}">${status.text}</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600 text-sm">${DateUtils.fromNow(customer.lastContact)}</td>
+                    <td class="px-4 py-3 text-right">
+                        <div class="flex justify-end space-x-2">
+                            <a href="customer-detail.html?id=${customer.id}" class="p-2 text-gray-400 hover:text-purple-600 transition-colors detail-link" title="查看详情">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </a>
+                            <button onclick="editCustomer('${customer.id}')" class="p-2 text-gray-400 hover:text-purple-600 transition-colors" title="编辑">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteCustomer('${customer.id}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="删除">
+                                <i data-lucide="trash" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                listViewBody.appendChild(row);
+            });
+
+            document.getElementById('listView').classList.remove('hidden');
+            document.getElementById('gridView').classList.add('hidden');
+        }
+
+        // 切换视图
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+            document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+            renderCustomers();
+        }
+
+        // 更新分页
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, filteredCustomers.length);
+
+            document.getElementById('showingStart').textContent = filteredCustomers.length > 0 ? start : 0;
+            document.getElementById('showingEnd').textContent = end;
+            document.getElementById('totalCount').textContent = filteredCustomers.length;
+
+            // 更新页码按钮
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = `px-3 py-2 rounded-lg transition-colors ${i === currentPage ? 'bg-purple-600 text-white' : 'border border-gray-300 hover:bg-gray-50'}`;
+                button.onclick = () => goToPage(i);
+                pageNumbers.appendChild(button);
+            }
+
+            // 更新上一页/下一页按钮状态
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+        }
+
+        // 跳转到指定页
+        function goToPage(page) {
+            currentPage = page;
+            renderCustomers();
+            updatePagination();
+        }
+
+        // 上一页
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderCustomers();
+                updatePagination();
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderCustomers();
+                updatePagination();
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const total = customers.length;
+            const today = DateUtils.today();
+            const newToday = customers.filter(c => c.createdAt.startsWith(today)).length;
+            const pending = customers.filter(c => c.status === 'pending').length;
+            const active = customers.filter(c => c.status === 'active').length;
+
+            document.getElementById('totalCustomers').textContent = total;
+            document.getElementById('newCustomers').textContent = newToday;
+            document.getElementById('pendingCustomers').textContent = pending;
+            document.getElementById('activeCustomers').textContent = active;
+            document.getElementById('sidebar-customer-count').textContent = total;
+        }
+
+        // 显示添加客户模态框
+        function showAddCustomerModal() {
+            document.getElementById('modalTitle').textContent = '添加客户';
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerId').value = '';
+            selectedTags = [];
+            updateTagButtons();
+            document.getElementById('customerModal').classList.remove('hidden');
+        }
+
+        // 显示客户详情（模态框版本，保留用于兼容性）
+        function showCustomerDetail(customerId) {
+            // 此函数已被改为跳转到客户详情页面
+            // 使用 customer-detail.html?id=客户ID 进行导航
+            window.location.href = `customer-detail.html?id=${customerId}`;
+        }
+
+        // 编辑客户
+        function editCustomer(customerId) {
+            const customer = customers.find(c => c.id === customerId);
+            if (!customer) return;
+
+            // 填充表单
+            document.getElementById('modalTitle').textContent = '编辑客户';
+            document.getElementById('customerId').value = customer.id;
+            document.getElementById('customerName').value = customer.name;
+            document.getElementById('customerPhone').value = customer.phone;
+            document.getElementById('customerGender').value = customer.gender;
+            document.getElementById('customerAge').value = customer.age;
+            document.getElementById('customerSource').value = customer.source;
+            document.getElementById('customerStatus').value = customer.status;
+            document.getElementById('customerNotes').value = customer.notes || '';
+
+            selectedTags = [...customer.tags];
+            updateTagButtons();
+
+            document.getElementById('customerModal').classList.remove('hidden');
+        }
+
+        // 删除客户
+        function deleteCustomer(customerId) {
+            const storedCustomers = StorageManager.get('customers', []);
+            const customer = storedCustomers.find(c => c.id === customerId);
+            if (!customer) return;
+
+            if (confirm(`确定要删除客户 "${customer.name}" 吗？此操作不可撤销。`)) {
+                const updatedCustomers = storedCustomers.filter(c => c.id !== customerId);
+                StorageManager.set('customers', updatedCustomers);
+
+                loadCustomers();
+                updateStats();
+                UIUtils.notify('客户已删除', 'success');
+            }
+        }
+
+        // 切换标签
+        function toggleTag(tag) {
+            const index = selectedTags.indexOf(tag);
+            if (index > -1) {
+                selectedTags.splice(index, 1);
+            } else {
+                selectedTags.push(tag);
+            }
+            updateTagButtons();
+        }
+
+        // 更新标签按钮状态
+        function updateTagButtons() {
+            const tagButtons = document.querySelectorAll('.tag-btn');
+            tagButtons.forEach(btn => {
+                const tag = btn.dataset.tag;
+                if (selectedTags.includes(tag)) {
+                    btn.classList.add('border-purple-500', 'bg-purple-50', 'text-purple-700');
+                } else {
+                    btn.classList.remove('border-purple-500', 'bg-purple-50', 'text-purple-700');
+                }
+            });
+            document.getElementById('customerTags').value = selectedTags.join(',');
+        }
+
+        // 关闭客户模态框
+        function closeCustomerModal() {
+            document.getElementById('customerModal').classList.add('hidden');
+        }
+
+        // 关闭详情模态框
+        function closeDetailModal() {
+            document.getElementById('customerDetailModal').classList.add('hidden');
+        }
+
+        // 表单提交
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const customerId = document.getElementById('customerId').value;
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            const gender = document.getElementById('customerGender').value;
+            const age = parseInt(document.getElementById('customerAge').value) || 0;
+            const source = document.getElementById('customerSource').value;
+            const status = document.getElementById('customerStatus').value;
+            const notes = document.getElementById('customerNotes').value;
+
+            // 验证手机号
+            if (!Validator.isPhone(phone)) {
+                UIUtils.notify('请输入正确的手机号', 'error');
+                return;
+            }
+
+            // 获取现有的完整客户数据
+            const storedCustomers = StorageManager.get('customers', []);
+
+            if (customerId) {
+                // 更新客户
+                const index = storedCustomers.findIndex(c => c.id === customerId);
+                if (index > -1) {
+                    // 保留现有数据结构，只更新需要修改的字段
+                    storedCustomers[index].name = name;
+                    storedCustomers[index].phone = phone;
+                    storedCustomers[index].status = status;
+                    storedCustomers[index].tags = selectedTags;
+                    storedCustomers[index].notes = notes;
+
+                    if (!storedCustomers[index].data) {
+                        storedCustomers[index].data = {};
+                    }
+                    if (!storedCustomers[index].data.tpl_basic_info) {
+                        storedCustomers[index].data.tpl_basic_info = {};
+                    }
+
+                    storedCustomers[index].data.tpl_basic_info.gender = gender;
+                    storedCustomers[index].data.tpl_basic_info.age = age;
+                    storedCustomers[index].data.tpl_basic_info.customer_source = source;
+
+                    UIUtils.notify('客户信息已更新', 'success');
+                }
+            } else {
+                // 添加新客户，使用 db.js 兼容的格式
+                const newCustomer = {
+                    id: StringUtils.uuid(),
+                    name: name,
+                    phone: phone,
+                    orgId: 'org_default',
+                    createdAt: new Date().toISOString(),
+                    data: {
+                        tpl_basic_info: {
+                            gender: gender,
+                            age: age,
+                            customer_source: source,
+                            vip_level: '普通会员',
+                            consultation_notes: notes
+                        }
+                    },
+                    tags: selectedTags,
+                    status: status,
+                    notes: notes,
+                    chatHistory: [],
+                    diagnosisHistory: []
+                };
+
+                storedCustomers.push(newCustomer);
+                UIUtils.notify('客户添加成功', 'success');
+            }
+
+            StorageManager.set('customers', storedCustomers);
+            closeCustomerModal();
+            loadCustomers();
+            updateStats();
+        });
+
+        // 全选切换
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const selectAllList = document.getElementById('selectAllList');
+            const checkboxes = document.querySelectorAll('.customer-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked || selectAllList.checked;
+                const customerId = checkbox.dataset.customerId;
+                if (checkbox.checked) {
+                    selectedCustomers.add(customerId);
+                } else {
+                    selectedCustomers.delete(customerId);
+                }
+            });
+
+            updateSelectedCount();
+        }
+
+        // 更新选中数量
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.customer-checkbox:checked');
+            selectedCustomers.clear();
+            checkboxes.forEach(checkbox => {
+                selectedCustomers.add(checkbox.dataset.customerId);
+            });
+
+            const count = selectedCustomers.size;
+            document.getElementById('selectedCount').textContent = count;
+
+            // 显示/隐藏批量操作栏
+            if (count > 0) {
+                document.getElementById('batchActionsBar').classList.remove('hidden');
+            } else {
+                document.getElementById('batchActionsBar').classList.add('hidden');
+            }
+
+            // 更新全选复选框状态
+            const totalCheckboxes = document.querySelectorAll('.customer-checkbox').length;
+            document.getElementById('selectAll').checked = count === totalCheckboxes && count > 0;
+            document.getElementById('selectAllList').checked = count === totalCheckboxes && count > 0;
+        }
+
+        // 批量编辑
+        function batchEdit() {
+            if (selectedCustomers.size === 0) return;
+            UIUtils.notify(`批量编辑 ${selectedCustomers.size} 位客户`, 'info');
+        }
+
+        // 批量导出
+        function batchExport() {
+            if (selectedCustomers.size === 0) return;
+            const selectedData = customers.filter(c => selectedCustomers.has(c.id));
+            console.log('导出数据:', selectedData);
+            UIUtils.notify(`已导出 ${selectedCustomers.size} 位客户`, 'success');
+        }
+
+        // 批量删除
+        function batchDelete() {
+            if (selectedCustomers.size === 0) return;
+
+            if (confirm(`确定要删除选中的 ${selectedCustomers.size} 位客户吗？此操作不可撤销。`)) {
+                const storedCustomers = StorageManager.get('customers', []);
+                const updatedCustomers = storedCustomers.filter(c => !selectedCustomers.has(c.id));
+                StorageManager.set('customers', updatedCustomers);
+                selectedCustomers.clear();
+
+                loadCustomers();
+                updateStats();
+                UIUtils.notify('批量删除成功', 'success');
+            }
+        }
+
+        // 导出客户
+        function exportCustomers() {
+            const dataStr = JSON.stringify(customers, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `customers_${DateUtils.format(new Date(), 'YYYYMMDD')}.json`;
+            link.click();
+            UIUtils.notify('客户数据已导出', 'success');
+        }
+
+        // 用户菜单切换
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // 点击模态框外部关闭
+        document.getElementById('customerModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeCustomerModal();
+            }
+        });
+
+        document.getElementById('customerDetailModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDetailModal();
+            }
+        });
+    </script>
+</body>
+</html>

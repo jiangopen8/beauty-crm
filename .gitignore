@@ -1,0 +1,23 @@
+# 忽略文件
+node_modules/
+.DS_Store
+.env
+db.config.js
+*.log
+.vscode/
+.idea/
+dist/
+build/
+coverage/
+
+# 临时文件
+*.tmp
+*.swp
+*~
+
+# 数据库配置（敏感信息）
+database/db.config.js
+
+# 备份文件
+*.bak
+*.backup

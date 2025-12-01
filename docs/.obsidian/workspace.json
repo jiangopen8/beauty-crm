@@ -1,0 +1,194 @@
+{
+  "main": {
+    "id": "cc6e8405dce8643f",
+    "type": "split",
+    "children": [
+      {
+        "id": "50df4e3e4007ef06",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9604df3fadd2c097",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "系统设计.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "系统设计"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "85ed4a5620f8c60d",
+    "type": "split",
+    "children": [
+      {
+        "id": "26e1dd839d9bb457",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "01d97766e691cc81",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "08bebd99d07535d7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "683381be9558eea1",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "bd5feea2dc838168",
+    "type": "split",
+    "children": [
+      {
+        "id": "9652f8ec728d7f6c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3f083d768e376a2d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "系统设计.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "系统设计 的反向链接列表"
+            }
+          },
+          {
+            "id": "60849e8187040ba2",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "系统设计.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "系统设计 的出链列表"
+            }
+          },
+          {
+            "id": "5b49a82e1b76b2ac",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "2d7dbb262f5feaee",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "6636279d9fb4e674",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "系统设计.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "系统设计 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:创建新数据库": false
+    }
+  },
+  "active": "9604df3fadd2c097",
+  "lastOpenFiles": [
+    "需求分析.md",
+    "ER图设计.md",
+    "README.md",
+    "系统设计.md",
+    "ER图设计.md.tmp.4268.1764561013115"
+  ]
+}

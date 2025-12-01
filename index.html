@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美业客户洞察 CRM - 数据看板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+
+            /* 图表标题在移动端缩小 */
+            .chart-title {
+                font-size: 1rem !important;
+            }
+
+            /* 图例文字在移动端缩小 */
+            .legend-item {
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* 卡片悬停效果 */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 渐变背景 */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 图表容器样式 */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* 移动端图表容器优化 */
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 240px; /* 移动端降低高度 */
+            }
+        }
+
+        /* 饼图样式 */
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        /* 移动端饼图容器优化 */
+        @media (max-width: 768px) {
+            .pie-chart-container {
+                width: 160px !important;
+                height: 160px !important;
+            }
+        }
+
+        /* 环形进度图 */
+        .ring-progress {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        /* 移动端环形图优化 */
+        @media (max-width: 768px) {
+            .ring-progress {
+                width: 140px;
+                height: 140px;
+            }
+            .ring-progress svg {
+                width: 100%;
+                height: 100%;
+            }
+            /* 移动端环形图中心文字缩小 */
+            .ring-progress .text-4xl {
+                font-size: 2rem !important;
+            }
+            .ring-progress .text-sm {
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* 条形图样式 */
+        .bar-item {
+            transition: all 0.3s ease;
+        }
+
+        .bar-item:hover .bar-fill {
+            opacity: 0.8;
+        }
+
+        /* 图表标题 */
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        /* 图例样式 */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes growWidth {
+            from { width: 0; }
+        }
+
+        .animate-grow {
+            animation: growWidth 1s ease-out;
+        }
+
+        @keyframes drawCircle {
+            from { stroke-dashoffset: 565; }
+        }
+
+        .animate-circle {
+            animation: drawCircle 1.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+
+                <!-- 系统状态信息 (移动端显示) -->
+                <div class="md:hidden mt-8 pt-6 border-t border-gray-200">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>系统状态</span>
+                            <span class="flex items-center space-x-1">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>正常</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>最后更新</span>
+                            <span id="last-update-time">刚刚</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">数据看板</h1>
+                        <p class="text-sm md:text-base text-gray-600">欢迎回来,实时掌握业务数据动态</p>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm">
+                        <span class="text-gray-500">最后更新:</span>
+                        <span class="font-medium text-gray-700" id="dashboard-update-time">2024-11-28 14:30</span>
+                        <button onclick="refreshDashboard()" class="ml-2 p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+                <!-- 客户总数 -->
+                <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                        <span class="text-xs text-green-600 font-medium flex items-center">
+                            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                            +12%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">128</h3>
+                    <p class="text-sm text-gray-600">客户总数</p>
+                </div>
+
+                <!-- 本月订单 -->
+                <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="shopping-cart" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <span class="text-xs text-green-600 font-medium flex items-center">
+                            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                            +23%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">67</h3>
+                    <p class="text-sm text-gray-600">本月订单</p>
+                </div>
+
+                <!-- 本月营收 -->
+                <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <span class="text-xs text-green-600 font-medium flex items-center">
+                            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>
+                            +18%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">¥68.5K</h3>
+                    <p class="text-sm text-gray-600">本月营收</p>
+                </div>
+
+                <!-- 待跟进 -->
+                <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="clock" class="w-6 h-6 text-orange-600"></i>
+                        </div>
+                        <span class="text-xs text-orange-600 font-medium flex items-center">
+                            <i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i>
+                            需关注
+                        </span>
+                    </div>
+                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">12</h3>
+                    <p class="text-sm text-gray-600">待跟进客户</p>
+                </div>
+            </div>
+
+            <!-- 快速操作和最近动态 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+                <!-- 快速操作 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">快速操作</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="window.location.href='customers.html?action=add'" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                            <i data-lucide="user-plus" class="w-8 h-8 text-gray-400 group-hover:text-purple-600 mb-2"></i>
+                            <span class="text-sm font-medium text-gray-600 group-hover:text-purple-600">添加客户</span>
+                        </button>
+                        <button onclick="window.location.href='orders.html?action=add'" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all group">
+                            <i data-lucide="plus-circle" class="w-8 h-8 text-gray-400 group-hover:text-green-600 mb-2"></i>
+                            <span class="text-sm font-medium text-gray-600 group-hover:text-green-600">创建订单</span>
+                        </button>
+                        <button onclick="window.location.href='tasks.html?action=add'" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                            <i data-lucide="calendar-plus" class="w-8 h-8 text-gray-400 group-hover:text-blue-600 mb-2"></i>
+                            <span class="text-sm font-medium text-gray-600 group-hover:text-blue-600">添加任务</span>
+                        </button>
+                        <button onclick="window.location.href='cases.html?action=add'" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all group">
+                            <i data-lucide="file-plus" class="w-8 h-8 text-gray-400 group-hover:text-orange-600 mb-2"></i>
+                            <span class="text-sm font-medium text-gray-600 group-hover:text-orange-600">创建案例</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 最近动态 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-900">最近动态</h2>
+                        <a href="#" class="text-sm text-blue-600 hover:text-blue-700">查看全部</a>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="user-plus" class="w-4 h-4 text-green-600"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-900">新增客户 <span class="font-medium">张小姐</span></p>
+                                <p class="text-xs text-gray-500 mt-1">2分钟前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="shopping-cart" class="w-4 h-4 text-blue-600"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-900">订单 <span class="font-medium">#12345</span> 已完成</p>
+                                <p class="text-xs text-gray-500 mt-1">15分钟前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-900">完成任务 <span class="font-medium">客户回访</span></p>
+                                <p class="text-xs text-gray-500 mt-1">1小时前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="file-text" class="w-4 h-4 text-orange-600"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-900">新增案例 <span class="font-medium">减重成功案例</span></p>
+                                <p class="text-xs text-gray-500 mt-1">3小时前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据图表区域 -->
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">数据分析</h2>
+
+                <!-- 第一行图表: 营收趋势 + 客户增长 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+                    <!-- 营收趋势图 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 animate-fade-in">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="chart-title">近6个月营收趋势</h3>
+                            <div class="flex items-center space-x-2 text-xs">
+                                <span class="text-gray-500">总计:</span>
+                                <span class="font-bold text-blue-600">¥412.8K</span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 客户增长曲线 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 animate-fade-in" style="animation-delay: 0.1s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="chart-title">近6个月客户增长</h3>
+                            <div class="flex items-center space-x-2 text-xs">
+                                <span class="text-gray-500">增长率:</span>
+                                <span class="font-bold text-green-600">+38.5%</span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="customerGrowthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二行图表: 订单状态饼图 + 任务完成率 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
+                    <!-- 订单状态饼图 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 animate-fade-in" style="animation-delay: 0.2s;">
+                        <h3 class="chart-title">订单状态分布</h3>
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-6 mt-4">
+                            <div class="pie-chart-container" style="width: 200px; height: 200px; max-width: 100%;">
+                                <canvas id="orderStatusPie"></canvas>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #10b981;"></div>
+                                    <span class="flex-1">已完成</span>
+                                    <span class="font-semibold text-gray-900">45 (45%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #3b82f6;"></div>
+                                    <span class="flex-1">进行中</span>
+                                    <span class="font-semibold text-gray-900">30 (30%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #f59e0b;"></div>
+                                    <span class="flex-1">待支付</span>
+                                    <span class="font-semibold text-gray-900">20 (20%)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #ef4444;"></div>
+                                    <span class="flex-1">已取消</span>
+                                    <span class="font-semibold text-gray-900">5 (5%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 任务完成率环形图 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 animate-fade-in" style="animation-delay: 0.3s;">
+                        <h3 class="chart-title">本月任务完成率</h3>
+                        <div class="flex flex-col items-center justify-center mt-4">
+                            <div class="ring-progress mb-4">
+                                <svg viewBox="0 0 180 180" preserveAspectRatio="xMidYMid meet">
+                                    <circle cx="90" cy="90" r="70" fill="none" stroke="#e5e7eb" stroke-width="20"/>
+                                    <circle id="progressCircle" cx="90" cy="90" r="70" fill="none" stroke="url(#gradient)" stroke-width="20"
+                                        stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"
+                                        transform="rotate(-90 90 90)" class="animate-circle"/>
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <div class="text-4xl font-bold text-gray-900">75%</div>
+                                    <div class="text-sm text-gray-500 mt-1">完成率</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 w-full">
+                                <div class="text-center">
+                                    <div class="text-xl font-bold text-gray-900">180</div>
+                                    <div class="text-xs text-gray-500 mt-1">总任务</div>
+                                </div>
+                                <div class="text-center border-l border-r border-gray-200">
+                                    <div class="text-xl font-bold text-green-600">135</div>
+                                    <div class="text-xs text-gray-500 mt-1">已完成</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xl font-bold text-orange-600">45</div>
+                                    <div class="text-xs text-gray-500 mt-1">进行中</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第三行图表: 本周业绩对比 + 服务类型分布 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <!-- 本周业绩对比柱状图 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 animate-fade-in" style="animation-delay: 0.4s;">
+                        <h3 class="chart-title">本周 vs 上周业绩对比</h3>
+                        <div class="chart-container">
+                            <canvas id="weeklyComparisonChart"></canvas>
+                        </div>
+                        <div class="flex items-center justify-center space-x-6 mt-4 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded" style="background: #8b5cf6;"></div>
+                                <span class="text-gray-600">本周</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded" style="background: #e9d5ff;"></div>
+                                <span class="text-gray-600">上周</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 服务类型分布横向条形图 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 animate-fade-in" style="animation-delay: 0.5s;">
+                        <h3 class="chart-title">服务类型分布</h3>
+                        <div class="space-y-4 mt-6">
+                            <div class="bar-item">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-700 font-medium">面部护理</span>
+                                    <span class="text-gray-900 font-semibold">45次</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                    <div class="bar-fill h-full rounded-full animate-grow"
+                                        style="width: 75%; background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-700 font-medium">身体护理</span>
+                                    <span class="text-gray-900 font-semibold">32次</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                    <div class="bar-fill h-full rounded-full animate-grow"
+                                        style="width: 53%; background: linear-gradient(90deg, #10b981 0%, #34d399 100%); animation-delay: 0.1s;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-700 font-medium">减重塑形</span>
+                                    <span class="text-gray-900 font-semibold">28次</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                    <div class="bar-fill h-full rounded-full animate-grow"
+                                        style="width: 47%; background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%); animation-delay: 0.2s;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-700 font-medium">抗衰管理</span>
+                                    <span class="text-gray-900 font-semibold">22次</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                    <div class="bar-fill h-full rounded-full animate-grow"
+                                        style="width: 37%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); animation-delay: 0.3s;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-700 font-medium">皮肤修复</span>
+                                    <span class="text-gray-900 font-semibold">18次</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                    <div class="bar-fill h-full rounded-full animate-grow"
+                                        style="width: 30%; background: linear-gradient(90deg, #ec4899 0%, #f472b6 100%); animation-delay: 0.4s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 待办任务和客户分布 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <!-- 待办任务 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-900">今日待办</h2>
+                        <span class="text-sm text-gray-500">共 8 项</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">回访王女士 - 减重方案跟进</p>
+                                <p class="text-xs text-gray-500 mt-1">今天 10:00</p>
+                            </div>
+                            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full flex-shrink-0">紧急</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">李小姐 - 护理方案制定</p>
+                                <p class="text-xs text-gray-500 mt-1">今天 14:30</p>
+                            </div>
+                            <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full flex-shrink-0">普通</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 text-blue-600 rounded">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">整理本周客户案例</p>
+                                <p class="text-xs text-gray-500 mt-1">今天 17:00</p>
+                            </div>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex-shrink-0">低优先级</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        查看全部任务 →
+                    </button>
+                </div>
+
+                <!-- 客户分布 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">客户分布</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-600">新客户</span>
+                                <span class="font-medium text-gray-900">32%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full animate-grow" style="width: 32%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-600">活跃客户</span>
+                                <span class="font-medium text-gray-900">48%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full animate-grow" style="width: 48%; animation-delay: 0.1s;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-600">沉睡客户</span>
+                                <span class="font-medium text-gray-900">20%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-orange-600 h-2 rounded-full animate-grow" style="width: 20%; animation-delay: 0.2s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600">41</div>
+                            <div class="text-xs text-gray-500 mt-1">新客户</div>
+                        </div>
+                        <div class="text-center border-l border-r border-gray-200">
+                            <div class="text-2xl font-bold text-green-600">61</div>
+                            <div class="text-xs text-gray-500 mt-1">活跃客户</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600">26</div>
+                            <div class="text-xs text-gray-500 mt-1">沉睡客户</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 用户菜单切换
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // 刷新看板数据
+        function refreshDashboard() {
+            const updateTimeElement = document.getElementById('dashboard-update-time');
+            const now = new Date();
+            const timeString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            updateTimeElement.textContent = timeString;
+
+            showNotification('数据已更新', 'success');
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 更新时间显示
+        function updateTime() {
+            const timeElement = document.getElementById('last-update-time');
+            if (timeElement) {
+                const now = new Date();
+                timeElement.textContent = now.toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // 每分钟更新一次时间
+        setInterval(updateTime, 60000);
+        updateTime();
+
+        // ==================== 图表绘制函数 ====================
+
+        // 绘制营收趋势折线图
+        function drawRevenueChart() {
+            const canvas = document.getElementById('revenueChart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            // 设置canvas尺寸
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            // 数据
+            const months = ['6月', '7月', '8月', '9月', '10月', '11月'];
+            const revenue = [58000, 62000, 65000, 71000, 68500, 88300];
+
+            // 绘图参数
+            const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            const maxValue = Math.max(...revenue);
+            const minValue = Math.min(...revenue);
+            const valueRange = maxValue - minValue;
+
+            // 绘制网格线
+            ctx.strokeStyle = '#f3f4f6';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+            }
+
+            // 绘制Y轴标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const value = maxValue - (valueRange / 5) * i;
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.fillText((value / 1000).toFixed(0) + 'K', padding.left - 10, y + 4);
+            }
+
+            // 绘制折线和区域填充
+            const points = revenue.map((val, i) => ({
+                x: padding.left + (chartWidth / (revenue.length - 1)) * i,
+                y: padding.top + chartHeight - ((val - minValue) / valueRange) * chartHeight
+            }));
+
+            // 绘制渐变填充
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, height - padding.bottom);
+            points.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制折线
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            points.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+
+            // 绘制数据点
+            points.forEach((p, i) => {
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            // 绘制X轴标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            months.forEach((month, i) => {
+                const x = points[i].x;
+                ctx.fillText(month, x, height - padding.bottom + 20);
+            });
+        }
+
+        // 绘制客户增长曲线
+        function drawCustomerGrowthChart() {
+            const canvas = document.getElementById('customerGrowthChart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            const months = ['6月', '7月', '8月', '9月', '10月', '11月'];
+            const customers = [78, 85, 92, 103, 115, 128];
+
+            const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            const maxValue = Math.max(...customers) + 10;
+            const minValue = Math.min(...customers) - 10;
+            const valueRange = maxValue - minValue;
+
+            // 绘制网格线
+            ctx.strokeStyle = '#f3f4f6';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+            }
+
+            // 绘制Y轴标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const value = Math.round(maxValue - (valueRange / 5) * i);
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.fillText(value, padding.left - 10, y + 4);
+            }
+
+            // 绘制曲线
+            const points = customers.map((val, i) => ({
+                x: padding.left + (chartWidth / (customers.length - 1)) * i,
+                y: padding.top + chartHeight - ((val - minValue) / valueRange) * chartHeight
+            }));
+
+            // 渐变填充
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+            gradient.addColorStop(0, 'rgba(139, 92, 246, 0.2)');
+            gradient.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, height - padding.bottom);
+            points.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制曲线
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            points.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+
+            // 绘制数据点
+            points.forEach((p, i) => {
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#8b5cf6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            // X轴标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            months.forEach((month, i) => {
+                ctx.fillText(month, points[i].x, height - padding.bottom + 20);
+            });
+        }
+
+        // 绘制订单状态饼图
+        function drawOrderStatusPie() {
+            const canvas = document.getElementById('orderStatusPie');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            // 获取容器尺寸并设置Canvas尺寸
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            // 设置Canvas实际尺寸（考虑设备像素比）
+            canvas.width = containerWidth * dpr;
+            canvas.height = containerHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            // 计算饼图参数
+            const size = Math.min(containerWidth, containerHeight);
+            const centerX = containerWidth / 2;
+            const centerY = containerHeight / 2;
+            const radius = size * 0.4; // 半径为容器尺寸的40%
+
+            const data = [
+                { label: '已完成', value: 45, color: '#10b981' },
+                { label: '进行中', value: 30, color: '#3b82f6' },
+                { label: '待支付', value: 20, color: '#f59e0b' },
+                { label: '已取消', value: 5, color: '#ef4444' }
+            ];
+
+            const total = data.reduce((sum, item) => sum + item.value, 0);
+            let startAngle = -Math.PI / 2;
+
+            data.forEach(item => {
+                const sliceAngle = (item.value / total) * 2 * Math.PI;
+
+                ctx.fillStyle = item.color;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fill();
+
+                // 添加描边
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                startAngle += sliceAngle;
+            });
+
+            // 绘制中心白色圆圈
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 绘制本周业绩对比柱状图
+        function drawWeeklyComparisonChart() {
+            const canvas = document.getElementById('weeklyComparisonChart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            const thisWeek = [8500, 9200, 8800, 10500, 11200, 13500, 9800];
+            const lastWeek = [7800, 8500, 8200, 9200, 9800, 11200, 8500];
+
+            const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            const maxValue = Math.max(...thisWeek, ...lastWeek);
+
+            // 绘制网格线
+            ctx.strokeStyle = '#f3f4f6';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+            }
+
+            // Y轴标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const value = (maxValue / 5) * (5 - i);
+                const y = padding.top + (chartHeight / 5) * i;
+                ctx.fillText((value / 1000).toFixed(1) + 'K', padding.left - 10, y + 4);
+            }
+
+            // 绘制柱状图
+            const barWidth = chartWidth / (days.length * 2.5);
+            const gap = barWidth * 0.3;
+
+            days.forEach((day, i) => {
+                const x = padding.left + (chartWidth / days.length) * i + gap;
+
+                // 上周数据
+                const lastWeekHeight = (lastWeek[i] / maxValue) * chartHeight;
+                ctx.fillStyle = '#e9d5ff';
+                ctx.fillRect(x, height - padding.bottom - lastWeekHeight, barWidth, lastWeekHeight);
+
+                // 本周数据
+                const thisWeekHeight = (thisWeek[i] / maxValue) * chartHeight;
+                ctx.fillStyle = '#8b5cf6';
+                ctx.fillRect(x + barWidth + gap / 2, height - padding.bottom - thisWeekHeight, barWidth, thisWeekHeight);
+            });
+
+            // X轴标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            days.forEach((day, i) => {
+                const x = padding.left + (chartWidth / days.length) * i + (chartWidth / days.length) / 2;
+                ctx.fillText(day, x, height - padding.bottom + 20);
+            });
+        }
+
+        // 初始化所有图表
+        function initCharts() {
+            drawRevenueChart();
+            drawCustomerGrowthChart();
+            drawOrderStatusPie();
+            drawWeeklyComparisonChart();
+
+            // 设置环形进度
+            const progressCircle = document.getElementById('progressCircle');
+            if (progressCircle) {
+                const percentage = 75;
+                const circumference = 2 * Math.PI * 70;
+                const offset = circumference - (percentage / 100) * circumference;
+                progressCircle.style.strokeDashoffset = offset;
+            }
+        }
+
+        // 页面加载时初始化图表
+        window.addEventListener('load', initCharts);
+
+        // 窗口大小改变时重绘图表（防抖处理，避免频繁重绘）
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            // 延迟200ms执行，避免resize过程中频繁重绘，优化性能
+            resizeTimer = setTimeout(initCharts, 200);
+        });
+    </script>
+</body>
+</html>

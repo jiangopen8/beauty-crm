@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务管理 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 任务卡片样式 */
+        .task-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 看板列样式 */
+        .board-column {
+            min-height: 500px;
+            max-height: calc(100vh - 400px);
+            overflow-y: auto;
+        }
+
+        /* 拖拽样式 */
+        .dragging {
+            opacity: 0.5;
+        }
+        .drag-over {
+            background-color: #f0f9ff;
+            border-color: #3b82f6;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 模态框动画 */
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 日历样式 */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:hover {
+            background-color: #f3f4f6;
+        }
+
+        .calendar-day.has-tasks {
+            position: relative;
+        }
+
+        .calendar-day.has-tasks::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .calendar-day.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* 筛选标签 */
+        .filter-tag {
+            transition: all 0.2s;
+        }
+
+        .filter-tag.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* 滚动条美化 */
+        .board-column::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .board-column::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .board-column::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .board-column::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+
+                <!-- 系统状态信息 (移动端显示) -->
+                <div class="md:hidden mt-8 pt-6 border-t border-gray-200">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>系统状态</span>
+                            <span class="flex items-center space-x-1">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>正常</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>最后更新</span>
+                            <span id="last-update-time">刚刚</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题和操作 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center">
+                            <i data-lucide="check-square" class="w-7 h-7 md:w-8 md:h-8 mr-2 text-blue-600"></i>
+                            任务管理
+                        </h1>
+                        <p class="text-sm md:text-base text-gray-600">高效管理客户任务,PDCA循环优化</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openAddTaskModal()" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">添加任务</span>
+                            <span class="sm:hidden">添加</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
+                <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                    <p class="text-xs text-gray-500 mb-1">总任务</p>
+                    <p class="text-2xl font-bold text-gray-900" id="stat-total">24</p>
+                </div>
+                <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200 shadow-sm">
+                    <p class="text-xs text-yellow-700 mb-1">待执行</p>
+                    <p class="text-2xl font-bold text-yellow-700" id="stat-pending">8</p>
+                </div>
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 shadow-sm">
+                    <p class="text-xs text-blue-700 mb-1">进行中</p>
+                    <p class="text-2xl font-bold text-blue-700" id="stat-inprogress">6</p>
+                </div>
+                <div class="bg-green-50 rounded-xl p-4 border border-green-200 shadow-sm">
+                    <p class="text-xs text-green-700 mb-1">已完成</p>
+                    <p class="text-2xl font-bold text-green-700" id="stat-completed">9</p>
+                </div>
+                <div class="bg-red-50 rounded-xl p-4 border border-red-200 shadow-sm">
+                    <p class="text-xs text-red-700 mb-1">已逾期</p>
+                    <p class="text-2xl font-bold text-red-700" id="stat-overdue">1</p>
+                </div>
+            </div>
+
+            <!-- 视图切换和筛选 -->
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <!-- 视图切换 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="switchView('board')" id="view-board-btn" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                            <span>看板</span>
+                        </button>
+                        <button onclick="switchView('list')" id="view-list-btn" class="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                            <span>列表</span>
+                        </button>
+                        <button onclick="switchView('calendar')" id="view-calendar-btn" class="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                            <span class="hidden md:inline">日历</span>
+                        </button>
+                    </div>
+
+                    <!-- 筛选器 -->
+                    <div class="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0">
+                        <i data-lucide="filter" class="w-4 h-4 text-gray-500 flex-shrink-0"></i>
+                        <select id="filter-type" onchange="applyFilters()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white flex-shrink-0">
+                            <option value="all">所有类型</option>
+                            <option value="meal">饮食</option>
+                            <option value="exercise">运动</option>
+                            <option value="sleep">睡眠</option>
+                            <option value="weight">体重</option>
+                            <option value="treatment">护理</option>
+                            <option value="checkup">复查</option>
+                            <option value="custom">自定义</option>
+                        </select>
+                        <select id="filter-customer" onchange="applyFilters()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white flex-shrink-0">
+                            <option value="all">所有客户</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 看板视图 -->
+            <div id="board-view" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <!-- 待执行 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-yellow-600"></i>
+                            <h3 class="font-bold text-gray-800">待执行</h3>
+                        </div>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-1 rounded-full" id="pending-count">0</span>
+                    </div>
+                    <div id="pending-tasks" class="board-column space-y-3">
+                        <!-- 任务卡片将通过 JS 动态插入 -->
+                    </div>
+                </div>
+
+                <!-- 进行中 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
+                            <h3 class="font-bold text-gray-800">进行中</h3>
+                        </div>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full" id="inprogress-count">0</span>
+                    </div>
+                    <div id="inprogress-tasks" class="board-column space-y-3">
+                        <!-- 任务卡片将通过 JS 动态插入 -->
+                    </div>
+                </div>
+
+                <!-- 已完成 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                            <h3 class="font-bold text-gray-800">已完成</h3>
+                        </div>
+                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full" id="completed-count">0</span>
+                    </div>
+                    <div id="completed-tasks" class="board-column space-y-3">
+                        <!-- 任务卡片将通过 JS 动态插入 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 列表视图 -->
+            <div id="list-view" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">任务</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">客户</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">计划日期</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="task-list-tbody" class="divide-y divide-gray-200">
+                            <!-- 任务行将通过 JS 动态插入 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="list-empty" class="hidden text-center py-12 text-gray-400">
+                    <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
+                    <p>暂无任务</p>
+                </div>
+            </div>
+
+            <!-- 日历视图 -->
+            <div id="calendar-view" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-4 md:p-6">
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900" id="calendar-month-year">2024年11月</h3>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="changeMonth(-1)" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="changeMonth(1)" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 星期标题 -->
+                    <div class="grid grid-cols-7 gap-2 mb-2">
+                        <div class="text-center text-xs font-medium text-gray-500">日</div>
+                        <div class="text-center text-xs font-medium text-gray-500">一</div>
+                        <div class="text-center text-xs font-medium text-gray-500">二</div>
+                        <div class="text-center text-xs font-medium text-gray-500">三</div>
+                        <div class="text-center text-xs font-medium text-gray-500">四</div>
+                        <div class="text-center text-xs font-medium text-gray-500">五</div>
+                        <div class="text-center text-xs font-medium text-gray-500">六</div>
+                    </div>
+
+                    <!-- 日历格子 -->
+                    <div id="calendar-grid" class="calendar-grid">
+                        <!-- 日期将通过 JS 动态插入 -->
+                    </div>
+                </div>
+
+                <!-- 选中日期的任务列表 -->
+                <div id="calendar-tasks" class="border-t border-gray-200 pt-4">
+                    <h4 class="text-sm font-bold text-gray-900 mb-3">选中日期任务</h4>
+                    <div id="calendar-task-list" class="space-y-2">
+                        <p class="text-sm text-gray-500">请选择日期查看任务</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加/编辑任务模态框 -->
+    <div id="task-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900" id="modal-title">添加任务</h2>
+                    <button onclick="closeTaskModal()" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <form id="task-form" class="space-y-4">
+                    <input type="hidden" id="task-id" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 客户选择 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">客户</label>
+                            <select id="task-customer" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">选择客户</option>
+                                <option value="customer1">张小姐</option>
+                                <option value="customer2">王女士</option>
+                                <option value="customer3">李小姐</option>
+                            </select>
+                        </div>
+
+                        <!-- 任务类型 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">任务类型</label>
+                            <select id="task-type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="meal">饮食</option>
+                                <option value="exercise">运动</option>
+                                <option value="sleep">睡眠</option>
+                                <option value="weight">体重</option>
+                                <option value="treatment">护理</option>
+                                <option value="checkup">复查</option>
+                                <option value="custom">自定义</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 任务标题 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">任务标题</label>
+                        <input type="text" id="task-title" required placeholder="请输入任务标题" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- 任务描述 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">任务描述</label>
+                        <textarea id="task-description" rows="3" placeholder="请输入任务描述" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 计划日期 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">计划日期</label>
+                            <input type="date" id="task-date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <!-- 计划时间 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">计划时间</label>
+                            <input type="time" id="task-time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- 提醒设置 -->
+                    <div>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="task-reminder" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <span class="text-sm font-medium text-gray-700">启用提醒</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button onclick="closeTaskModal()" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium">
+                    取消
+                </button>
+                <button onclick="saveTask()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script>
+        // 初始化
+        lucide.createIcons();
+
+        // 任务数据
+        let tasks = [
+            {
+                id: '1',
+                customer: '张小姐',
+                customerId: 'customer1',
+                type: 'meal',
+                title: '早餐：低卡营养餐',
+                description: '燕麦+水煮蛋+牛奶',
+                status: 'pending',
+                scheduledDate: '2024-11-28',
+                scheduledTime: '08:00',
+                reminderEnabled: true
+            },
+            {
+                id: '2',
+                customer: '王女士',
+                customerId: 'customer2',
+                type: 'exercise',
+                title: '有氧运动30分钟',
+                description: '慢跑或快走',
+                status: 'inprogress',
+                scheduledDate: '2024-11-28',
+                scheduledTime: '10:00',
+                reminderEnabled: true
+            },
+            {
+                id: '3',
+                customer: '李小姐',
+                customerId: 'customer3',
+                type: 'treatment',
+                title: '面部护理',
+                description: '深层清洁+补水',
+                status: 'completed',
+                scheduledDate: '2024-11-27',
+                scheduledTime: '14:00',
+                reminderEnabled: false
+            },
+            {
+                id: '4',
+                customer: '张小姐',
+                customerId: 'customer1',
+                type: 'weight',
+                title: '记录体重',
+                description: '早晨空腹称重',
+                status: 'pending',
+                scheduledDate: '2024-11-28',
+                scheduledTime: '07:00',
+                reminderEnabled: true
+            },
+            {
+                id: '5',
+                customer: '王女士',
+                customerId: 'customer2',
+                type: 'sleep',
+                title: '保证睡眠8小时',
+                description: '23:00前入睡',
+                status: 'pending',
+                scheduledDate: '2024-11-28',
+                scheduledTime: '23:00',
+                reminderEnabled: true
+            },
+            {
+                id: '6',
+                customer: '李小姐',
+                customerId: 'customer3',
+                type: 'checkup',
+                title: '定期复查',
+                description: '皮肤状态评估',
+                status: 'inprogress',
+                scheduledDate: '2024-11-29',
+                scheduledTime: '15:00',
+                reminderEnabled: true
+            }
+        ];
+
+        let currentView = 'board';
+        let currentFilter = { type: 'all', customer: 'all' };
+        let calendarDate = new Date();
+
+        // 任务类型配置
+        const taskTypeConfig = {
+            meal: { label: '饮食', color: 'orange' },
+            exercise: { label: '运动', color: 'blue' },
+            sleep: { label: '睡眠', color: 'purple' },
+            weight: { label: '体重', color: 'pink' },
+            treatment: { label: '护理', color: 'green' },
+            checkup: { label: '复查', color: 'red' },
+            custom: { label: '自定义', color: 'gray' }
+        };
+
+        // 任务状态配置
+        const taskStatusConfig = {
+            pending: { label: '待执行', color: 'yellow' },
+            inprogress: { label: '进行中', color: 'blue' },
+            completed: { label: '已完成', color: 'green' },
+            overdue: { label: '已逾期', color: 'red' }
+        };
+
+        // 初始化页面
+        function initPage() {
+            renderTasks();
+            updateStats();
+            populateCustomerFilter();
+            initCalendar();
+        }
+
+        // 渲染任务
+        function renderTasks() {
+            if (currentView === 'board') {
+                renderBoardView();
+            } else if (currentView === 'list') {
+                renderListView();
+            } else if (currentView === 'calendar') {
+                renderCalendarView();
+            }
+        }
+
+        // 渲染看板视图
+        function renderBoardView() {
+            const filteredTasks = getFilteredTasks();
+
+            // 清空所有列
+            document.getElementById('pending-tasks').innerHTML = '';
+            document.getElementById('inprogress-tasks').innerHTML = '';
+            document.getElementById('completed-tasks').innerHTML = '';
+
+            // 统计各状态数量
+            let counts = { pending: 0, inprogress: 0, completed: 0 };
+
+            filteredTasks.forEach(task => {
+                const card = createTaskCard(task);
+                const container = document.getElementById(`${task.status}-tasks`);
+                if (container) {
+                    container.appendChild(card);
+                    counts[task.status]++;
+                }
+            });
+
+            // 更新计数
+            document.getElementById('pending-count').textContent = counts.pending;
+            document.getElementById('inprogress-count').textContent = counts.inprogress;
+            document.getElementById('completed-count').textContent = counts.completed;
+
+            // 如果列为空,显示提示
+            ['pending', 'inprogress', 'completed'].forEach(status => {
+                const container = document.getElementById(`${status}-tasks`);
+                if (container.children.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">暂无任务</p>';
+                }
+            });
+
+            lucide.createIcons();
+        }
+
+        // 创建任务卡片
+        function createTaskCard(task) {
+            const div = document.createElement('div');
+            const typeConfig = taskTypeConfig[task.type];
+            const statusConfig = taskStatusConfig[task.status];
+
+            div.className = `task-card p-4 rounded-xl border-2 bg-${statusConfig.color}-50 border-${statusConfig.color}-200 hover:shadow-md transition-all`;
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-medium text-gray-800 text-sm flex-1">${task.title}</h4>
+                    <span class="text-xs px-2 py-0.5 rounded-full border bg-${typeConfig.color}-100 text-${typeConfig.color}-700 border-${typeConfig.color}-200 ml-2">
+                        ${typeConfig.label}
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mb-3">${task.description}</p>
+                <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                        ${formatDate(task.scheduledDate)}
+                        ${task.scheduledTime ? ` ${task.scheduledTime}` : ''}
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="user" class="w-3 h-3"></i>
+                        ${task.customer}
+                    </div>
+                </div>
+                ${task.status !== 'completed' ? `
+                    <div class="flex gap-2">
+                        ${task.status === 'pending' ? `
+                            <button onclick="updateTaskStatus('${task.id}', 'inprogress')" class="flex-1 px-2 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                开始
+                            </button>
+                        ` : ''}
+                        <button onclick="updateTaskStatus('${task.id}', 'completed')" class="flex-1 px-2 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                            完成
+                        </button>
+                        <button onclick="editTask('${task.id}')" class="px-2 py-1.5 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                ` : `
+                    <div class="flex items-center justify-center text-green-600 text-xs font-medium">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
+                        已完成
+                    </div>
+                `}
+            `;
+
+            return div;
+        }
+
+        // 渲染列表视图
+        function renderListView() {
+            const filteredTasks = getFilteredTasks();
+            const tbody = document.getElementById('task-list-tbody');
+            const empty = document.getElementById('list-empty');
+
+            tbody.innerHTML = '';
+
+            if (filteredTasks.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+
+            filteredTasks.forEach(task => {
+                const tr = document.createElement('tr');
+                const typeConfig = taskTypeConfig[task.type];
+                const statusConfig = taskStatusConfig[task.status];
+
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="px-4 md:px-6 py-4">
+                        <div>
+                            <p class="font-medium text-gray-900 text-sm">${task.title}</p>
+                            <p class="text-xs text-gray-500 mt-1">${task.description}</p>
+                        </div>
+                    </td>
+                    <td class="px-4 md:px-6 py-4">
+                        <span class="text-xs px-2 py-1 rounded-full border bg-${typeConfig.color}-100 text-${typeConfig.color}-700 border-${typeConfig.color}-200">
+                            ${typeConfig.label}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 text-sm text-gray-600 hidden md:table-cell">${task.customer}</td>
+                    <td class="px-4 md:px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">
+                        ${formatDate(task.scheduledDate)}
+                        ${task.scheduledTime ? `<br/>${task.scheduledTime}` : ''}
+                    </td>
+                    <td class="px-4 md:px-6 py-4">
+                        <span class="text-xs px-2 py-1 rounded-full font-medium bg-${statusConfig.color}-100 text-${statusConfig.color}-700">
+                            ${statusConfig.label}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4">
+                        ${task.status !== 'completed' ? `
+                            <div class="flex gap-2">
+                                ${task.status === 'pending' ? `
+                                    <button onclick="updateTaskStatus('${task.id}', 'inprogress')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
+                                        开始
+                                    </button>
+                                ` : ''}
+                                <button onclick="updateTaskStatus('${task.id}', 'completed')" class="text-xs bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors">
+                                    完成
+                                </button>
+                            </div>
+                        ` : `
+                            <span class="text-xs text-green-600 font-medium">已完成</span>
+                        `}
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        // 渲染日历视图
+        function renderCalendarView() {
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            // 更新月份标题
+            document.getElementById('calendar-month-year').textContent =
+                `${year}年${month + 1}月`;
+
+            // 获取当月第一天和最后一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startWeekday = firstDay.getDay();
+
+            // 生成日历格子
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            // 填充前面的空白天
+            for (let i = 0; i < startWeekday; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'calendar-day text-gray-300';
+                grid.appendChild(emptyDiv);
+            }
+
+            // 填充每一天
+            const filteredTasks = getFilteredTasks();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasTasks = filteredTasks.some(task => task.scheduledDate === dateStr);
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `calendar-day text-sm ${hasTasks ? 'has-tasks font-medium' : ''}`;
+                dayDiv.textContent = day;
+                dayDiv.onclick = () => selectCalendarDate(dateStr);
+
+                // 标记今天
+                const today = new Date();
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayDiv.classList.add('bg-blue-100', 'font-bold');
+                }
+
+                grid.appendChild(dayDiv);
+            }
+
+            lucide.createIcons();
+        }
+
+        // 选择日历日期
+        function selectCalendarDate(dateStr) {
+            // 移除之前的选中状态
+            document.querySelectorAll('.calendar-day').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // 添加选中状态到当前日期
+            event.target.classList.add('selected');
+
+            // 显示该日期的任务
+            const dayTasks = getFilteredTasks().filter(task => task.scheduledDate === dateStr);
+            const listContainer = document.getElementById('calendar-task-list');
+
+            if (dayTasks.length === 0) {
+                listContainer.innerHTML = '<p class="text-sm text-gray-500">该日期暂无任务</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            dayTasks.forEach(task => {
+                const typeConfig = taskTypeConfig[task.type];
+                const statusConfig = taskStatusConfig[task.status];
+
+                const taskDiv = document.createElement('div');
+                taskDiv.className = `p-3 rounded-lg border bg-${statusConfig.color}-50 border-${statusConfig.color}-200`;
+                taskDiv.innerHTML = `
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-900">${task.title}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-${typeConfig.color}-100 text-${typeConfig.color}-700">
+                            ${typeConfig.label}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">${task.description}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">${task.scheduledTime || '未设置时间'}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-${statusConfig.color}-100 text-${statusConfig.color}-700">
+                            ${statusConfig.label}
+                        </span>
+                    </div>
+                `;
+
+                listContainer.appendChild(taskDiv);
+            });
+
+            lucide.createIcons();
+        }
+
+        // 初始化日历
+        function initCalendar() {
+            renderCalendarView();
+        }
+
+        // 切换月份
+        function changeMonth(delta) {
+            calendarDate.setMonth(calendarDate.getMonth() + delta);
+            renderCalendarView();
+        }
+
+        // 切换视图
+        function switchView(view) {
+            currentView = view;
+
+            // 更新按钮状态
+            ['board', 'list', 'calendar'].forEach(v => {
+                const btn = document.getElementById(`view-${v}-btn`);
+                if (v === view) {
+                    btn.className = 'flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors';
+                } else {
+                    btn.className = 'flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors';
+                }
+            });
+
+            // 显示/隐藏视图
+            document.getElementById('board-view').classList.toggle('hidden', view !== 'board');
+            document.getElementById('list-view').classList.toggle('hidden', view !== 'list');
+            document.getElementById('calendar-view').classList.toggle('hidden', view !== 'calendar');
+
+            renderTasks();
+        }
+
+        // 应用筛选
+        function applyFilters() {
+            currentFilter.type = document.getElementById('filter-type').value;
+            currentFilter.customer = document.getElementById('filter-customer').value;
+            renderTasks();
+            updateStats();
+        }
+
+        // 获取筛选后的任务
+        function getFilteredTasks() {
+            return tasks.filter(task => {
+                if (currentFilter.type !== 'all' && task.type !== currentFilter.type) return false;
+                if (currentFilter.customer !== 'all' && task.customerId !== currentFilter.customer) return false;
+                return true;
+            });
+        }
+
+        // 更新统计
+        function updateStats() {
+            const filteredTasks = getFilteredTasks();
+            const stats = {
+                total: filteredTasks.length,
+                pending: filteredTasks.filter(t => t.status === 'pending').length,
+                inprogress: filteredTasks.filter(t => t.status === 'inprogress').length,
+                completed: filteredTasks.filter(t => t.status === 'completed').length,
+                overdue: filteredTasks.filter(t => t.status === 'overdue').length
+            };
+
+            document.getElementById('stat-total').textContent = stats.total;
+            document.getElementById('stat-pending').textContent = stats.pending;
+            document.getElementById('stat-inprogress').textContent = stats.inprogress;
+            document.getElementById('stat-completed').textContent = stats.completed;
+            document.getElementById('stat-overdue').textContent = stats.overdue;
+        }
+
+        // 填充客户筛选器
+        function populateCustomerFilter() {
+            const select = document.getElementById('filter-customer');
+            const customers = [...new Set(tasks.map(t => ({ id: t.customerId, name: t.customer })))];
+
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                select.appendChild(option);
+            });
+        }
+
+        // 打开添加任务模态框
+        function openAddTaskModal() {
+            document.getElementById('modal-title').textContent = '添加任务';
+            document.getElementById('task-form').reset();
+            document.getElementById('task-id').value = '';
+
+            // 设置默认日期为今天
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('task-date').value = today;
+
+            document.getElementById('task-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // 编辑任务
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            document.getElementById('modal-title').textContent = '编辑任务';
+            document.getElementById('task-id').value = task.id;
+            document.getElementById('task-customer').value = task.customerId;
+            document.getElementById('task-type').value = task.type;
+            document.getElementById('task-title').value = task.title;
+            document.getElementById('task-description').value = task.description;
+            document.getElementById('task-date').value = task.scheduledDate;
+            document.getElementById('task-time').value = task.scheduledTime || '';
+            document.getElementById('task-reminder').checked = task.reminderEnabled;
+
+            document.getElementById('task-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // 关闭任务模态框
+        function closeTaskModal() {
+            document.getElementById('task-modal').classList.add('hidden');
+        }
+
+        // 保存任务
+        function saveTask() {
+            const taskId = document.getElementById('task-id').value;
+            const customerSelect = document.getElementById('task-customer');
+            const customerId = customerSelect.value;
+            const customerName = customerSelect.options[customerSelect.selectedIndex].text;
+
+            const taskData = {
+                id: taskId || Date.now().toString(),
+                customer: customerName,
+                customerId: customerId,
+                type: document.getElementById('task-type').value,
+                title: document.getElementById('task-title').value,
+                description: document.getElementById('task-description').value,
+                status: taskId ? tasks.find(t => t.id === taskId).status : 'pending',
+                scheduledDate: document.getElementById('task-date').value,
+                scheduledTime: document.getElementById('task-time').value,
+                reminderEnabled: document.getElementById('task-reminder').checked
+            };
+
+            if (!taskData.customerId || !taskData.title || !taskData.scheduledDate) {
+                alert('请填写必填项');
+                return;
+            }
+
+            if (taskId) {
+                // 更新任务
+                const index = tasks.findIndex(t => t.id === taskId);
+                if (index !== -1) {
+                    tasks[index] = { ...tasks[index], ...taskData };
+                }
+            } else {
+                // 添加新任务
+                tasks.push(taskData);
+            }
+
+            closeTaskModal();
+            renderTasks();
+            updateStats();
+            showNotification(taskId ? '任务已更新' : '任务已添加', 'success');
+        }
+
+        // 更新任务状态
+        function updateTaskStatus(taskId, newStatus) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            task.status = newStatus;
+            renderTasks();
+            updateStats();
+
+            const statusLabels = {
+                'inprogress': '已开始',
+                'completed': '已完成',
+                'pending': '待执行'
+            };
+
+            showNotification(`任务${statusLabels[newStatus]}`, 'success');
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const dateOnly = dateStr.split('T')[0];
+            const todayStr = today.toISOString().split('T')[0];
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            if (dateOnly === todayStr) return '今天';
+            if (dateOnly === tomorrowStr) return '明天';
+
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${month}月${day}日`;
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 用户菜单切换
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', initPage);
+    </script>
+</body>
+</html>

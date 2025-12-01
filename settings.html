@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 标签页样式 */
+        .tab-button {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            background-color: #f3f4f6;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 设置卡片 */
+        .settings-card {
+            transition: all 0.3s ease;
+        }
+
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 文件上传区域 */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background-color: #f9fafb;
+        }
+
+        .upload-area.dragging {
+            border-color: #667eea;
+            background-color: #f3f4f6;
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* Logo预览 */
+        .logo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f9fafb;
+        }
+
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* 主题色选择器 */
+        .theme-color-option {
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+            min-width: 48px;
+            min-height: 48px;
+        }
+
+        .theme-color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-color-option.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .theme-color-option {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="settings.html" class="flex items-center px-4 py-2 text-sm text-blue-600 bg-blue-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto">
+            <!-- 页面标题 -->
+            <div class="bg-white border-b border-gray-200 px-4 md:px-6 py-4 md:py-6 sticky top-0 z-10">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">系统设置</h1>
+                        <p class="text-sm md:text-base text-gray-600">管理系统配置和组织信息</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <button onclick="saveAllSettings()" class="w-full md:w-auto px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-sm flex items-center justify-center space-x-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>保存所有设置</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6">
+                <!-- 标签页导航 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="flex overflow-x-auto">
+                        <button onclick="switchTab('organization')" class="tab-button active flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
+                            <i data-lucide="building" class="w-4 h-4"></i>
+                            <span>组织信息</span>
+                        </button>
+                        <button onclick="switchTab('switch-org')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            <span>组织切换</span>
+                        </button>
+                        <button onclick="switchTab('user-info')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                            <span>用户信息</span>
+                        </button>
+                        <button onclick="switchTab('data-management')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            <span>数据管理</span>
+                        </button>
+                        <button onclick="switchTab('system-config')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
+                            <i data-lucide="sliders" class="w-4 h-4"></i>
+                            <span>系统配置</span>
+                        </button>
+                        <button onclick="switchTab('about')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                            <span>关于系统</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 标签页内容 -->
+
+                <!-- 组织信息 -->
+                <div id="tab-organization" class="tab-content active">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 基础信息 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="building-2" class="w-5 h-5 text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">基础信息</h2>
+                                    <p class="text-sm text-gray-500">组织的基本资料</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">机构名称</label>
+                                    <input type="text" id="org-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入机构名称">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">联系人</label>
+                                    <input type="text" id="org-contact" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入联系人姓名">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">联系电话</label>
+                                    <input type="tel" id="org-phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入联系电话">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">详细地址</label>
+                                    <textarea id="org-address" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="请输入详细地址"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logo设置 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="image" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">品牌标识</h2>
+                                    <p class="text-sm text-gray-500">上传机构Logo</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="logo-preview mb-4">
+                                        <i data-lucide="image" class="w-12 h-12 text-gray-400" id="logo-placeholder"></i>
+                                        <img id="logo-img" class="hidden" src="" alt="Logo" loading="lazy">
+                                    </div>
+                                    <label class="px-6 py-3 md:px-4 md:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer min-h-[44px] flex items-center justify-center">
+                                        <i data-lucide="upload" class="w-4 h-4 inline-block mr-2"></i>
+                                        上传Logo
+                                        <input type="file" id="logo-upload" accept="image/png,image/jpeg,image/jpg" class="hidden" onchange="handleLogoUpload(event)">
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-2">建议尺寸: 200x200px, 支持PNG/JPG格式, 最大2MB</p>
+                                </div>
+
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-start space-x-2">
+                                        <i data-lucide="info" class="w-4 h-4 text-blue-600 mt-0.5"></i>
+                                        <div class="text-sm text-blue-800">
+                                            <p class="font-medium mb-1">Logo使用说明</p>
+                                            <ul class="space-y-1 text-xs">
+                                                <li>• Logo将显示在系统顶部导航栏</li>
+                                                <li>• 建议使用透明背景的PNG图片</li>
+                                                <li>• 文件大小不超过2MB</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 组织切换 -->
+                <div id="tab-switch-org" class="tab-content">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="layers" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">组织列表</h2>
+                                    <p class="text-sm text-gray-500">管理和切换不同的组织</p>
+                                </div>
+                            </div>
+                            <button onclick="showCreateOrgModal()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span class="hidden md:inline">创建组织</span>
+                            </button>
+                        </div>
+
+                        <div id="org-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- 组织卡片将动态加载 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户信息 -->
+                <div id="tab-user-info" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 个人资料 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="user-circle" class="w-5 h-5 text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">个人资料</h2>
+                                    <p class="text-sm text-gray-500">编辑您的个人信息</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex flex-col items-center mb-6">
+                                    <div class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-3">
+                                        <span class="text-white text-xl md:text-2xl font-bold">李</span>
+                                    </div>
+                                    <button class="text-sm text-blue-600 hover:text-blue-700 min-h-[44px] px-4 flex items-center">更换头像</button>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">姓名</label>
+                                    <input type="text" id="user-name" value="李美容师" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">职位</label>
+                                    <input type="text" id="user-position" value="高级美容顾问" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                                    <input type="email" id="user-email" value="li@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                                    <input type="tel" id="user-mobile" value="138****8888" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 安全设置 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="shield" class="w-5 h-5 text-red-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">安全设置</h2>
+                                    <p class="text-sm text-gray-500">管理账户安全</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-green-500 bg-green-50 p-4 rounded">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">密码强度</p>
+                                            <p class="text-xs text-gray-600 mt-1">您的密码安全等级: 强</p>
+                                        </div>
+                                        <div class="flex space-x-1">
+                                            <div class="w-2 h-8 bg-green-500 rounded"></div>
+                                            <div class="w-2 h-8 bg-green-500 rounded"></div>
+                                            <div class="w-2 h-8 bg-green-500 rounded"></div>
+                                            <div class="w-2 h-8 bg-gray-300 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="changePassword()" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <i data-lucide="key" class="w-5 h-5 text-gray-600"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">修改密码</p>
+                                                <p class="text-xs text-gray-500">上次修改: 30天前</p>
+                                            </div>
+                                        </div>
+                                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                </button>
+
+                                <button class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <i data-lucide="smartphone" class="w-5 h-5 text-gray-600"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">双因素认证</p>
+                                                <p class="text-xs text-gray-500">未启用</p>
+                                            </div>
+                                        </div>
+                                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                </button>
+
+                                <button class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <i data-lucide="clock" class="w-5 h-5 text-gray-600"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">登录历史</p>
+                                                <p class="text-xs text-gray-500">查看最近登录记录</p>
+                                            </div>
+                                        </div>
+                                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据管理 -->
+                <div id="tab-data-management" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 数据导入导出 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="download" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">数据导入导出</h2>
+                                    <p class="text-sm text-gray-500">备份和恢复数据</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h3 class="text-sm font-medium text-gray-900">导出数据</h3>
+                                            <p class="text-xs text-gray-600 mt-1">导出当前组织的所有数据</p>
+                                        </div>
+                                        <i data-lucide="download-cloud" class="w-8 h-8 text-blue-600"></i>
+                                    </div>
+                                    <button onclick="exportData()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        <i data-lucide="download" class="w-4 h-4 inline-block mr-2"></i>
+                                        导出为JSON文件
+                                    </button>
+                                    <p class="text-xs text-gray-500 mt-2">包含: 客户、订单、任务、模板、案例等数据</p>
+                                </div>
+
+                                <div class="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h3 class="text-sm font-medium text-gray-900">导入数据</h3>
+                                            <p class="text-xs text-gray-600 mt-1">从JSON文件导入数据</p>
+                                        </div>
+                                        <i data-lucide="upload-cloud" class="w-8 h-8 text-green-600"></i>
+                                    </div>
+                                    <label class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer flex items-center justify-center">
+                                        <i data-lucide="upload" class="w-4 h-4 inline-block mr-2"></i>
+                                        选择文件导入
+                                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-2">仅支持JSON格式的数据文件</p>
+                                </div>
+
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex items-start space-x-2">
+                                        <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-600 mt-0.5"></i>
+                                        <div class="text-xs text-yellow-800">
+                                            <p class="font-medium mb-1">重要提示</p>
+                                            <ul class="space-y-1">
+                                                <li>• 导入数据会与现有数据合并</li>
+                                                <li>• 建议导入前先备份当前数据</li>
+                                                <li>• 导入的数据将归属于当前组织</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 数据清理 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">数据清理</h2>
+                                    <p class="text-sm text-gray-500">管理和清理数据</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h3 class="text-sm font-medium text-gray-900">数据统计</h3>
+                                        <i data-lucide="pie-chart" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-600">客户数据</span>
+                                            <span class="font-medium" id="stat-customers">0 条</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-600">订单数据</span>
+                                            <span class="font-medium" id="stat-orders">0 条</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-600">任务数据</span>
+                                            <span class="font-medium" id="stat-tasks">0 条</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-600">模板数据</span>
+                                            <span class="font-medium" id="stat-templates">0 条</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                                    <div class="flex items-start space-x-3 mb-4">
+                                        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5"></i>
+                                        <div>
+                                            <h3 class="text-sm font-medium text-red-900">危险操作</h3>
+                                            <p class="text-xs text-red-700 mt-1">清空数据后无法恢复,请谨慎操作</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="clearAllData()" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4 inline-block mr-2"></i>
+                                        清空当前组织所有数据
+                                    </button>
+                                </div>
+
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <h3 class="text-sm font-medium text-gray-900 mb-3">生成测试数据</h3>
+                                    <div class="space-y-2">
+                                        <button onclick="generateDemoCustomers()" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                                            生成演示客户 (5个)
+                                        </button>
+                                        <button onclick="generateFullDemoData()" class="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
+                                            生成完整演示数据
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统配置 -->
+                <div id="tab-system-config" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 主题配置 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="palette" class="w-5 h-5 text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">主题配置</h2>
+                                    <p class="text-sm text-gray-500">自定义系统外观</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">主题色</label>
+                                    <div class="grid grid-cols-5 gap-2 md:gap-3">
+                                        <div class="theme-color-option active w-12 h-12 md:w-[50px] md:h-[50px]" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" onclick="selectThemeColor('purple')" title="紫色渐变"></div>
+                                        <div class="theme-color-option w-12 h-12 md:w-[50px] md:h-[50px]" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" onclick="selectThemeColor('pink')" title="粉色渐变"></div>
+                                        <div class="theme-color-option w-12 h-12 md:w-[50px] md:h-[50px]" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" onclick="selectThemeColor('blue')" title="蓝色渐变"></div>
+                                        <div class="theme-color-option w-12 h-12 md:w-[50px] md:h-[50px]" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="selectThemeColor('green')" title="绿色渐变"></div>
+                                        <div class="theme-color-option w-12 h-12 md:w-[50px] md:h-[50px]" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" onclick="selectThemeColor('orange')" title="橙色渐变"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">显示模式</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button class="px-4 py-3 border-2 border-purple-500 bg-purple-50 rounded-lg text-left">
+                                            <div class="flex items-center space-x-3">
+                                                <i data-lucide="sun" class="w-5 h-5 text-purple-600"></i>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">浅色模式</p>
+                                                    <p class="text-xs text-gray-500">当前使用</p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <button class="px-4 py-3 border-2 border-gray-300 rounded-lg text-left hover:border-purple-500">
+                                            <div class="flex items-center space-x-3">
+                                                <i data-lucide="moon" class="w-5 h-5 text-gray-600"></i>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">深色模式</p>
+                                                    <p class="text-xs text-gray-500">即将推出</p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">界面缩放</label>
+                                    <div class="space-y-3">
+                                        <input type="range" min="80" max="120" value="100" class="w-full" id="ui-scale">
+                                        <div class="flex justify-between text-xs text-gray-500">
+                                            <span>80%</span>
+                                            <span id="scale-value">100%</span>
+                                            <span>120%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 语言和区域 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="globe" class="w-5 h-5 text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">语言和区域</h2>
+                                    <p class="text-sm text-gray-500">设置语言和时区</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">显示语言</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="zh-CN" selected>简体中文</option>
+                                        <option value="zh-TW">繁体中文</option>
+                                        <option value="en-US">English</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">时区</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="Asia/Shanghai" selected>中国标准时间 (UTC+8)</option>
+                                        <option value="Asia/Hong_Kong">香港时间 (UTC+8)</option>
+                                        <option value="Asia/Taipei">台北时间 (UTC+8)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">日期格式</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="YYYY-MM-DD" selected>2024-11-28</option>
+                                        <option value="DD/MM/YYYY">28/11/2024</option>
+                                        <option value="MM/DD/YYYY">11/28/2024</option>
+                                        <option value="YYYY年MM月DD日">2024年11月28日</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">时间格式</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="24h" selected>24小时制 (14:30)</option>
+                                        <option value="12h">12小时制 (2:30 PM)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">货币符号</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="CNY" selected>¥ 人民币</option>
+                                        <option value="HKD">HK$ 港币</option>
+                                        <option value="TWD">NT$ 新台币</option>
+                                        <option value="USD">$ 美元</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 通知设置 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="bell" class="w-5 h-5 text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">通知设置</h2>
+                                    <p class="text-sm text-gray-500">管理系统通知</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between py-3 border-b border-gray-200 min-h-[60px]">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">新客户提醒</p>
+                                        <p class="text-xs text-gray-500">有新客户时发送通知</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer p-2 -m-2">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-12 h-7 md:w-11 md:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] md:after:top-[2px] after:left-[4px] md:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between py-3 border-b border-gray-200 min-h-[60px]">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">订单提醒</p>
+                                        <p class="text-xs text-gray-500">新订单和订单状态变更</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer p-2 -m-2">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-12 h-7 md:w-11 md:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] md:after:top-[2px] after:left-[4px] md:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between py-3 border-b border-gray-200 min-h-[60px]">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">任务提醒</p>
+                                        <p class="text-xs text-gray-500">任务到期前提醒</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer p-2 -m-2">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-12 h-7 md:w-11 md:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] md:after:top-[2px] after:left-[4px] md:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between py-3 border-b border-gray-200 min-h-[60px]">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">邮件通知</p>
+                                        <p class="text-xs text-gray-500">接收邮件通知</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer p-2 -m-2">
+                                        <input type="checkbox" class="sr-only peer">
+                                        <div class="w-12 h-7 md:w-11 md:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] md:after:top-[2px] after:left-[4px] md:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between py-3 min-h-[60px]">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">系统更新通知</p>
+                                        <p class="text-xs text-gray-500">新功能和更新提醒</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer p-2 -m-2">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-12 h-7 md:w-11 md:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] md:after:top-[2px] after:left-[4px] md:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 关于系统 -->
+                <div id="tab-about" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 系统信息 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="info" class="w-5 h-5 text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">系统信息</h2>
+                                    <p class="text-sm text-gray-500">版本和授权信息</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-center mb-6">
+                                    <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                                        <i data-lucide="sparkles" class="w-12 h-12 text-white"></i>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mb-6">
+                                    <h3 class="text-xl font-bold text-gray-900 mb-1">美业客户洞察 CRM</h3>
+                                    <p class="text-sm text-gray-600">Beauty Insight CRM</p>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-sm text-gray-600">版本号</span>
+                                        <span class="text-sm font-medium text-gray-900">v1.0.0</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-sm text-gray-600">发布日期</span>
+                                        <span class="text-sm font-medium text-gray-900">2024-11-28</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-sm text-gray-600">授权类型</span>
+                                        <span class="text-sm font-medium text-gray-900">企业版</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-sm text-gray-600">授权到期</span>
+                                        <span class="text-sm font-medium text-green-600">永久授权</span>
+                                    </div>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-sm text-gray-600">技术支持</span>
+                                        <span class="text-sm font-medium text-blue-600">7×24小时</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 mt-6">
+                                    <p class="text-xs text-gray-600 text-center">
+                                        Copyright © 2024 Beauty Insight CRM<br>
+                                        All rights reserved.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 帮助和支持 -->
+                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="help-circle" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-900">帮助和支持</h2>
+                                    <p class="text-sm text-gray-500">获取帮助和反馈</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <a href="#" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="book-open" class="w-5 h-5 text-gray-600"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">使用文档</p>
+                                            <p class="text-xs text-gray-500 mt-1">查看完整的使用手册</p>
+                                        </div>
+                                        <i data-lucide="external-link" class="w-4 h-4 text-gray-400"></i>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="video" class="w-5 h-5 text-gray-600"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">视频教程</p>
+                                            <p class="text-xs text-gray-500 mt-1">观看操作演示视频</p>
+                                        </div>
+                                        <i data-lucide="external-link" class="w-4 h-4 text-gray-400"></i>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="message-circle" class="w-5 h-5 text-gray-600"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">在线客服</p>
+                                            <p class="text-xs text-gray-500 mt-1">联系客服获取帮助</p>
+                                        </div>
+                                        <i data-lucide="external-link" class="w-4 h-4 text-gray-400"></i>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="block p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="mail" class="w-5 h-5 text-gray-600"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">意见反馈</p>
+                                            <p class="text-xs text-gray-500 mt-1">提交问题和建议</p>
+                                        </div>
+                                        <i data-lucide="external-link" class="w-4 h-4 text-gray-400"></i>
+                                    </div>
+                                </a>
+
+                                <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <h3 class="text-sm font-medium text-gray-900 mb-3">联系方式</h3>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <i data-lucide="phone" class="w-4 h-4 text-blue-600"></i>
+                                            <span class="text-gray-600">客服热线:</span>
+                                            <span class="font-medium text-gray-900">400-888-8888</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i data-lucide="mail" class="w-4 h-4 text-blue-600"></i>
+                                            <span class="text-gray-600">邮箱:</span>
+                                            <span class="font-medium text-gray-900">support@beautycrm.com</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i data-lucide="clock" class="w-4 h-4 text-blue-600"></i>
+                                            <span class="text-gray-600">服务时间:</span>
+                                            <span class="font-medium text-gray-900">7×24小时</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // ==================== 用户菜单 ====================
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // ==================== 侧边栏切换 ====================
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // ==================== 标签页切换 ====================
+
+        function switchTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 移除所有标签按钮的active状态
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // 显示选中的标签页内容
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            // 设置选中的标签按钮为active
+            event.target.closest('.tab-button').classList.add('active');
+
+            // 刷新图标
+            lucide.createIcons();
+
+            // 加载对应标签页的数据
+            loadTabData(tabName);
+        }
+
+        // ==================== 加载标签页数据 ====================
+
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'organization':
+                    loadOrganizationInfo();
+                    break;
+                case 'switch-org':
+                    loadOrganizationList();
+                    break;
+                case 'data-management':
+                    loadDataStatistics();
+                    break;
+            }
+        }
+
+        // ==================== 组织信息管理 ====================
+
+        function loadOrganizationInfo() {
+            const currentOrg = db.getCurrentOrg();
+            if (currentOrg) {
+                document.getElementById('org-name').value = currentOrg.name || '';
+                document.getElementById('org-contact').value = currentOrg.contactPerson || '';
+                document.getElementById('org-phone').value = currentOrg.phone || '';
+                document.getElementById('org-address').value = currentOrg.address || '';
+            }
+        }
+
+        function saveOrganizationInfo() {
+            const currentOrg = db.getCurrentOrg();
+            if (!currentOrg) {
+                UIUtils.notify('未找到当前组织', 'error');
+                return;
+            }
+
+            currentOrg.name = document.getElementById('org-name').value;
+            currentOrg.contactPerson = document.getElementById('org-contact').value;
+            currentOrg.phone = document.getElementById('org-phone').value;
+            currentOrg.address = document.getElementById('org-address').value;
+
+            db.saveOrganization(currentOrg);
+            UIUtils.notify('组织信息保存成功', 'success');
+        }
+
+        // ==================== Logo上传 ====================
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 验证文件类型
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (!allowedTypes.includes(file.type)) {
+                UIUtils.notify('仅支持PNG、JPG格式的图片文件', 'error');
+                event.target.value = ''; // 重置文件选择
+                return;
+            }
+
+            // 验证文件大小 (2MB)
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                UIUtils.notify(`文件大小不能超过2MB (当前: ${(file.size / 1024 / 1024).toFixed(2)}MB)`, 'error');
+                event.target.value = ''; // 重置文件选择
+                return;
+            }
+
+            // 验证图片尺寸
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+
+            img.onload = function() {
+                URL.revokeObjectURL(objectUrl);
+
+                // 建议尺寸检查（非强制）
+                if (img.width < 100 || img.height < 100) {
+                    if (!confirm('图片尺寸较小（建议至少200x200px），是否继续上传？')) {
+                        event.target.value = '';
+                        return;
+                    }
+                }
+
+                // 读取并保存图片
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const logoImg = document.getElementById('logo-img');
+                    const logoPlaceholder = document.getElementById('logo-placeholder');
+
+                    logoImg.src = e.target.result;
+                    logoImg.classList.remove('hidden');
+                    logoPlaceholder.classList.add('hidden');
+
+                    // 保存到localStorage
+                    StorageManager.set('org_logo', e.target.result);
+                    UIUtils.notify('Logo上传成功', 'success');
+                };
+                reader.readAsDataURL(file);
+            };
+
+            img.onerror = function() {
+                URL.revokeObjectURL(objectUrl);
+                UIUtils.notify('图片加载失败，请选择有效的图片文件', 'error');
+                event.target.value = '';
+            };
+
+            img.src = objectUrl;
+        }
+
+        // ==================== 组织列表和切换 ====================
+
+        function loadOrganizationList() {
+            const orgs = db.getOrganizations();
+            const currentOrgId = db.getCurrentOrgId();
+            const container = document.getElementById('org-list');
+
+            container.innerHTML = orgs.map(org => `
+                <div class="settings-card bg-white rounded-lg shadow-sm border ${org.id === currentOrgId ? 'border-purple-500 bg-purple-50' : 'border-gray-200'} p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-base font-bold text-gray-900 mb-1">${org.name}</h3>
+                            <p class="text-sm text-gray-600 mb-2">${org.contactPerson || '未设置联系人'}</p>
+                            <p class="text-xs text-gray-500">${org.phone || '未设置电话'}</p>
+                        </div>
+                        ${org.id === currentOrgId ? `
+                            <span class="px-2 py-1 bg-purple-500 text-white text-xs rounded-full">当前</span>
+                        ` : ''}
+                    </div>
+                    <div class="flex space-x-2">
+                        ${org.id !== currentOrgId ? `
+                            <button onclick="switchOrganization('${org.id}')" class="flex-1 px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
+                                <i data-lucide="refresh-cw" class="w-3 h-3 inline-block mr-1"></i>
+                                切换
+                            </button>
+                        ` : `
+                            <button class="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg cursor-default text-sm">
+                                <i data-lucide="check" class="w-3 h-3 inline-block mr-1"></i>
+                                使用中
+                            </button>
+                        `}
+                        <button onclick="editOrganization('${org.id}')" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            <i data-lucide="edit" class="w-3 h-3"></i>
+                        </button>
+                        ${orgs.length > 1 ? `
+                            <button onclick="deleteOrganization('${org.id}')" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function switchOrganization(orgId) {
+            if (confirm('切换组织将刷新页面,是否继续?')) {
+                db.setCurrentOrgId(orgId);
+            }
+        }
+
+        function showCreateOrgModal() {
+            const orgName = prompt('请输入新组织名称:');
+            if (!orgName || !orgName.trim()) {
+                return;
+            }
+
+            const newOrg = db.createOrganization({
+                name: orgName.trim(),
+                contactPerson: '',
+                phone: '',
+                address: ''
+            });
+
+            UIUtils.notify('组织创建成功', 'success');
+            loadOrganizationList();
+        }
+
+        function editOrganization(orgId) {
+            const orgs = db.getOrganizations();
+            const org = orgs.find(o => o.id === orgId);
+            if (!org) return;
+
+            const newName = prompt('修改组织名称:', org.name);
+            if (newName && newName.trim()) {
+                org.name = newName.trim();
+                db.saveOrganization(org);
+                UIUtils.notify('组织名称修改成功', 'success');
+                loadOrganizationList();
+            }
+        }
+
+        function deleteOrganization(orgId) {
+            if (confirm('删除组织将同时删除该组织下的所有数据,此操作不可恢复!确定要删除吗?')) {
+                db.deleteOrganization(orgId);
+                UIUtils.notify('组织删除成功', 'success');
+                loadOrganizationList();
+            }
+        }
+
+        // ==================== 数据导入导出 ====================
+
+        function exportData() {
+            try {
+                const data = db.exportData();
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const currentOrg = db.getCurrentOrg();
+                const timestamp = DateUtils.format(new Date(), 'YYYYMMDD_HHmmss');
+
+                a.href = url;
+                a.download = `${currentOrg.name}_数据备份_${timestamp}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                UIUtils.notify('数据导出成功', 'success');
+            } catch (error) {
+                console.error('导出失败:', error);
+                UIUtils.notify('数据导出失败', 'error');
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const success = db.importData(e.target.result);
+                    if (success) {
+                        UIUtils.notify('数据导入成功,页面将刷新', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        UIUtils.notify('数据导入失败,请检查文件格式', 'error');
+                    }
+                } catch (error) {
+                    console.error('导入失败:', error);
+                    UIUtils.notify('数据导入失败: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+
+            // 重置文件输入
+            event.target.value = '';
+        }
+
+        // ==================== 数据统计 ====================
+
+        function loadDataStatistics() {
+            document.getElementById('stat-customers').textContent = db.getCustomers().length + ' 条';
+            document.getElementById('stat-orders').textContent = db.getOrders().length + ' 条';
+            document.getElementById('stat-tasks').textContent = db.getTasks().length + ' 条';
+            document.getElementById('stat-templates').textContent = db.getTemplates().length + ' 条';
+        }
+
+        // ==================== 数据清理 ====================
+
+        function clearAllData() {
+            if (!confirm('确定要清空当前组织的所有数据吗?此操作不可恢复!')) {
+                return;
+            }
+
+            if (!confirm('再次确认:这将删除所有客户、订单、任务等数据,确定继续吗?')) {
+                return;
+            }
+
+            db.clearCurrentOrgData();
+            UIUtils.notify('数据已清空', 'success');
+            loadDataStatistics();
+        }
+
+        // ==================== 生成演示数据 ====================
+
+        function generateDemoCustomers() {
+            db.generateDemoCustomers(5);
+            UIUtils.notify('演示客户生成成功', 'success');
+            loadDataStatistics();
+        }
+
+        function generateFullDemoData() {
+            const result = db.generateFullDemoData();
+            if (result.success) {
+                UIUtils.notify(`生成成功: ${result.orders} 个订单, ${result.tasks} 个任务`, 'success');
+                loadDataStatistics();
+            } else {
+                UIUtils.notify(result.message || '生成失败', 'error');
+            }
+        }
+
+        // ==================== 主题配置 ====================
+
+        function selectThemeColor(color) {
+            document.querySelectorAll('.theme-color-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            StorageManager.set('theme_color', color);
+            UIUtils.notify('主题色已更新', 'success');
+        }
+
+        // ==================== 界面缩放 ====================
+
+        document.getElementById('ui-scale')?.addEventListener('input', function(e) {
+            const value = e.target.value;
+            document.getElementById('scale-value').textContent = value + '%';
+            document.body.style.zoom = value + '%';
+            StorageManager.set('ui_scale', value);
+        });
+
+        // ==================== 修改密码 ====================
+
+        function changePassword() {
+            alert('密码修改功能开发中...');
+        }
+
+        // ==================== 保存所有设置 ====================
+
+        function saveAllSettings() {
+            saveOrganizationInfo();
+            // 其他设置保存逻辑...
+            UIUtils.notify('所有设置已保存', 'success');
+        }
+
+        // ==================== 页面初始化 ====================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载组织信息
+            loadOrganizationInfo();
+
+            // 加载Logo
+            const savedLogo = StorageManager.get('org_logo');
+            if (savedLogo) {
+                const logoImg = document.getElementById('logo-img');
+                const logoPlaceholder = document.getElementById('logo-placeholder');
+                logoImg.src = savedLogo;
+                logoImg.classList.remove('hidden');
+                logoPlaceholder.classList.add('hidden');
+            }
+
+            // 加载UI缩放
+            const savedScale = StorageManager.get('ui_scale');
+            if (savedScale) {
+                document.getElementById('ui-scale').value = savedScale;
+                document.getElementById('scale-value').textContent = savedScale + '%';
+                document.body.style.zoom = savedScale + '%';
+            }
+
+            // 刷新图标
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

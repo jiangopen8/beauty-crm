@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单详情 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 卡片悬停效果 */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 订单状态徽章 */
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-paid { background: #dbeafe; color: #1e40af; }
+        .status-in_progress { background: #e0e7ff; color: #3730a3; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        /* 时间轴样式 */
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            padding-bottom: 24px;
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: -24px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-item:last-child:before {
+            display: none;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid #3b82f6;
+            background: white;
+        }
+        .timeline-dot.completed {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 任务状态样式 */
+        .task-status-pending { background: #fef3c7; color: #92400e; }
+        .task-status-in_progress { background: #dbeafe; color: #1e40af; }
+        .task-status-completed { background: #d1fae5; color: #065f46; }
+        .task-status-skipped { background: #f3f4f6; color: #6b7280; }
+
+        /* 模态框动画 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal {
+            background: white;
+            border-radius: 0.5rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* 编辑按钮悬停效果 */
+        .edit-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .editable-section:hover .edit-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题和操作 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-2">
+                            <button onclick="goBack()" class="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">订单详情</h1>
+                        </div>
+                        <p class="text-sm md:text-base text-gray-600 ml-11" id="orderSubtitle">订单号: 加载中...</p>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-11 md:ml-0">
+                        <button onclick="printOrder()" class="hidden md:flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg transition-colors">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>打印</span>
+                        </button>
+                        <button onclick="showEditStatusModal()" class="flex items-center space-x-2 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                            <span>编辑状态</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loading" class="flex items-center justify-center py-12">
+                <div class="loading-spinner"></div>
+            </div>
+
+            <!-- 订单内容 -->
+            <div id="orderContent" class="hidden space-y-6">
+                <!-- 订单状态和基本信息 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 订单状态卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-900">订单状态</h2>
+                            <span id="statusBadge" class="px-3 py-1 rounded-full text-sm font-medium">加载中</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">创建时间</span>
+                                <span class="font-medium text-gray-900" id="createdTime">-</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">最后更新</span>
+                                <span class="font-medium text-gray-900" id="updatedTime">-</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">创建人</span>
+                                <span class="font-medium text-gray-900" id="createdBy">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 客户信息卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-900">客户信息</h2>
+                            <button onclick="viewCustomer()" class="text-blue-600 hover:text-blue-700 text-sm">
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="text-white text-lg font-medium" id="customerAvatar">?</span>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900" id="customerName">-</div>
+                                    <div class="text-sm text-gray-600" id="customerPhone">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 费用统计卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-lg font-bold text-gray-900 mb-4">费用统计</h2>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">订单总额</span>
+                                <span class="font-medium text-gray-900" id="totalAmount">¥0.00</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">优惠金额</span>
+                                <span class="font-medium text-orange-600" id="discountAmount">-¥0.00</span>
+                            </div>
+                            <div class="pt-3 border-t border-gray-200">
+                                <div class="flex justify-between">
+                                    <span class="font-medium text-gray-900">实付金额</span>
+                                    <span class="text-xl font-bold text-blue-600" id="finalAmount">¥0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 订单项列表 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">方案详情</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">方案名称</th>
+                                    <th class="text-right py-3 px-4 text-sm font-medium text-gray-600 mobile-hidden">单价</th>
+                                    <th class="text-center py-3 px-4 text-sm font-medium text-gray-600 mobile-hidden">数量</th>
+                                    <th class="text-right py-3 px-4 text-sm font-medium text-gray-600">小计</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderItemsTable">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 任务统计和生成 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 任务统计 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-900">关联任务统计</h2>
+                            <button onclick="viewTasks()" class="text-blue-600 hover:text-blue-700 text-sm">
+                                查看全部
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-blue-600" id="totalTasks">0</div>
+                                <div class="text-sm text-gray-600 mt-1">总任务数</div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-green-600" id="completedTasks">0</div>
+                                <div class="text-sm text-gray-600 mt-1">已完成</div>
+                            </div>
+                            <div class="bg-orange-50 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-orange-600" id="pendingTasks">0</div>
+                                <div class="text-sm text-gray-600 mt-1">待执行</div>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-purple-600" id="inProgressTasks">0</div>
+                                <div class="text-sm text-gray-600 mt-1">进行中</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 生成任务计划 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-lg font-bold text-gray-900 mb-4">任务计划生成</h2>
+                        <div class="space-y-4">
+                            <p class="text-sm text-gray-600">
+                                根据订单方案自动生成任务计划,帮助客户按时完成各项打卡和记录任务。
+                            </p>
+                            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                <span>计划周期: <span class="font-medium text-gray-900">7天</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span>任务频率: <span class="font-medium text-gray-900">每日打卡</span></span>
+                            </div>
+                            <button onclick="generateTasks()" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all">
+                                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                <span>智能生成任务计划</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 订单状态流转时间轴 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6">订单流转记录</h2>
+                    <div id="timelineContainer" class="space-y-0">
+                        <!-- 动态填充时间轴 -->
+                    </div>
+                </div>
+
+                <!-- 备注信息 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 editable-section">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-900">备注信息</h2>
+                        <button onclick="editNotes()" class="edit-btn text-blue-600 hover:text-blue-700 text-sm">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="notesContent" class="text-gray-600 whitespace-pre-wrap">
+                        暂无备注
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 编辑状态模态框 -->
+    <div id="editStatusModal" class="hidden modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-gray-900">编辑订单状态</h3>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">订单状态</label>
+                        <select id="editStatusSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="pending">待支付</option>
+                            <option value="paid">已支付</option>
+                            <option value="in_progress">进行中</option>
+                            <option value="completed">已完成</option>
+                            <option value="cancelled">已取消</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">状态说明</label>
+                        <textarea id="statusNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="请输入状态变更说明..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeEditStatusModal()" class="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg transition-colors">
+                    取消
+                </button>
+                <button onclick="saveStatus()" class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑备注模态框 -->
+    <div id="editNotesModal" class="hidden modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold text-gray-900">编辑备注信息</h3>
+            </div>
+            <div class="modal-body">
+                <textarea id="notesTextarea" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="请输入备注信息..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeEditNotesModal()" class="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg transition-colors">
+                    取消
+                </button>
+                <button onclick="saveNotes()" class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 全局变量
+        let currentOrder = null;
+
+        // 页面加载时获取订单数据
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderId = URLUtils.getParam('id');
+
+            if (!orderId) {
+                showError('未找到订单ID');
+                setTimeout(() => {
+                    window.location.href = 'orders.html';
+                }, 2000);
+                return;
+            }
+
+            loadOrderDetail(orderId);
+        });
+
+        // 加载订单详情
+        function loadOrderDetail(orderId) {
+            const order = db.getOrderById(orderId);
+
+            if (!order) {
+                showError('订单不存在');
+                setTimeout(() => {
+                    window.location.href = 'orders.html';
+                }, 2000);
+                return;
+            }
+
+            currentOrder = order;
+            renderOrderDetail(order);
+
+            // 隐藏加载状态,显示内容
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('orderContent').classList.remove('hidden');
+        }
+
+        // 渲染订单详情
+        function renderOrderDetail(order) {
+            // 页面标题
+            document.getElementById('orderSubtitle').textContent = `订单号: ${order.orderNumber}`;
+
+            // 订单状态卡片
+            const statusMap = {
+                'pending': { text: '待支付', class: 'status-pending' },
+                'paid': { text: '已支付', class: 'status-paid' },
+                'in_progress': { text: '进行中', class: 'status-in_progress' },
+                'completed': { text: '已完成', class: 'status-completed' },
+                'cancelled': { text: '已取消', class: 'status-cancelled' }
+            };
+
+            const statusInfo = statusMap[order.status] || { text: '未知', class: '' };
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.textContent = statusInfo.text;
+            statusBadge.className = `px-3 py-1 rounded-full text-sm font-medium ${statusInfo.class}`;
+
+            document.getElementById('createdTime').textContent = DateUtils.format(order.createdAt, 'YYYY-MM-DD HH:mm');
+            document.getElementById('updatedTime').textContent = DateUtils.format(order.updatedAt, 'YYYY-MM-DD HH:mm');
+            document.getElementById('createdBy').textContent = order.createdBy || '-';
+
+            // 客户信息
+            const customer = db.getCustomerById(order.customerId);
+            if (customer) {
+                document.getElementById('customerAvatar').textContent = customer.name.charAt(0);
+                document.getElementById('customerName').textContent = customer.name;
+                document.getElementById('customerPhone').textContent = customer.phone;
+            } else {
+                document.getElementById('customerAvatar').textContent = '?';
+                document.getElementById('customerName').textContent = order.customerName || '未知客户';
+                document.getElementById('customerPhone').textContent = '-';
+            }
+
+            // 费用统计
+            document.getElementById('totalAmount').textContent = NumberUtils.formatMoney(order.totalAmount);
+            document.getElementById('discountAmount').textContent = '-' + NumberUtils.formatMoney(order.discountAmount || 0);
+            document.getElementById('finalAmount').textContent = NumberUtils.formatMoney(order.finalAmount);
+
+            // 订单项列表
+            renderOrderItems(order.items || []);
+
+            // 任务统计
+            renderTaskStats(order.id);
+
+            // 订单流转时间轴
+            renderTimeline(order);
+
+            // 备注信息
+            document.getElementById('notesContent').textContent = order.notes || '暂无备注';
+
+            // 重新初始化图标
+            lucide.createIcons();
+        }
+
+        // 渲染订单项
+        function renderOrderItems(items) {
+            const tbody = document.getElementById('orderItemsTable');
+            tbody.innerHTML = '';
+
+            if (items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-gray-500">
+                            暂无订单项
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="font-medium text-gray-900">${item.planTemplateName || '未知方案'}</div>
+                        <div class="text-xs text-gray-500 mt-1 mobile-hidden">ID: ${item.planTemplateId}</div>
+                    </td>
+                    <td class="py-3 px-4 text-right text-gray-900 mobile-hidden">${NumberUtils.formatMoney(item.unitPrice)}</td>
+                    <td class="py-3 px-4 text-center text-gray-900 mobile-hidden">${item.quantity}</td>
+                    <td class="py-3 px-4 text-right font-medium text-gray-900">${NumberUtils.formatMoney(item.totalPrice)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 渲染任务统计
+        function renderTaskStats(orderId) {
+            const tasks = db.getTasksByOrderId(orderId);
+
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(t => t.status === 'completed').length;
+            const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+            const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
+
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('pendingTasks').textContent = pendingTasks;
+            document.getElementById('inProgressTasks').textContent = inProgressTasks;
+        }
+
+        // 渲染时间轴
+        function renderTimeline(order) {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+
+            // 构建时间轴数据
+            const timelineData = [
+                {
+                    time: order.createdAt,
+                    title: '订单创建',
+                    description: `订单创建成功,订单号: ${order.orderNumber}`,
+                    completed: true
+                }
+            ];
+
+            if (order.paymentTime) {
+                timelineData.push({
+                    time: order.paymentTime,
+                    title: '支付完成',
+                    description: `支付方式: ${order.paymentMethod || '未知'}`,
+                    completed: true
+                });
+            }
+
+            if (order.status === 'in_progress') {
+                timelineData.push({
+                    time: order.updatedAt,
+                    title: '订单进行中',
+                    description: '客户正在执行方案任务',
+                    completed: true
+                });
+            }
+
+            if (order.status === 'completed') {
+                timelineData.push({
+                    time: order.completedAt || order.updatedAt,
+                    title: '订单完成',
+                    description: '所有任务已完成,订单结束',
+                    completed: true
+                });
+            }
+
+            if (order.status === 'cancelled') {
+                timelineData.push({
+                    time: order.cancelledAt || order.updatedAt,
+                    title: '订单取消',
+                    description: order.cancelReason || '订单已取消',
+                    completed: true
+                });
+            }
+
+            // 渲染时间轴
+            timelineData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item';
+                div.innerHTML = `
+                    <div class="timeline-dot ${item.completed ? 'completed' : ''}"></div>
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between">
+                            <div class="font-medium text-gray-900">${item.title}</div>
+                            <div class="text-sm text-gray-500">${DateUtils.format(item.time, 'YYYY-MM-DD HH:mm')}</div>
+                        </div>
+                        <div class="text-sm text-gray-600">${item.description}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 生成任务
+        function generateTasks() {
+            if (!currentOrder) return;
+
+            // 检查是否已有任务
+            const existingTasks = db.getTasksByOrderId(currentOrder.id);
+            if (existingTasks.length > 0) {
+                if (!confirm(`该订单已有 ${existingTasks.length} 个任务,是否继续生成新任务?`)) {
+                    return;
+                }
+            }
+
+            // 生成7天的任务计划
+            const today = new Date();
+            const customer = db.getCustomerById(currentOrder.customerId);
+
+            let taskCount = 0;
+            for (let day = 0; day < 7; day++) {
+                const taskDate = new Date(today);
+                taskDate.setDate(taskDate.getDate() + day);
+                const dateStr = taskDate.toISOString().split('T')[0];
+
+                // 每天3个任务: 饮食打卡、运动打卡、体重记录(每周一次)
+                const dailyTasks = [
+                    {
+                        id: `task_meal_${currentOrder.id}_${day}_${Date.now()}`,
+                        orgId: db.getCurrentOrgId(),
+                        orderId: currentOrder.id,
+                        customerId: currentOrder.customerId,
+                        customerName: currentOrder.customerName,
+                        type: 'meal',
+                        title: `饮食拍照打卡 - 第${day + 1}天`,
+                        description: '记录三餐饮食并拍照上传',
+                        status: day === 0 ? TaskStatus.IN_PROGRESS : TaskStatus.PENDING,
+                        frequency: 'daily',
+                        scheduledDate: dateStr,
+                        scheduledTime: '20:00',
+                        reminderEnabled: true,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        id: `task_exercise_${currentOrder.id}_${day}_${Date.now()}`,
+                        orgId: db.getCurrentOrgId(),
+                        orderId: currentOrder.id,
+                        customerId: currentOrder.customerId,
+                        customerName: currentOrder.customerName,
+                        type: 'exercise',
+                        title: `运动打卡 - 第${day + 1}天`,
+                        description: '完成有氧运动30分钟',
+                        status: TaskStatus.PENDING,
+                        frequency: 'daily',
+                        scheduledDate: dateStr,
+                        scheduledTime: '18:00',
+                        reminderEnabled: true,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
+                ];
+
+                // 每周一次体重记录
+                if (day % 7 === 0) {
+                    dailyTasks.push({
+                        id: `task_weight_${currentOrder.id}_${day}_${Date.now()}`,
+                        orgId: db.getCurrentOrgId(),
+                        orderId: currentOrder.id,
+                        customerId: currentOrder.customerId,
+                        customerName: currentOrder.customerName,
+                        type: 'weight',
+                        title: `体重记录 - 第${day + 1}天`,
+                        description: '测量体重和体脂率',
+                        status: TaskStatus.PENDING,
+                        frequency: 'weekly',
+                        scheduledDate: dateStr,
+                        scheduledTime: '07:00',
+                        reminderEnabled: true,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+
+                // 保存任务
+                dailyTasks.forEach(task => {
+                    db.saveTask(task);
+                    taskCount++;
+                });
+            }
+
+            showSuccess(`成功生成 ${taskCount} 个任务!`);
+
+            // 刷新任务统计
+            renderTaskStats(currentOrder.id);
+        }
+
+        // 查看任务列表
+        function viewTasks() {
+            if (!currentOrder) return;
+            window.location.href = `tasks.html?orderId=${currentOrder.id}`;
+        }
+
+        // 查看客户详情
+        function viewCustomer() {
+            if (!currentOrder) return;
+            window.location.href = `customer-detail.html?id=${currentOrder.customerId}`;
+        }
+
+        // 显示编辑状态模态框
+        function showEditStatusModal() {
+            if (!currentOrder) return;
+
+            document.getElementById('editStatusSelect').value = currentOrder.status;
+            document.getElementById('statusNotes').value = '';
+            document.getElementById('editStatusModal').classList.remove('hidden');
+        }
+
+        // 关闭编辑状态模态框
+        function closeEditStatusModal() {
+            document.getElementById('editStatusModal').classList.add('hidden');
+        }
+
+        // 保存状态
+        function saveStatus() {
+            if (!currentOrder) return;
+
+            const newStatus = document.getElementById('editStatusSelect').value;
+            const notes = document.getElementById('statusNotes').value;
+
+            // 更新订单状态
+            currentOrder.status = newStatus;
+            currentOrder.updatedAt = new Date().toISOString();
+
+            // 根据状态更新相关时间
+            if (newStatus === 'completed' && !currentOrder.completedAt) {
+                currentOrder.completedAt = new Date().toISOString();
+            }
+            if (newStatus === 'cancelled' && !currentOrder.cancelledAt) {
+                currentOrder.cancelledAt = new Date().toISOString();
+                if (notes) {
+                    currentOrder.cancelReason = notes;
+                }
+            }
+
+            // 保存到数据库
+            db.saveOrder(currentOrder);
+
+            // 关闭模态框
+            closeEditStatusModal();
+
+            // 显示成功提示
+            showSuccess('订单状态已更新');
+
+            // 重新渲染
+            renderOrderDetail(currentOrder);
+        }
+
+        // 编辑备注
+        function editNotes() {
+            if (!currentOrder) return;
+
+            document.getElementById('notesTextarea').value = currentOrder.notes || '';
+            document.getElementById('editNotesModal').classList.remove('hidden');
+        }
+
+        // 关闭编辑备注模态框
+        function closeEditNotesModal() {
+            document.getElementById('editNotesModal').classList.add('hidden');
+        }
+
+        // 保存备注
+        function saveNotes() {
+            if (!currentOrder) return;
+
+            const notes = document.getElementById('notesTextarea').value;
+
+            // 更新订单备注
+            currentOrder.notes = notes;
+            currentOrder.updatedAt = new Date().toISOString();
+
+            // 保存到数据库
+            db.saveOrder(currentOrder);
+
+            // 关闭模态框
+            closeEditNotesModal();
+
+            // 显示成功提示
+            showSuccess('备注已保存');
+
+            // 更新显示
+            document.getElementById('notesContent').textContent = notes || '暂无备注';
+        }
+
+        // 打印订单
+        function printOrder() {
+            window.print();
+        }
+
+        // 返回
+        function goBack() {
+            window.location.href = 'orders.html';
+        }
+
+        // 用户菜单切换
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // 显示成功提示
+        function showSuccess(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 bg-green-500 text-white';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // 显示错误提示
+        function showError(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 bg-red-500 text-white';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // 点击模态框外部关闭
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeEditStatusModal();
+                closeEditNotesModal();
+            }
+        });
+    </script>
+</body>
+</html>
