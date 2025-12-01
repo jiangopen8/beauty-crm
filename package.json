@@ -1,0 +1,38 @@
+{
+  "name": "beauty-crm",
+  "version": "1.0.0",
+  "description": "美业客户洞察CRM系统 - Beauty Industry Customer Insight CRM System",
+  "main": "index.html",
+  "scripts": {
+    "doc:check": "node scripts/sync-docs.js check",
+    "doc:status": "node scripts/sync-docs.js status",
+    "doc:links": "node scripts/sync-docs.js links",
+    "doc:diff": "node scripts/sync-docs.js diff",
+    "doc:commit": "node scripts/sync-docs.js commit",
+    "doc:push": "node scripts/sync-docs.js push",
+    "doc:sync": "node scripts/sync-docs.js sync",
+    "doc:help": "node scripts/sync-docs.js help"
+  },
+  "keywords": [
+    "crm",
+    "beauty",
+    "saas",
+    "customer-management",
+    "franchise-management"
+  ],
+  "author": "美业CRM开发团队",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiangopen8/beauty-crm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jiangopen8/beauty-crm/issues"
+  },
+  "homepage": "https://github.com/jiangopen8/beauty-crm#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

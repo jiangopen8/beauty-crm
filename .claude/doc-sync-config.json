@@ -1,0 +1,244 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "美业CRM文档同步配置",
+  "version": "1.0.0",
+  "description": "文档与代码联动的同步配置文件",
+
+  "github": {
+    "repository": "https://github.com/jiangopen8/beauty-crm",
+    "branch": "master",
+    "docsPath": "docs",
+    "autoSync": true,
+    "commitPrefix": "docs:"
+  },
+
+  "localPaths": {
+    "docsRoot": "D:\\work6\\美业客户后台\\docs",
+    "codeRoot": "D:\\work6\\美业客户后台",
+    "databasePath": "D:\\work6\\美业客户后台\\database"
+  },
+
+  "syncRules": {
+    "documents": [
+      {
+        "file": "docs/README.md",
+        "description": "文档导航和项目概览",
+        "syncTriggers": ["manual", "version-update"],
+        "linkedFiles": []
+      },
+      {
+        "file": "docs/需求分析.md",
+        "description": "业务需求和功能需求文档",
+        "syncTriggers": ["manual", "html-change"],
+        "linkedFiles": [
+          "*.html",
+          "js/utils.js"
+        ]
+      },
+      {
+        "file": "docs/系统设计.md",
+        "description": "系统架构和技术设计文档",
+        "syncTriggers": ["manual", "database-change", "js-change"],
+        "linkedFiles": [
+          "database/init.sql",
+          "database/db.config.example.js",
+          "js/db.js"
+        ]
+      },
+      {
+        "file": "docs/ER图设计.md",
+        "description": "数据库ER图和关系说明",
+        "syncTriggers": ["database-change"],
+        "linkedFiles": [
+          "database/init.sql"
+        ]
+      }
+    ],
+
+    "watchPatterns": {
+      "html": {
+        "pattern": "**/*.html",
+        "exclude": ["node_modules/**", "dist/**", "test-*.html"],
+        "triggerDocs": ["docs/需求分析.md", "docs/CODE_DOC_MAPPING.md"],
+        "checkFrequency": "on-save"
+      },
+      "javascript": {
+        "pattern": "js/**/*.js",
+        "exclude": ["js/**/*.min.js"],
+        "triggerDocs": ["docs/系统设计.md", "docs/CODE_DOC_MAPPING.md"],
+        "checkFrequency": "on-save"
+      },
+      "database": {
+        "pattern": "database/**/*.sql",
+        "exclude": [],
+        "triggerDocs": ["docs/系统设计.md", "docs/ER图设计.md"],
+        "checkFrequency": "on-save"
+      },
+      "css": {
+        "pattern": "css/**/*.css",
+        "exclude": ["css/**/*.min.css"],
+        "triggerDocs": ["docs/需求分析.md"],
+        "checkFrequency": "on-save"
+      }
+    }
+  },
+
+  "updateTriggers": {
+    "htmlPageAdded": {
+      "condition": "新增HTML页面文件",
+      "actions": [
+        "更新docs/需求分析.md中的功能模块清单",
+        "更新docs/CODE_DOC_MAPPING.md中的页面映射表",
+        "检查是否需要更新docs/README.md"
+      ]
+    },
+    "databaseTableAdded": {
+      "condition": "database/init.sql中新增表结构",
+      "actions": [
+        "更新docs/系统设计.md中的表结构设计章节",
+        "更新docs/ER图设计.md中的ER图和关系说明",
+        "检查docs/README.md中的表清单是否需要更新"
+      ]
+    },
+    "databaseColumnModified": {
+      "condition": "修改表字段定义",
+      "actions": [
+        "更新docs/系统设计.md中对应表的字段说明",
+        "检查docs/ER图设计.md是否需要调整",
+        "添加变更记录到文档更新日志"
+      ]
+    },
+    "apiEndpointAdded": {
+      "condition": "新增API接口",
+      "actions": [
+        "更新docs/系统设计.md中的接口设计章节",
+        "更新docs/CODE_DOC_MAPPING.md中的API映射"
+      ]
+    },
+    "featureCompleted": {
+      "condition": "功能模块开发完成",
+      "actions": [
+        "更新docs/需求分析.md中对应功能的完成状态",
+        "更新docs/README.md中的开发计划进度",
+        "创建功能演示说明文档"
+      ]
+    }
+  },
+
+  "documentStandards": {
+    "format": "Markdown",
+    "charset": "UTF-8",
+    "lineEnding": "LF",
+    "markdownLint": {
+      "enabled": true,
+      "rules": {
+        "MD013": false,
+        "MD033": true,
+        "MD041": true
+      }
+    },
+    "requiredSections": {
+      "需求分析.md": [
+        "项目概述",
+        "业务需求分析",
+        "功能需求",
+        "非功能性需求",
+        "数据需求",
+        "接口需求",
+        "约束条件",
+        "验收标准"
+      ],
+      "系统设计.md": [
+        "系统架构设计",
+        "数据库设计",
+        "接口设计",
+        "权限设计",
+        "安全设计",
+        "性能优化",
+        "部署架构"
+      ]
+    }
+  },
+
+  "versionControl": {
+    "documentVersion": "1.0.0",
+    "updateLog": {
+      "enabled": true,
+      "location": "docs/README.md#文档更新记录"
+    },
+    "changeTracking": {
+      "enabled": true,
+      "format": "在文档末尾记录变更历史"
+    }
+  },
+
+  "validation": {
+    "linkCheck": {
+      "enabled": true,
+      "checkInternal": true,
+      "checkExternal": false
+    },
+    "codeExampleCheck": {
+      "enabled": true,
+      "validateSQL": true,
+      "validateJavaScript": true,
+      "validateJSON": true
+    },
+    "consistencyCheck": {
+      "enabled": true,
+      "rules": [
+        "检查文档中提到的表名是否存在于database/init.sql",
+        "检查文档中提到的HTML页面是否存在",
+        "检查版本号是否一致",
+        "检查日期格式是否统一"
+      ]
+    }
+  },
+
+  "automation": {
+    "preCommitHook": {
+      "enabled": true,
+      "tasks": [
+        "检查文档链接有效性",
+        "验证Markdown语法",
+        "检查文档与代码一致性",
+        "更新最后修改日期"
+      ]
+    },
+    "scheduledTasks": {
+      "daily": [
+        "检查文档与GitHub仓库同步状态"
+      ],
+      "weekly": [
+        "生成文档健康度报告",
+        "检查所有外部链接有效性"
+      ],
+      "monthly": [
+        "归档旧版本文档",
+        "生成文档更新统计"
+      ]
+    }
+  },
+
+  "notifications": {
+    "channels": ["console", "log"],
+    "events": {
+      "documentOutOfSync": "warn",
+      "brokenLink": "error",
+      "codeChangeDetected": "info",
+      "syncCompleted": "info"
+    }
+  },
+
+  "codeToDocMapping": {
+    "enabled": true,
+    "mappingFile": "docs/CODE_DOC_MAPPING.md",
+    "autoUpdate": true,
+    "categories": [
+      "HTML页面映射",
+      "JavaScript模块映射",
+      "数据库表映射",
+      "API接口映射"
+    ]
+  }
+}
