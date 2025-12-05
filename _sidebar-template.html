@@ -1,0 +1,107 @@
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_INDEX}} rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_CUSTOMERS}} rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_ORDERS}} rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_TASKS}} rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_CASES}} rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_FRANCHISEES}} rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_USERS}} rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_ROLES}} rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统管理 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_ORGANIZATIONS}} rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+                    </a>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 -->
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_TEMPLATES}} rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_CUSTOMER_TEMPLATES}} rounded-lg transition-colors ml-4">
+                            <i data-lucide="file-edit" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_TASK_TEMPLATES}} rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm {{ACTIVE_SETTINGS}} rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>

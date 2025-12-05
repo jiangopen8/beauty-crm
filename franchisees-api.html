@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加盟商管理 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 卡片悬停效果 */
+        .franchisee-card {
+            transition: all 0.3s ease;
+        }
+        .franchisee-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 状态标签动画 */
+        .status-badge {
+            transition: all 0.2s ease;
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 模态框动画 */
+        .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+
+        /* 简单的CSS图表条 */
+        .chart-bar {
+            transition: width 0.5s ease;
+        }
+
+        /* 趋势指示器 */
+        .trend-up {
+            color: #10b981;
+        }
+        .trend-down {
+            color: #ef4444;
+        }
+        .trend-stable {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能功能 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                    </a>
+                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>方案模板</span>
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                    </a>
+                </div>
+
+                <!-- 系统设置 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            <i data-lucide="store" class="w-7 h-7 text-purple-600"></i>
+                            加盟商管理
+                        </h1>
+                        <p class="text-sm md:text-base text-gray-600">管理全国加盟店信息与业绩</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="generateDemoData()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span class="hidden md:inline">生成演示数据</span>
+                            <span class="md:hidden">演示数据</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+                <div class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="store" class="w-4 h-4 text-indigo-600"></i>
+                        <p class="text-xs text-gray-500 font-medium">加盟店总数</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900" id="statTotal">0</p>
+                </div>
+                <div class="bg-green-50 p-3 md:p-4 rounded-xl shadow-sm border border-green-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                        <p class="text-xs text-green-700 font-medium">运营中</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-green-700" id="statActive">0</p>
+                </div>
+                <div class="bg-yellow-50 p-3 md:p-4 rounded-xl shadow-sm border border-yellow-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-yellow-600"></i>
+                        <p class="text-xs text-yellow-700 font-medium">待审核</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-yellow-700" id="statPending">0</p>
+                </div>
+                <div class="bg-orange-50 p-3 md:p-4 rounded-xl shadow-sm border border-orange-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4 text-orange-600"></i>
+                        <p class="text-xs text-orange-700 font-medium">已暂停</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-orange-700" id="statSuspended">0</p>
+                </div>
+                <div class="bg-blue-50 p-3 md:p-4 rounded-xl shadow-sm border border-blue-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="dollar-sign" class="w-4 h-4 text-blue-600"></i>
+                        <p class="text-xs text-blue-700 font-medium">本月总营收</p>
+                    </div>
+                    <p class="text-lg md:text-xl font-bold text-blue-700" id="statRevenue">¥0</p>
+                </div>
+                <div class="bg-purple-50 p-3 md:p-4 rounded-xl shadow-sm border border-purple-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="trending-up" class="w-4 h-4 text-purple-600"></i>
+                        <p class="text-xs text-purple-700 font-medium">本月总提成</p>
+                    </div>
+                    <p class="text-lg md:text-xl font-bold text-purple-700" id="statRoyalty">¥0</p>
+                </div>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+                <div class="flex flex-col md:flex-row gap-3 md:gap-4">
+                    <div class="flex-1 relative">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="搜索加盟店名称、城市或联系人..."
+                            onkeyup="filterFranchisees()"
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        />
+                    </div>
+                    <select
+                        id="statusFilter"
+                        onchange="filterFranchisees()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    >
+                        <option value="all">所有状态</option>
+                        <option value="pending">待审核</option>
+                        <option value="active">运营中</option>
+                        <option value="suspended">已暂停</option>
+                        <option value="terminated">已终止</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 加盟商列表 -->
+            <div id="franchiseeList" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <!-- 加盟商卡片将在这里动态生成 -->
+            </div>
+
+            <!-- 空状态 -->
+            <div id="emptyState" class="hidden text-center py-12 text-gray-400">
+                <i data-lucide="store" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
+                <p class="text-lg">暂无加盟商数据</p>
+                <p class="text-sm mt-2">点击右上角"生成演示数据"按钮创建演示数据</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 详情模态框 -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 p-4" onclick="closeDetailModal(event)">
+        <div class="modal-content bg-white rounded-2xl max-w-4xl w-full mx-auto my-8 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 md:p-6 flex justify-between items-start z-10">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900" id="modalTitle"></h2>
+                    <p class="text-gray-500 text-sm mt-1" id="modalAddress"></p>
+                </div>
+                <button onclick="closeDetailModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-gray-400"></i>
+                </button>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6" id="modalContent">
+                <!-- 内容将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        let allFranchisees = [];
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFranchisees();
+        });
+
+        // 加载加盟商数据
+        function loadFranchisees() {
+            allFranchisees = db.getFranchisees();
+            updateStats();
+            filterFranchisees();
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            const stats = {
+                total: allFranchisees.length,
+                active: allFranchisees.filter(f => f.status === 'active').length,
+                pending: allFranchisees.filter(f => f.status === 'pending').length,
+                suspended: allFranchisees.filter(f => f.status === 'suspended').length,
+                totalRevenue: 0,
+                totalRoyalty: 0
+            };
+
+            allFranchisees.forEach(f => {
+                if (f.performance && f.performance.length > 0) {
+                    const latestPerf = f.performance[0];
+                    stats.totalRevenue += latestPerf.revenue || 0;
+                    stats.totalRoyalty += latestPerf.royaltyPaid || 0;
+                }
+            });
+
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statActive').textContent = stats.active;
+            document.getElementById('statPending').textContent = stats.pending;
+            document.getElementById('statSuspended').textContent = stats.suspended;
+            document.getElementById('statRevenue').textContent = `¥${(stats.totalRevenue / 10000).toFixed(1)}万`;
+            document.getElementById('statRoyalty').textContent = `¥${(stats.totalRoyalty / 10000).toFixed(1)}万`;
+        }
+
+        // 筛选加盟商
+        function filterFranchisees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const filtered = allFranchisees.filter(f => {
+                const matchesStatus = statusFilter === 'all' || f.status === statusFilter;
+                const matchesSearch = !searchTerm ||
+                    f.franchiseeName.toLowerCase().includes(searchTerm) ||
+                    f.city.toLowerCase().includes(searchTerm) ||
+                    f.contactPerson.toLowerCase().includes(searchTerm);
+                return matchesStatus && matchesSearch;
+            });
+
+            renderFranchisees(filtered);
+        }
+
+        // 渲染加盟商列表
+        function renderFranchisees(franchisees) {
+            const container = document.getElementById('franchiseeList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (franchisees.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = franchisees.map(f => createFranchiseeCard(f)).join('');
+            lucide.createIcons();
+        }
+
+        // 创建加盟商卡片
+        function createFranchiseeCard(franchisee) {
+            const latestPerf = franchisee.performance && franchisee.performance.length > 0 ? franchisee.performance[0] : null;
+            const prevPerf = franchisee.performance && franchisee.performance.length > 1 ? franchisee.performance[1] : null;
+            const revenueGrowth = latestPerf && prevPerf ? ((latestPerf.revenue - prevPerf.revenue) / prevPerf.revenue * 100) : 0;
+
+            const statusInfo = getStatusInfo(franchisee.status);
+
+            return `
+                <div class="franchisee-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-900 mb-1">${franchisee.franchiseeName}</h3>
+                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                <span>${franchisee.city}, ${franchisee.province}</span>
+                            </div>
+                        </div>
+                        <span class="status-badge px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusInfo.colorClass}">
+                            <i data-lucide="${statusInfo.icon}" class="w-4 h-4"></i>
+                            ${statusInfo.label}
+                        </span>
+                    </div>
+
+                    <!-- Info Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-gray-600">负责人:</span>
+                            <span class="font-medium text-gray-900">${franchisee.contactPerson}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-gray-600">${franchisee.phone}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="store" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-gray-600">面积:</span>
+                            <span class="font-medium text-gray-900">${franchisee.storeArea}㎡</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="users" class="w-4 h-4 text-gray-400"></i>
+                            <span class="text-gray-600">员工:</span>
+                            <span class="font-medium text-gray-900">${franchisee.employeeCount}人</span>
+                        </div>
+                    </div>
+
+                    <!-- Contract Info -->
+                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                        <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                            <i data-lucide="file-text" class="w-3 h-3"></i>
+                            <span>合同信息</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <span class="text-gray-500">合同号: </span>
+                                <span class="font-medium text-gray-900">${franchisee.contract.contractNumber}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">加盟费: </span>
+                                <span class="font-medium text-gray-900">¥${(franchisee.contract.franchiseFee / 10000).toFixed(0)}万</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">提成比例: </span>
+                                <span class="font-medium text-gray-900">${franchisee.contract.royaltyRate}%</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">到期时间: </span>
+                                <span class="font-medium text-gray-900">${new Date(franchisee.contract.endDate).toLocaleDateString('zh-CN')}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${latestPerf ? `
+                    <!-- Performance -->
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-gray-500">最近业绩 (${latestPerf.month})</span>
+                            ${revenueGrowth !== 0 ? `
+                            <span class="text-xs font-medium ${revenueGrowth > 0 ? 'trend-up' : 'trend-down'}">
+                                ${revenueGrowth > 0 ? '↑' : '↓'} ${Math.abs(revenueGrowth).toFixed(1)}%
+                            </span>
+                            ` : ''}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-blue-50 rounded-lg p-2">
+                                <p class="text-xs text-blue-600 mb-1">营收</p>
+                                <p class="text-sm font-bold text-blue-700">¥${(latestPerf.revenue / 10000).toFixed(1)}万</p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-2">
+                                <p class="text-xs text-green-600 mb-1">客户数</p>
+                                <p class="text-sm font-bold text-green-700">${latestPerf.customerCount}人</p>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-2">
+                                <p class="text-xs text-purple-600 mb-1">提成</p>
+                                <p class="text-sm font-bold text-purple-700">¥${(latestPerf.royaltyPaid / 10000).toFixed(1)}万</p>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Actions -->
+                    <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+                        <button
+                            onclick='viewFranchiseeDetail(${JSON.stringify(franchisee).replace(/'/g, "\\'")})'
+                            class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                        >
+                            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            查看详情
+                        </button>
+                        <button
+                            onclick="deleteFranchisee('${franchisee.id}')"
+                            class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        >
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 获取状态信息
+        function getStatusInfo(status) {
+            const statusMap = {
+                'pending': { label: '待审核', icon: 'clock', colorClass: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+                'active': { label: '运营中', icon: 'check-circle', colorClass: 'bg-green-100 text-green-700 border-green-300' },
+                'suspended': { label: '已暂停', icon: 'alert-circle', colorClass: 'bg-orange-100 text-orange-700 border-orange-300' },
+                'terminated': { label: '已终止', icon: 'x-circle', colorClass: 'bg-red-100 text-red-700 border-red-300' }
+            };
+            return statusMap[status] || statusMap['pending'];
+        }
+
+        // 查看加盟商详情
+        function viewFranchiseeDetail(franchisee) {
+            document.getElementById('modalTitle').textContent = franchisee.franchiseeName;
+            document.getElementById('modalAddress').textContent = franchisee.address;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <!-- Basic Info -->
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">基本信息</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">法人代表</p>
+                            <p class="font-medium text-gray-900">${franchisee.legalPerson}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">联系人</p>
+                            <p class="font-medium text-gray-900">${franchisee.contactPerson}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">联系电话</p>
+                            <p class="font-medium text-gray-900">${franchisee.phone}</p>
+                        </div>
+                        ${franchisee.email ? `
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">邮箱</p>
+                            <p class="font-medium text-gray-900">${franchisee.email}</p>
+                        </div>
+                        ` : ''}
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">门店面积</p>
+                            <p class="font-medium text-gray-900">${franchisee.storeArea} ㎡</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">员工数量</p>
+                            <p class="font-medium text-gray-900">${franchisee.employeeCount} 人</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contract Details -->
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">合同详情</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">合同编号</p>
+                                <p class="font-medium text-gray-900">${franchisee.contract.contractNumber}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">签约日期</p>
+                                <p class="font-medium text-gray-900">${new Date(franchisee.contract.signedDate).toLocaleDateString('zh-CN')}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">合同开始</p>
+                                <p class="font-medium text-gray-900">${new Date(franchisee.contract.startDate).toLocaleDateString('zh-CN')}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">合同到期</p>
+                                <p class="font-medium text-gray-900">${new Date(franchisee.contract.endDate).toLocaleDateString('zh-CN')}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">加盟费</p>
+                                <p class="font-medium text-gray-900">¥${franchisee.contract.franchiseFee.toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">保证金</p>
+                                <p class="font-medium text-gray-900">¥${franchisee.contract.depositAmount.toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">提成比例</p>
+                                <p class="font-medium text-gray-900">${franchisee.contract.royaltyRate}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Trend -->
+                ${franchisee.performance && franchisee.performance.length > 0 ? `
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">业绩趋势</h3>
+                    <div class="space-y-3">
+                        ${franchisee.performance.slice(0, 6).reverse().map(perf => {
+                            const maxRevenue = Math.max(...franchisee.performance.map(p => p.revenue));
+                            const barWidth = (perf.revenue / maxRevenue * 100).toFixed(1);
+                            return `
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">${perf.month}</span>
+                                    <span class="font-medium text-gray-900">¥${(perf.revenue / 10000).toFixed(1)}万</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="chart-bar bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full" style="width: ${barWidth}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>客户: ${perf.customerCount}人</span>
+                                    <span>订单: ${perf.orderCount}个</span>
+                                    <span>提成: ¥${(perf.royaltyPaid / 10000).toFixed(1)}万</span>
+                                </div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Notes -->
+                ${franchisee.notes ? `
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">备注</h3>
+                    <p class="text-gray-600 bg-gray-50 rounded-lg p-4">${franchisee.notes}</p>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // 关闭详情模态框
+        function closeDetailModal(event) {
+            if (!event || event.target.id === 'detailModal') {
+                document.getElementById('detailModal').classList.add('hidden');
+            }
+        }
+
+        // 删除加盟商
+        function deleteFranchisee(id) {
+            if (confirm('确定要删除这个加盟商吗？此操作不可恢复。')) {
+                db.deleteFranchisee(id);
+                showNotification('加盟商已删除', 'success');
+                loadFranchisees();
+            }
+        }
+
+        // 生成演示数据
+        function generateDemoData() {
+            if (typeof db.generateFranchiseeDemoData === 'function') {
+                const result = db.generateFranchiseeDemoData();
+                showNotification(`演示数据生成成功！生成了 ${result.franchisees} 个加盟商数据`, 'success');
+                loadFranchisees();
+            } else {
+                showNotification('演示数据生成功能暂未实现', 'error');
+            }
+        }
+
+        // 用户菜单切换
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

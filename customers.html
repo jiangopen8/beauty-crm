@@ -162,7 +162,9 @@
                     </button>
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
-                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
                     </div>
                 </div>
 
@@ -212,8 +214,7 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14 md:pt-16">
-        <!-- 侧边栏 -->
+    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
         <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
             <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
                 <!-- 快速统计 -->
@@ -222,19 +223,19 @@
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">客户总数</span>
-                            <span class="font-semibold text-purple-600" id="totalCustomers">0</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">今日新增</span>
-                            <span class="font-semibold text-green-600" id="newCustomers">0</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">待跟进</span>
-                            <span class="font-semibold text-orange-600" id="pendingCustomers">0</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">活跃客户</span>
-                            <span class="font-semibold text-blue-600" id="activeCustomers">0</span>
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
                         </div>
                     </div>
                 </div>
@@ -245,62 +246,91 @@
                     <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>数据看板</span>
+                        
                     </a>
-                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg transition-colors">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>客户管理</span>
-                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full" id="sidebar-customer-count">0</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
                     </a>
                     <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="shopping-cart" class="w-4 h-4"></i>
                         <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
                     </a>
                     <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="check-square" class="w-4 h-4"></i>
                         <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
                     </a>
                 </div>
 
-                <!-- 智能功能 -->
+                <!-- 智能服务 -->
                 <div class="space-y-2">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
                     <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                         <span>客户案例</span>
-                    </a>
-                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <i data-lucide="layers" class="w-4 h-4"></i>
-                        <span>方案模板</span>
+                        
                     </a>
                     <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="store" class="w-4 h-4"></i>
                         <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
                     </a>
                 </div>
 
-                <!-- 系统设置 -->
+                    <!-- 系统管理 -->
                 <div class="space-y-2">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
                     <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                         <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
                     </a>
                 </div>
-
-                <!-- 系统状态信息 (移动端显示) -->
-                <div class="md:hidden mt-8 pt-6 border-t border-gray-200">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between text-xs text-gray-500">
-                            <span>系统状态</span>
-                            <span class="flex items-center space-x-1">
-                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span>正常</span>
-                            </span>
-                        </div>
-                    </div>
                 </div>
-            </div>
-        </aside>
+            </aside>
 
         <!-- 遮罩层 (移动端) -->
         <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
@@ -558,6 +588,19 @@
     <script>
         // 初始化图标
         lucide.createIcons();
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
+
 
         // 全局变量
         let customers = [];

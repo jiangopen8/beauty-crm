@@ -1,11 +1,20 @@
-# 忽略文件
+# 依赖包
 node_modules/
-.DS_Store
+
+# 环境配置（敏感信息）
 .env
-db.config.js
+database/db.config.js
+
+# 日志文件
+logs/
 *.log
+
+# IDE配置
+.DS_Store
 .vscode/
 .idea/
+
+# 构建文件
 dist/
 build/
 coverage/
@@ -13,10 +22,8 @@ coverage/
 # 临时文件
 *.tmp
 *.swp
+*.swo
 *~
-
-# 数据库配置（敏感信息）
-database/db.config.js
 
 # 备份文件
 *.bak

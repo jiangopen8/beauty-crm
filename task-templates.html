@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务模板管理 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 卡片悬停效果 */
+        .template-card {
+            transition: all 0.3s ease;
+        }
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 模态框动画 */
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 字段项样式 */
+        .field-item {
+            transition: all 0.2s ease;
+        }
+
+        .field-item:hover {
+            background-color: #f9fafb;
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 分类标签样式 */
+        .category-profile { background: #eef2ff; color: #4338ca; }
+        .category-behavior { background: #dcfce7; color: #166534; }
+        .category-plan { background: #fef3c7; color: #92400e; }
+        .category-other { background: #fed7aa; color: #9a3412; }
+
+        /* 预览模态框样式 */
+        .preview-field {
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                        
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能服务 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                        
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
+                    </a>
+                </div>
+
+                    <!-- 系统管理 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
+                    </a>
+                </div>
+                </div>
+            </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">任务模板管理</h1>
+                        <p class="text-sm md:text-base text-gray-600">管理标准化任务流程模板，提高团队工作效率和服务质量</p>
+                    </div>
+                    <button onclick="openCreateModal()" class="flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span class="font-medium">创建模板</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                            <input type="text" id="searchInput" onkeyup="handleSearch()" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="搜索模板名称或编码...">
+                        </div>
+                    </div>
+                    <button onclick="loadTemplates()" class="flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        <span>刷新</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 分类筛选标签 -->
+            <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-2">
+                <div class="flex gap-2 overflow-x-auto pb-2">
+                    <button onclick="filterCategory('all')" id="filter-all" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap bg-purple-600 text-white">
+                        全部模板
+                    </button>
+                    <button onclick="filterCategory('customer_follow_up')" id="filter-customer_follow_up" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        客户跟进
+                    </button>
+                    <button onclick="filterCategory('service_process')" id="filter-service_process" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        服务流程
+                    </button>
+                    <button onclick="filterCategory('quality_check')" id="filter-quality_check" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        质量检查
+                    </button>
+                    <button onclick="filterCategory('inventory')" id="filter-inventory" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        库存管理
+                    </button>
+                    <button onclick="filterCategory('training')" id="filter-training" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        培训
+                    </button>
+                    <button onclick="filterCategory('other')" id="filter-other" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        其他方案
+                    </button>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loading-state" class="hidden text-center py-12">
+                <div class="w-12 h-12 mx-auto mb-4">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                </div>
+                <p class="text-gray-500">加载中...</p>
+            </div>
+
+            <!-- 模板列表 -->
+            <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <!-- 模板卡片将通过 JavaScript 动态生成 -->
+            </div>
+
+            <!-- 空状态 -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <div class="w-24 h-24 mx-auto mb-4 text-gray-300">
+                    <i data-lucide="layers" class="w-full h-full"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">暂无模板</h3>
+                <p class="text-gray-500 mb-6">点击上方按钮创建您的第一个模板</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 创建/编辑模板模态框 -->
+    <div id="templateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 modal-overlay">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden modal-content">
+                <!-- 模态框头部 -->
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
+                    <h2 id="modalTitle" class="text-xl font-bold text-white">创建新模板</h2>
+                    <button onclick="closeModal()" class="text-white hover:text-gray-200 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- 模态框内容 -->
+                <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                    <!-- 基本信息 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="info" class="w-5 h-5 mr-2 text-purple-600"></i>
+                            基本信息
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    模板名称 <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 深层客户跟进方案">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    所属分类 <span class="text-red-500">*</span>
+                                </label>
+                                <select id="templateCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+                                    <option value="hydration">客户跟进</option>
+                                    <option value="whitening">服务流程</option>
+                                    <option value="anti_aging">质量检查</option>
+                                    <option value="repair">库存管理</option>
+                                    <option value="hair_care">培训</option>
+                                    <option value="other">其他方案</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    目标肤质
+                                </label>
+                                <input type="text" id="targetSkinType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 干性、混合性、油性">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    目标年龄段
+                                </label>
+                                <input type="text" id="targetAgeRange" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 25-35岁">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    疗程周期
+                                </label>
+                                <input type="text" id="courseDuration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 4周">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    护理频率
+                                </label>
+                                <input type="text" id="treatmentFrequency" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 每周2次">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    预期效果
+                                </label>
+                                <textarea id="expectedEffects" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="描述此方案的预期效果..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 护理步骤 -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="list-ordered" class="w-5 h-5 mr-2 text-purple-600"></i>
+                                护理步骤
+                            </h3>
+                            <button onclick="addStep()" class="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>添加步骤</span>
+                            </button>
+                        </div>
+                        <div id="stepsList" class="space-y-3"></div>
+                        <div id="noStepsMessage" class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <i data-lucide="list-ordered" class="w-12 h-12 mx-auto text-gray-400 mb-2"></i>
+                            <p class="text-gray-500 text-sm">暂无护理步骤,点击"添加步骤"开始配置</p>
+                        </div>
+                    </div>
+
+                    <!-- 所需产品 -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="package" class="w-5 h-5 mr-2 text-purple-600"></i>
+                                所需产品
+                            </h3>
+                            <button onclick="addProduct()" class="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>添加产品</span>
+                            </button>
+                        </div>
+                        <div id="productsList" class="space-y-3"></div>
+                        <div id="noProductsMessage" class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <i data-lucide="package" class="w-12 h-12 mx-auto text-gray-400 mb-2"></i>
+                            <p class="text-gray-500 text-sm">暂无产品,点击"添加产品"开始配置</p>
+                        </div>
+                    </div>
+
+                    <!-- 注意事项 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="alert-circle" class="w-5 h-5 mr-2 text-purple-600"></i>
+                            注意事项
+                        </h3>
+                        <textarea id="precautions" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="填写护理注意事项..."></textarea>
+                    </div>
+                </div>
+
+                <!-- 模态框底部 -->
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t border-gray-200">
+                    <button onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button onclick="saveTemplate()" id="saveBtn" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md">
+                        保存模板
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 modal-overlay">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden modal-content">
+                <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">模板预览</h2>
+                    <button onclick="closePreviewModal()" class="text-white hover:text-gray-200 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                    <div id="previewContent"></div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t border-gray-200">
+                    <button onclick="editTemplateFromPreview()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
+                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        <span>编辑</span>
+                    </button>
+                    <button onclick="closePreviewModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
+
+
+        // ==================== 数据管理 ====================
+
+        // 搜索防抖timer
+        let searchTimer = null;
+        let currentSearch = '';
+
+        // 分类映射 - 对应数据库 category 字段
+        const CATEGORIES = {
+            hydration: { label: '客户跟进', class: 'category-profile', icon: 'droplet' },
+            whitening: { label: '服务流程', class: 'category-behavior', icon: 'sun' },
+            anti_aging: { label: '质量检查', class: 'category-plan', icon: 'clock' },
+            repair: { label: '库存管理', class: 'category-other', icon: 'shield' },
+            hair_care: { label: '培训', class: 'category-profile', icon: 'scissors' },
+            other: { label: '其他方案', class: 'category-other', icon: 'file-text' }
+        };
+
+        // 数据存储
+        let templates = [];
+        let currentTemplate = null;
+        let currentFilter = 'all';
+        let previewingTemplate = null;
+
+        // 获取当前组织ID
+        function getCurrentOrgId() {
+            return localStorage.getItem('currentOrgId') || '1';
+        }
+
+        // ==================== 加载状态管理 ====================
+
+        function showLoading() {
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('templates-grid').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-state').classList.add('hidden');
+        }
+
+        // ==================== 初始化 ====================
+
+        function init() {
+            loadTemplates();
+            lucide.createIcons();
+        }
+
+        // ==================== 加载模板数据 ====================
+
+        async function loadTemplates() {
+            try {
+                showLoading();
+                const orgId = getCurrentOrgId();
+                const response = await taskTemplateAPI.getList({
+                    org_id: orgId,
+                    category: currentFilter === 'all' ? null : currentFilter,
+                    search: currentSearch || null,
+                    page: 1,
+                    pageSize: 100
+                });
+
+                hideLoading();
+
+                if (response.success) {
+                    templates = response.data.items || response.data || [];
+                    renderTemplates();
+                } else {
+                    console.error('加载模板失败:', response.error);
+                    showNotification('加载模板失败', 'error');
+                    templates = [];
+                    renderTemplates();
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('加载模板失败:', error);
+                showNotification('加载模板失败', 'error');
+                templates = [];
+                renderTemplates();
+            }
+        }
+
+        // 搜索处理函数
+        function handleSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                currentSearch = document.getElementById('searchInput').value.trim();
+                loadTemplates();
+            }, 500); // 500ms 防抖
+        }
+
+        // ==================== 渲染函数 ====================
+
+        function renderTemplates() {
+            const grid = document.getElementById('templates-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            const filteredTemplates = currentFilter === 'all'
+                ? templates
+                : templates.filter(t => t.category === currentFilter);
+
+            if (filteredTemplates.length === 0) {
+                grid.classList.add('hidden');
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                grid.classList.remove('hidden');
+                grid.innerHTML = filteredTemplates.map(template => createTemplateCard(template)).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        function createTemplateCard(template) {
+            const category = CATEGORIES[template.category] || CATEGORIES.other;
+            const steps = typeof template.steps === 'string' ? JSON.parse(template.steps || '[]') : (template.steps || []);
+            const products = typeof template.products === 'string' ? JSON.parse(template.products || '[]') : (template.products || []);
+            const services = typeof template.services === 'string' ? JSON.parse(template.services || '[]') : (template.services || []);
+
+            return `
+                <div class="template-card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 relative group">
+                    <!-- 操作按钮 -->
+                    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="previewTemplate('${template.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="预览">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="editTemplate('${template.id}')" class="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors" title="编辑">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteTemplate('${template.id}')" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors" title="删除">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- 图标和标题 -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 ${category.class} rounded-xl">
+                            <i data-lucide="${category.icon}" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-gray-800 truncate" title="${template.template_name}">${template.template_name}</h3>
+                            <p class="text-xs text-gray-400 font-mono truncate">${template.template_code}</p>
+                        </div>
+                    </div>
+
+                    <!-- 分类标签 -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <span class="inline-block px-2 py-1 text-xs rounded-lg ${category.class} font-semibold">
+                            ${category.label}
+                        </span>
+                        <span class="text-xs text-gray-500">使用 ${template.usage_count || 0} 次</span>
+                    </div>
+
+                    <!-- 描述 -->
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+                        ${template.expected_effects || '暂无描述'}
+                    </p>
+
+                    <!-- 方案信息预览 -->
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase">方案信息</h4>
+                        </div>
+                        <div class="space-y-1">
+                            ${template.course_duration ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">疗程周期</span>
+                                    <span class="text-gray-600">${template.course_duration}</span>
+                                </div>
+                            ` : ''}
+                            ${template.treatment_frequency ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">护理频率</span>
+                                    <span class="text-gray-600">${template.treatment_frequency}</span>
+                                </div>
+                            ` : ''}
+                            ${steps.length > 0 ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">护理步骤</span>
+                                    <span class="text-gray-600">${steps.length} 步</span>
+                                </div>
+                            ` : ''}
+                            ${products.length > 0 ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">所需产品</span>
+                                    <span class="text-gray-600">${products.length} 项</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== 分类筛选 ====================
+
+        function filterCategory(category) {
+            currentFilter = category;
+
+            // 更新按钮样式
+            document.querySelectorAll('.category-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-600', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+            });
+
+            const activeBtn = document.getElementById(`filter-${category}`);
+            activeBtn.classList.add('bg-purple-600', 'text-white');
+            activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+
+            loadTemplates(); // 重新加载数据
+        }
+
+        // ==================== 模态框操作 ====================
+
+        function openCreateModal() {
+            currentTemplate = null;
+            document.getElementById('modalTitle').textContent = '创建新模板';
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateCategory').value = 'customer_follow_up';
+            document.getElementById('targetSkinType').value = '';
+            document.getElementById('targetAgeRange').value = '';
+            document.getElementById('courseDuration').value = '';
+            document.getElementById('treatmentFrequency').value = '';
+            document.getElementById('expectedEffects').value = '';
+            document.getElementById('precautions').value = '';
+            document.getElementById('stepsList').innerHTML = '';
+            document.getElementById('productsList').innerHTML = '';
+            document.getElementById('noStepsMessage').classList.remove('hidden');
+            document.getElementById('noProductsMessage').classList.remove('hidden');
+            document.getElementById('templateModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        async function editTemplate(id) {
+            try {
+                // 从服务器获取最新的模板数据
+                const response = await taskTemplateAPI.getById(id);
+
+                if (!response.success || !response.data) {
+                    showNotification('获取模板详情失败', 'error');
+                    return;
+                }
+
+                const template = response.data;
+                currentTemplate = template;
+
+                document.getElementById('modalTitle').textContent = '编辑模板';
+                document.getElementById('templateName').value = template.template_name || '';
+                document.getElementById('templateCategory').value = template.category || 'customer_follow_up';
+                document.getElementById('targetSkinType').value = template.target_skin_type || '';
+                document.getElementById('targetAgeRange').value = template.target_age_range || '';
+                document.getElementById('courseDuration').value = template.course_duration || '';
+                document.getElementById('treatmentFrequency').value = template.treatment_frequency || '';
+                document.getElementById('expectedEffects').value = template.expected_effects || '';
+                document.getElementById('precautions').value = template.precautions || '';
+
+                // 渲染护理步骤
+                const steps = typeof template.steps === 'string' ? JSON.parse(template.steps || '[]') : (template.steps || []);
+                const stepsList = document.getElementById('stepsList');
+                stepsList.innerHTML = steps.map((step, index) => createStepItem(step, index)).join('');
+                if (steps.length > 0) {
+                    document.getElementById('noStepsMessage').classList.add('hidden');
+                } else {
+                    document.getElementById('noStepsMessage').classList.remove('hidden');
+                }
+
+                // 渲染所需产品
+                const products = typeof template.products === 'string' ? JSON.parse(template.products || '[]') : (template.products || []);
+                const productsList = document.getElementById('productsList');
+                productsList.innerHTML = products.map((product, index) => createProductItem(product, index)).join('');
+                if (products.length > 0) {
+                    document.getElementById('noProductsMessage').classList.add('hidden');
+                } else {
+                    document.getElementById('noProductsMessage').classList.remove('hidden');
+                }
+
+                document.getElementById('templateModal').classList.remove('hidden');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('编辑模板失败:', error);
+                showNotification('获取模板详情失败', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('templateModal').classList.add('hidden');
+            currentTemplate = null;
+        }
+
+        // ==================== 护理步骤管理 ====================
+
+        function addStep() {
+            const stepsList = document.getElementById('stepsList');
+            const index = stepsList.children.length;
+            const newStep = {
+                step_number: index + 1,
+                description: '',
+                duration: ''
+            };
+
+            stepsList.insertAdjacentHTML('beforeend', createStepItem(newStep, index));
+            document.getElementById('noStepsMessage').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        function createStepItem(step, index) {
+            return `
+                <div class="step-item p-4 bg-gray-50 rounded-xl border border-gray-200 relative" data-index="${index}">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600 rounded-l-xl"></div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-1 flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">
+                                ${step.step_number || index + 1}
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-9">
+                            <label class="text-xs text-gray-500 mb-1 block">步骤描述</label>
+                            <textarea rows="2"
+                                class="step-description w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="描述这一步的操作...">${step.description || ''}</textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-gray-500 mb-1 block">时长(分钟)</label>
+                            <input type="number"
+                                class="step-duration w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="10" value="${step.duration || ''}">
+                        </div>
+                    </div>
+
+                    <button onclick="removeStep(${index})"
+                        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        title="删除步骤">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function removeStep(index) {
+            const stepsList = document.getElementById('stepsList');
+            const stepItems = stepsList.querySelectorAll('.step-item');
+            if (stepItems[index]) {
+                stepItems[index].remove();
+            }
+
+            // 重新编号
+            const remainingSteps = stepsList.querySelectorAll('.step-item');
+            remainingSteps.forEach((item, idx) => {
+                item.dataset.index = idx;
+                const numberEl = item.querySelector('.w-8.h-8');
+                if (numberEl) numberEl.textContent = idx + 1;
+            });
+
+            if (stepsList.children.length === 0) {
+                document.getElementById('noStepsMessage').classList.remove('hidden');
+            }
+        }
+
+        // ==================== 产品管理 ====================
+
+        function addProduct() {
+            const productsList = document.getElementById('productsList');
+            const index = productsList.children.length;
+            const newProduct = {
+                name: '',
+                quantity: '',
+                usage: ''
+            };
+
+            productsList.insertAdjacentHTML('beforeend', createProductItem(newProduct, index));
+            document.getElementById('noProductsMessage').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        function createProductItem(product, index) {
+            return `
+                <div class="product-item p-4 bg-gray-50 rounded-xl border border-gray-200 relative" data-index="${index}">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-pink-600 rounded-l-xl"></div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-6">
+                            <label class="text-xs text-gray-500 mb-1 block">产品名称</label>
+                            <input type="text"
+                                class="product-name w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="例如: 深层保湿精华" value="${product.name || ''}">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="text-xs text-gray-500 mb-1 block">用量</label>
+                            <input type="text"
+                                class="product-quantity w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="例如: 2-3滴" value="${product.quantity || ''}">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="text-xs text-gray-500 mb-1 block">使用方法</label>
+                            <input type="text"
+                                class="product-usage w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="例如: 均匀涂抹" value="${product.usage || ''}">
+                        </div>
+                    </div>
+
+                    <button onclick="removeProduct(${index})"
+                        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        title="删除产品">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function removeProduct(index) {
+            const productsList = document.getElementById('productsList');
+            const productItems = productsList.querySelectorAll('.product-item');
+            if (productItems[index]) {
+                productItems[index].remove();
+            }
+
+            if (productsList.children.length === 0) {
+                document.getElementById('noProductsMessage').classList.remove('hidden');
+            }
+        }
+
+        // ==================== 保存模板 ====================
+
+        async function saveTemplate() {
+            const templateName = document.getElementById('templateName').value.trim();
+            const category = document.getElementById('templateCategory').value;
+            const targetSkinType = document.getElementById('targetSkinType').value.trim();
+            const targetAgeRange = document.getElementById('targetAgeRange').value.trim();
+            const courseDuration = document.getElementById('courseDuration').value.trim();
+            const treatmentFrequency = document.getElementById('treatmentFrequency').value.trim();
+            const expectedEffects = document.getElementById('expectedEffects').value.trim();
+            const precautions = document.getElementById('precautions').value.trim();
+
+            // 验证必填字段
+            if (!templateName) {
+                showNotification('请输入模板名称', 'error');
+                return;
+            }
+
+            // 收集护理步骤数据
+            const stepItems = document.querySelectorAll('.step-item');
+            const steps = Array.from(stepItems).map((item, index) => {
+                const description = item.querySelector('.step-description').value.trim();
+                const duration = item.querySelector('.step-duration').value;
+                return {
+                    step_number: index + 1,
+                    description,
+                    duration: duration ? parseInt(duration) : null
+                };
+            });
+
+            // 收集产品数据
+            const productItems = document.querySelectorAll('.product-item');
+            const products = Array.from(productItems).map(item => {
+                return {
+                    name: item.querySelector('.product-name').value.trim(),
+                    quantity: item.querySelector('.product-quantity').value.trim(),
+                    usage: item.querySelector('.product-usage').value.trim()
+                };
+            }).filter(p => p.name); // 过滤掉名称为空的产品
+
+            // 构建请求数据
+            const data = {
+                template_name: templateName,
+                category: category,
+                org_id: parseInt(getCurrentOrgId()),
+                scope: 'organization', // 默认组织级别
+                target_skin_type: targetSkinType || null,
+                target_age_range: targetAgeRange || null,
+                course_duration: courseDuration || null,
+                treatment_frequency: treatmentFrequency || null,
+                expected_effects: expectedEffects || null,
+                precautions: precautions || null,
+                steps: JSON.stringify(steps),
+                products: JSON.stringify(products),
+                services: JSON.stringify([]), // 暂时为空数组
+                status: 'active'
+            };
+
+            // 禁用保存按钮
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '保存中...';
+
+            try {
+                let response;
+                if (currentTemplate) {
+                    // 更新现有模板
+                    response = await taskTemplateAPI.update(currentTemplate.id, data);
+                } else {
+                    // 创建新模板
+                    response = await taskTemplateAPI.create(data);
+                }
+
+                saveBtn.disabled = false;
+                saveBtn.textContent = '保存模板';
+
+                if (response.success) {
+                    showNotification(currentTemplate ? '模板更新成功' : '模板创建成功', 'success');
+                    closeModal();
+                    loadTemplates(); // 重新加载模板列表
+                } else {
+                    showNotification(response.error?.message || '保存失败', 'error');
+                }
+            } catch (error) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '保存模板';
+                console.error('保存模板失败:', error);
+                showNotification('保存模板失败', 'error');
+            }
+        }
+
+        // ==================== 删除模板 ====================
+
+        async function deleteTemplate(id) {
+            if (!confirm('确定要删除此模板吗?此操作不可撤销。')) {
+                return;
+            }
+
+            try {
+                const response = await taskTemplateAPI.delete(id);
+
+                if (response.success) {
+                    showNotification('模板已删除', 'success');
+                    loadTemplates(); // 重新加载数据
+                } else {
+                    showNotification(response.error?.message || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除模板失败:', error);
+                showNotification('删除模板失败', 'error');
+            }
+        }
+
+        // ==================== 预览模板 ====================
+
+        function previewTemplate(id) {
+            const template = templates.find(t => t.id === id);
+            if (!template) return;
+
+            previewingTemplate = template;
+            const category = CATEGORIES[template.category] || CATEGORIES.other;
+            const steps = typeof template.steps === 'string' ? JSON.parse(template.steps || '[]') : (template.steps || []);
+            const products = typeof template.products === 'string' ? JSON.parse(template.products || '[]') : (template.products || []);
+
+            const content = `
+                <div class="space-y-6">
+                    <!-- 模板信息 -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="p-3 ${category.class} rounded-xl">
+                                <i data-lucide="${category.icon}" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">${template.template_name}</h3>
+                                <p class="text-sm text-gray-500">${template.template_code || ''}</p>
+                            </div>
+                        </div>
+                        <div class="mb-3 flex items-center gap-2">
+                            <span class="inline-block px-3 py-1 text-sm rounded-lg ${category.class} font-semibold">
+                                ${category.label}
+                            </span>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">使用 ${template.usage_count || 0} 次</span>
+                        </div>
+                    </div>
+
+                    <!-- 基本信息 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        ${template.target_skin_type ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">目标肤质</h5>
+                                <p class="text-gray-700">${template.target_skin_type}</p>
+                            </div>
+                        ` : ''}
+                        ${template.target_age_range ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">目标年龄段</h5>
+                                <p class="text-gray-700">${template.target_age_range}</p>
+                            </div>
+                        ` : ''}
+                        ${template.course_duration ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">疗程周期</h5>
+                                <p class="text-gray-700">${template.course_duration}</p>
+                            </div>
+                        ` : ''}
+                        ${template.treatment_frequency ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">护理频率</h5>
+                                <p class="text-gray-700">${template.treatment_frequency}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- 预期效果 -->
+                    ${template.expected_effects ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">预期效果</h4>
+                            <p class="text-gray-600 bg-gray-50 p-3 rounded-lg">${template.expected_effects}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- 护理步骤 -->
+                    ${steps.length > 0 ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="list-ordered" class="w-5 h-5"></i>
+                                护理步骤 (${steps.length} 步)
+                            </h4>
+                            <div class="space-y-3">
+                                ${steps.map(step => `
+                                    <div class="flex gap-3 bg-gray-50 p-3 rounded-lg">
+                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">
+                                            ${step.step_number}
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-gray-700">${step.description}</p>
+                                            ${step.duration ? `<p class="text-xs text-gray-500 mt-1">时长: ${step.duration} 分钟</p>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- 所需产品 -->
+                    ${products.length > 0 ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="package" class="w-5 h-5"></i>
+                                所需产品 (${products.length} 项)
+                            </h4>
+                            <div class="space-y-2">
+                                ${products.map(product => `
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-900">${product.name}</span>
+                                            ${product.quantity ? `<span class="text-sm text-purple-600">${product.quantity}</span>` : ''}
+                                        </div>
+                                        ${product.usage ? `<p class="text-sm text-gray-600">${product.usage}</p>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- 注意事项 -->
+                    ${template.precautions ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                                注意事项
+                            </h4>
+                            <p class="text-gray-600 bg-amber-50 p-3 rounded-lg border border-amber-200">${template.precautions}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('previewContent').innerHTML = content;
+            document.getElementById('previewModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function editTemplateFromPreview() {
+            closePreviewModal();
+            if (previewingTemplate) {
+                editTemplate(previewingTemplate.id);
+            }
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+            previewingTemplate = null;
+        }
+
+        // ==================== 通知系统 ====================
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-orange-500'
+            };
+
+            notification.className = `fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-right`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ==================== 用户菜单和侧边栏 ====================
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // ==================== 初始化 ====================
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

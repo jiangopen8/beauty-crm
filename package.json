@@ -4,6 +4,8 @@
   "description": "美业客户洞察CRM系统 - Beauty Industry Customer Insight CRM System",
   "main": "index.html",
   "scripts": {
+    "start": "node api/server.js",
+    "dev": "nodemon api/server.js",
     "doc:check": "node scripts/sync-docs.js check",
     "doc:status": "node scripts/sync-docs.js status",
     "doc:links": "node scripts/sync-docs.js links",
@@ -11,7 +13,10 @@
     "doc:commit": "node scripts/sync-docs.js commit",
     "doc:push": "node scripts/sync-docs.js push",
     "doc:sync": "node scripts/sync-docs.js sync",
-    "doc:help": "node scripts/sync-docs.js help"
+    "doc:help": "node scripts/sync-docs.js help",
+    "db:test": "node database/test-connection.js",
+    "db:init": "node database/init-db.js",
+    "db:verify": "node database/verify-tables.js"
   },
   "keywords": [
     "crm",
@@ -33,6 +38,17 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "mysql2": "^3.15.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
 }

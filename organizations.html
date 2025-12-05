@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-mode="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组织管理 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 卡片悬停效果 */
+        .org-card {
+            transition: all 0.3s ease;
+        }
+        .org-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 渐变背景 */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* 当前组织高亮 */
+        .current-org {
+            border-color: #8b5cf6 !important;
+            background-color: #f5f3ff !important;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast动画 */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast {
+            animation: slideInRight 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <div>
+                            <h1 class="text-lg md:text-xl font-bold text-gray-900">
+                                美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="settings.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                        
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能服务 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                        
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
+                    </a>
+                </div>
+
+                    <!-- 系统管理 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
+                    </a>
+                </div>
+                </div>
+            </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-4 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">组织管理</h1>
+                        <p class="text-sm md:text-base text-gray-600">管理和切换组织，查看组织信息</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 当前组织信息卡片 -->
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-lg p-6 mb-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-90 mb-1">当前组织</p>
+                        <h2 class="text-2xl md:text-3xl font-bold" id="current-org-display">加载中...</h2>
+                        <p class="text-sm opacity-75 mt-2" id="current-org-info">组织编码: -</p>
+                    </div>
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i data-lucide="building-2" class="w-8 h-8"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex justify-end mb-6">
+                <button onclick="loadOrganizationList()" class="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors shadow-sm flex items-center space-x-2">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    <span>刷新列表</span>
+                </button>
+            </div>
+
+            <!-- 组织列表说明 -->
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">可用组织列表</h3>
+                <p class="text-sm text-gray-600">点击"切换"按钮可切换到对应组织，页面将自动刷新</p>
+            </div>
+
+            <!-- 组织列表 -->
+            <div id="org-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 组织列表将在这里动态加载 -->
+                <div class="col-span-full text-center py-12">
+                    <div class="loading-spinner mx-auto mb-3"></div>
+                    <p class="text-gray-500">加载组织列表中...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
+
+
+        // ==================== 用户菜单 ====================
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // ==================== 移动端侧边栏 ====================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // ==================== 组织管理功能 ====================
+
+        // 加载组织列表
+        async function loadOrganizationList() {
+            try {
+                // 从API获取组织列表
+                const result = await organizationAPI.getList();
+
+                if (!result.success) {
+                    console.error('获取组织列表失败:', result.error);
+                    const container = document.getElementById('org-list');
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="col-span-full text-center py-12">
+                                <i data-lucide="alert-circle" class="w-16 h-16 mx-auto mb-3 text-red-500"></i>
+                                <p class="text-gray-600 text-lg mb-2">获取组织列表失败</p>
+                                <p class="text-sm text-gray-500 mb-4">${result.error || '未知错误'}</p>
+                                <button onclick="loadOrganizationList()" class="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 shadow-sm">
+                                    重试
+                                </button>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                    }
+                    return;
+                }
+
+                const orgs = result.data.items || [];
+                const currentOrgId = parseInt(localStorage.getItem('currentOrgId')) || (orgs.length > 0 ? orgs[0].id : null);
+
+                // 更新当前组织显示
+                updateCurrentOrgDisplay(currentOrgId, orgs);
+
+                const container = document.getElementById('org-list');
+                if (!container) return;
+
+                if (orgs.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i data-lucide="building-2" class="w-16 h-16 mx-auto mb-3 text-gray-400"></i>
+                            <p class="text-gray-600 text-lg mb-2">暂无可用组织</p>
+                            <p class="text-sm text-gray-500">请联系系统管理员分配组织权限</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = orgs.map(org => `
+                    <div class="org-card bg-white rounded-lg shadow-sm border ${org.id === currentOrgId ? 'current-org border-purple-500' : 'border-gray-200'} p-5 transition-all">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h3 class="text-lg font-bold text-gray-900">${org.org_name}</h3>
+                                    ${org.id === currentOrgId ? `
+                                        <span class="px-2 py-1 bg-purple-500 text-white text-xs rounded-full font-medium">当前</span>
+                                    ` : ''}
+                                </div>
+                                <p class="text-xs text-gray-500 mb-2 flex items-center">
+                                    <i data-lucide="hash" class="w-3 h-3 mr-1"></i>
+                                    ${org.org_code || '无编码'}
+                                </p>
+                                ${org.contact_person ? `
+                                    <p class="text-sm text-gray-600 mb-1 flex items-center">
+                                        <i data-lucide="user" class="w-3 h-3 mr-1"></i>
+                                        ${org.contact_person}
+                                    </p>
+                                ` : ''}
+                                ${org.contact_phone ? `
+                                    <p class="text-sm text-gray-600 flex items-center">
+                                        <i data-lucide="phone" class="w-3 h-3 mr-1"></i>
+                                        ${org.contact_phone}
+                                    </p>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mt-4">
+                            ${org.id !== currentOrgId ? `
+                                <button onclick="switchOrganization(${org.id}, '${org.org_name}')" class="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm font-medium shadow-sm">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4 inline-block mr-1"></i>
+                                    切换到此组织
+                                </button>
+                            ` : `
+                                <button class="w-full px-4 py-2 bg-purple-100 text-purple-700 rounded-lg cursor-default text-sm font-medium">
+                                    <i data-lucide="check" class="w-4 h-4 inline-block mr-1"></i>
+                                    当前使用中
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+            } catch (error) {
+                console.error('加载组织列表失败:', error);
+                const container = document.getElementById('org-list');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i data-lucide="alert-circle" class="w-16 h-16 mx-auto mb-3 text-red-500"></i>
+                            <p class="text-gray-600 text-lg mb-2">加载组织列表时发生错误</p>
+                            <p class="text-sm text-gray-500 mb-4">${error.message}</p>
+                            <button onclick="loadOrganizationList()" class="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 shadow-sm">
+                                重试
+                            </button>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        // 更新当前组织显示
+        async function updateCurrentOrgDisplay(currentOrgId, orgs) {
+            const displayEl = document.getElementById('current-org-display');
+            const infoEl = document.getElementById('current-org-info');
+            const sidebarNameEl = document.getElementById('sidebar-org-name');
+            const sidebarCodeEl = document.getElementById('sidebar-org-code');
+            const headerOrgNameEl = document.getElementById('header-org-name');
+
+            if (!displayEl || !infoEl) return;
+
+            if (!currentOrgId) {
+                displayEl.textContent = '未选择组织';
+                infoEl.textContent = '请先选择一个组织';
+                if (sidebarNameEl) sidebarNameEl.textContent = '未选择';
+                if (sidebarCodeEl) sidebarCodeEl.textContent = '-';
+                if (headerOrgNameEl) headerOrgNameEl.textContent = '';
+                return;
+            }
+
+            try {
+                // 从组织列表中查找或从API获取
+                let currentOrg = orgs ? orgs.find(o => o.id === currentOrgId) : null;
+
+                if (!currentOrg) {
+                    const result = await organizationAPI.getById(currentOrgId);
+                    if (result.success) {
+                        currentOrg = result.data;
+                    }
+                }
+
+                if (currentOrg) {
+                    displayEl.textContent = currentOrg.org_name;
+                    infoEl.textContent = `组织编码: ${currentOrg.org_code || '无'} | 类型: ${getOrgTypeLabel(currentOrg.org_type)}`;
+
+                    // 同步到localStorage
+                    localStorage.setItem('currentOrgName', currentOrg.org_name);
+
+                    // 更新侧边栏
+                    if (sidebarNameEl) sidebarNameEl.textContent = currentOrg.org_name;
+                    if (sidebarCodeEl) sidebarCodeEl.textContent = currentOrg.org_code || '无编码';
+
+                    // 更新顶部标题栏
+                    if (headerOrgNameEl) headerOrgNameEl.textContent = ' - ' + currentOrg.org_name;
+                } else {
+                    displayEl.textContent = '组织不存在';
+                    infoEl.textContent = 'ID: ' + currentOrgId;
+                    if (sidebarNameEl) sidebarNameEl.textContent = '组织不存在';
+                    if (sidebarCodeEl) sidebarCodeEl.textContent = 'ID: ' + currentOrgId;
+                    if (headerOrgNameEl) headerOrgNameEl.textContent = '';
+                    if (sidebarCodeEl) sidebarCodeEl.textContent = 'ID: ' + currentOrgId;
+                }
+            } catch (error) {
+                console.error('更新当前组织显示失败:', error);
+                displayEl.textContent = '加载失败';
+                infoEl.textContent = 'ID: ' + currentOrgId;
+            }
+        }
+
+        // 获取组织类型标签
+        function getOrgTypeLabel(type) {
+            const labels = {
+                'headquarters': '总部',
+                'franchisee': '加盟商',
+                'branch': '分支机构',
+                'other': '其他'
+            };
+            return labels[type] || type;
+        }
+
+        // 切换组织
+        async function switchOrganization(orgId, orgName) {
+            try {
+                // 保存组织ID和名称到localStorage
+                localStorage.setItem('currentOrgId', orgId);
+                localStorage.setItem('currentOrgName', orgName);
+
+                // 显示切换提示
+                showToast(`正在切换到「${orgName}」...`, 'info');
+
+                // 延迟刷新,让用户看到提示
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } catch (error) {
+                console.error('切换组织失败:', error);
+                showToast('切换组织失败: ' + error.message, 'error');
+            }
+        }
+
+        // Toast提示
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-purple-500'
+            };
+
+            const icons = {
+                success: 'check-circle',
+                error: 'alert-circle',
+                info: 'info'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `toast fixed top-20 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrganizationList();
+        });
+    </script>
+</body>
+</html>

@@ -120,7 +120,9 @@
                     </button>
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
-                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
                     </div>
                 </div>
 
@@ -170,8 +172,7 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14 md:pt-16">
-        <!-- 侧边栏 -->
+    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
         <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
             <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
                 <!-- 快速统计 -->
@@ -203,16 +204,17 @@
                     <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>数据看板</span>
+                        
                     </a>
                     <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>客户管理</span>
                         <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
                     </a>
-                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg transition-colors">
                         <i data-lucide="shopping-cart" class="w-4 h-4"></i>
                         <span>订单管理</span>
-                        <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
                     </a>
                     <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="check-square" class="w-4 h-4"></i>
@@ -221,50 +223,72 @@
                     </a>
                 </div>
 
-                <!-- 智能功能 -->
+                <!-- 智能服务 -->
                 <div class="space-y-2">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
                     <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                         <span>客户案例</span>
-                    </a>
-                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <i data-lucide="layers" class="w-4 h-4"></i>
-                        <span>方案模板</span>
+                        
                     </a>
                     <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="store" class="w-4 h-4"></i>
                         <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
                     </a>
                 </div>
 
-                <!-- 系统设置 -->
+                    <!-- 系统管理 -->
                 <div class="space-y-2">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
                     <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                         <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
                     </a>
                 </div>
-
-                <!-- 系统状态信息 (移动端显示) -->
-                <div class="md:hidden mt-8 pt-6 border-t border-gray-200">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between text-xs text-gray-500">
-                            <span>系统状态</span>
-                            <span class="flex items-center space-x-1">
-                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span>正常</span>
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs text-gray-500">
-                            <span>最后更新</span>
-                            <span id="last-update-time">刚刚</span>
-                        </div>
-                    </div>
                 </div>
-            </div>
-        </aside>
+            </aside>
 
         <!-- 遮罩层 (移动端) -->
         <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
@@ -554,9 +578,23 @@
     </div>
 
     <script src="js/utils.js"></script>
+    <script src="js/orderAPI.js"></script>
     <script>
         // 初始化图标
         lucide.createIcons();
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
+
 
         // 全局变量
         let currentFilter = 'all';
@@ -566,18 +604,83 @@
         let filteredOrders = [];
 
         // 初始化订单数据
-        function initOrders() {
-            allOrders = StorageManager.get('orders', []);
+        async function initOrders() {
+            try {
+                // 从 API 加载统计数据
+                await updateStatistics();
 
-            // 如果没有订单数据,创建演示数据
-            if (allOrders.length === 0) {
-                allOrders = generateDemoOrders();
-                StorageManager.set('orders', allOrders);
+                // 从 API 加载订单列表
+                await loadOrders();
+            } catch (error) {
+                console.error('初始化订单失败:', error);
+                UIUtils.notify('加载订单数据失败', 'error');
             }
+        }
 
-            filteredOrders = allOrders;
-            updateStatistics();
-            renderOrders();
+        // 从 API 加载订单列表
+        async function loadOrders() {
+            try {
+                const response = await orderAPI.getList({
+                    org_id: 1, // TODO: 使用实际的机构ID
+                    order_status: currentFilter === 'all' ? undefined : mapStatusToBackend(currentFilter),
+                    search: document.getElementById('searchInput')?.value || undefined,
+                    page: currentPage,
+                    pageSize: pageSize
+                });
+
+                if (response.success) {
+                    allOrders = response.data.list.map(order => ({
+                        ...order,
+                        // 映射后端字段到前端
+                        id: order.id.toString(),
+                        orderNo: order.order_no,
+                        customerName: order.customer_name,
+                        serviceName: '订单服务', // TODO: 添加服务名称字段
+                        serviceDescription: order.remark || '',
+                        price: parseFloat(order.original_amount),
+                        quantity: 1,
+                        total: parseFloat(order.final_amount),
+                        status: mapStatusToFrontend(order.order_status),
+                        createdAt: order.created_at,
+                        updatedAt: order.updated_at
+                    }));
+
+                    filteredOrders = allOrders;
+                    renderOrders();
+                } else {
+                    throw new Error(response.message || '加载订单失败');
+                }
+            } catch (error) {
+                console.error('加载订单失败:', error);
+                UIUtils.notify('加载订单失败', 'error');
+                // 显示空状态
+                document.getElementById('emptyState').classList.remove('hidden');
+            }
+        }
+
+        // 映射后端状态到前端状态
+        function mapStatusToFrontend(backendStatus) {
+            const statusMap = {
+                'pending': 'draft',
+                'confirmed': 'pending',
+                'in_progress': 'processing',
+                'completed': 'completed',
+                'cancelled': 'cancelled'
+            };
+            return statusMap[backendStatus] || backendStatus;
+        }
+
+        // 映射前端状态到后端状态
+        function mapStatusToBackend(frontendStatus) {
+            const statusMap = {
+                'draft': 'pending',
+                'pending': 'confirmed',
+                'paid': 'confirmed',
+                'processing': 'in_progress',
+                'completed': 'completed',
+                'cancelled': 'cancelled'
+            };
+            return statusMap[frontendStatus] || frontendStatus;
         }
 
         // 生成演示订单数据
@@ -614,26 +717,40 @@
         }
 
         // 更新统计数据
-        function updateStatistics() {
-            const stats = {
-                draft: 0,
-                pending: 0,
-                paid: 0,
-                processing: 0,
-                completed: 0,
-                cancelled: 0
-            };
+        async function updateStatistics() {
+            try {
+                const response = await orderAPI.getStats(1); // TODO: 使用实际的机构ID
 
-            allOrders.forEach(order => {
-                stats[order.status]++;
-            });
+                if (response.success) {
+                    const { by_status } = response.data;
 
-            document.getElementById('draftCount').textContent = stats.draft;
-            document.getElementById('pendingCount').textContent = stats.pending;
-            document.getElementById('paidCount').textContent = stats.paid;
-            document.getElementById('processingCount').textContent = stats.processing;
-            document.getElementById('completedCount').textContent = stats.completed;
-            document.getElementById('cancelledCount').textContent = stats.cancelled;
+                    // 初始化计数
+                    const stats = {
+                        pending: 0,
+                        confirmed: 0,
+                        in_progress: 0,
+                        completed: 0,
+                        cancelled: 0
+                    };
+
+                    // 汇总统计数据
+                    by_status.forEach(item => {
+                        if (stats.hasOwnProperty(item.order_status)) {
+                            stats[item.order_status] = parseInt(item.count);
+                        }
+                    });
+
+                    // 映射到前端显示的状态
+                    document.getElementById('draftCount').textContent = stats.pending || 0;
+                    document.getElementById('pendingCount').textContent = stats.confirmed || 0;
+                    document.getElementById('paidCount').textContent = stats.confirmed || 0; // 已支付 = 已确认
+                    document.getElementById('processingCount').textContent = stats.in_progress || 0;
+                    document.getElementById('completedCount').textContent = stats.completed || 0;
+                    document.getElementById('cancelledCount').textContent = stats.cancelled || 0;
+                }
+            } catch (error) {
+                console.error('更新统计数据失败:', error);
+            }
         }
 
         // 渲染订单列表
@@ -810,31 +927,13 @@
         }
 
         // 搜索订单
-        function searchOrders() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-
-            if (!keyword) {
-                filteredOrders = currentFilter === 'all'
-                    ? allOrders
-                    : allOrders.filter(order => order.status === currentFilter);
-            } else {
-                const baseOrders = currentFilter === 'all'
-                    ? allOrders
-                    : allOrders.filter(order => order.status === currentFilter);
-
-                filteredOrders = baseOrders.filter(order =>
-                    order.orderNo.toLowerCase().includes(keyword) ||
-                    order.customerName.toLowerCase().includes(keyword) ||
-                    order.serviceName.toLowerCase().includes(keyword)
-                );
-            }
-
+        async function searchOrders() {
             currentPage = 1;
-            renderOrders();
+            await loadOrders();
         }
 
         // 筛选订单
-        function filterOrders(status) {
+        async function filterOrders(status) {
             currentFilter = status;
 
             // 更新按钮状态
@@ -843,34 +942,12 @@
             });
             event.target.classList.add('active');
 
-            // 应用筛选
-            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-
-            if (status === 'all') {
-                filteredOrders = keyword
-                    ? allOrders.filter(order =>
-                        order.orderNo.toLowerCase().includes(keyword) ||
-                        order.customerName.toLowerCase().includes(keyword) ||
-                        order.serviceName.toLowerCase().includes(keyword)
-                    )
-                    : allOrders;
-            } else {
-                const statusOrders = allOrders.filter(order => order.status === status);
-                filteredOrders = keyword
-                    ? statusOrders.filter(order =>
-                        order.orderNo.toLowerCase().includes(keyword) ||
-                        order.customerName.toLowerCase().includes(keyword) ||
-                        order.serviceName.toLowerCase().includes(keyword)
-                    )
-                    : statusOrders;
-            }
-
             currentPage = 1;
-            renderOrders();
+            await loadOrders();
         }
 
         // 重置筛选
-        function resetFilters() {
+        async function resetFilters() {
             document.getElementById('searchInput').value = '';
             currentFilter = 'all';
 
@@ -881,9 +958,8 @@
                 }
             });
 
-            filteredOrders = allOrders;
             currentPage = 1;
-            renderOrders();
+            await loadOrders();
         }
 
         // 显示创建订单模态框
@@ -1026,29 +1102,30 @@
         }
 
         // 删除订单
-        function deleteOrder(orderId) {
+        async function deleteOrder(orderId) {
             const order = allOrders.find(o => o.id === orderId);
             if (!order) return;
 
             if (confirm(`确定要删除订单 ${order.orderNo} 吗?此操作不可恢复。`)) {
-                allOrders = allOrders.filter(o => o.id !== orderId);
-                StorageManager.set('orders', allOrders);
+                try {
+                    const response = await orderAPI.delete(order.id);
 
-                // 重新筛选
-                if (currentFilter === 'all') {
-                    filteredOrders = allOrders;
-                } else {
-                    filteredOrders = allOrders.filter(o => o.status === currentFilter);
+                    if (response.success) {
+                        UIUtils.notify('订单已删除', 'success');
+                        await updateStatistics();
+                        await loadOrders();
+                    } else {
+                        throw new Error(response.message || '删除订单失败');
+                    }
+                } catch (error) {
+                    console.error('删除订单失败:', error);
+                    UIUtils.notify('删除订单失败', 'error');
                 }
-
-                updateStatistics();
-                renderOrders();
-                UIUtils.notify('订单已删除', 'success');
             }
         }
 
         // 保存订单
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const orderId = document.getElementById('orderId').value;
@@ -1061,50 +1138,55 @@
             const status = document.getElementById('orderStatus').value;
             const notes = document.getElementById('notes').value;
 
+            // 准备后端API需要的数据格式
             const orderData = {
-                customerId,
-                customerName,
-                serviceName,
-                serviceDescription,
-                price,
-                quantity,
-                total: price * quantity,
-                status,
-                notes,
-                updatedAt: DateUtils.now()
+                org_id: 1, // TODO: 使用实际的机构ID
+                store_id: 1, // TODO: 使用实际的门店ID
+                customer_id: customerId,
+                customer_name: customerName,
+                customer_phone: '13800138000', // TODO: 从客户数据获取
+                original_amount: price * quantity,
+                discount_amount: 0,
+                final_amount: price * quantity,
+                payment_method: status === 'paid' ? 'wechat' : null,
+                payment_status: status === 'paid' ? 'paid' : 'unpaid',
+                paid_amount: status === 'paid' ? price * quantity : 0,
+                order_status: mapStatusToBackend(status),
+                service_date: null, // TODO: 添加服务日期选择
+                service_start_time: null,
+                service_end_time: null,
+                remark: notes || serviceDescription,
+                created_by: 1, // TODO: 使用实际登录用户ID
+                updated_by: 1
             };
 
-            if (orderId) {
-                // 编辑现有订单
-                const index = allOrders.findIndex(o => o.id === orderId);
-                if (index !== -1) {
-                    allOrders[index] = { ...allOrders[index], ...orderData };
-                    UIUtils.notify('订单更新成功', 'success');
+            try {
+                let response;
+                if (orderId) {
+                    // 更新现有订单
+                    response = await orderAPI.update(orderId, orderData);
+                    if (response.success) {
+                        UIUtils.notify('订单更新成功', 'success');
+                    }
+                } else {
+                    // 创建新订单
+                    response = await orderAPI.create(orderData);
+                    if (response.success) {
+                        UIUtils.notify('订单创建成功', 'success');
+                    }
                 }
-            } else {
-                // 创建新订单
-                const newOrder = {
-                    id: StringUtils.uuid(),
-                    orderNo: `ORD${String(allOrders.length + 1).padStart(5, '0')}`,
-                    ...orderData,
-                    createdAt: DateUtils.now()
-                };
-                allOrders.unshift(newOrder);
-                UIUtils.notify('订单创建成功', 'success');
+
+                if (response.success) {
+                    await updateStatistics();
+                    await loadOrders();
+                    closeOrderModal();
+                } else {
+                    throw new Error(response.message || '保存订单失败');
+                }
+            } catch (error) {
+                console.error('保存订单失败:', error);
+                UIUtils.notify(error.message || '保存订单失败', 'error');
             }
-
-            StorageManager.set('orders', allOrders);
-
-            // 重新筛选
-            if (currentFilter === 'all') {
-                filteredOrders = allOrders;
-            } else {
-                filteredOrders = allOrders.filter(o => o.status === currentFilter);
-            }
-
-            updateStatistics();
-            renderOrders();
-            closeOrderModal();
         });
 
         // 用户菜单切换

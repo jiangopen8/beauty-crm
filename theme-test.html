@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-mode="light" data-theme="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题功能测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS 变量定义 - 主题色系统 */
+        :root {
+            --theme-gradient-start: #667eea;
+            --theme-gradient-end: #764ba2;
+            --theme-primary: #667eea;
+        }
+
+        [data-theme="pink"] {
+            --theme-gradient-start: #f093fb;
+            --theme-gradient-end: #f5576c;
+            --theme-primary: #f093fb;
+        }
+
+        [data-theme="blue"] {
+            --theme-gradient-start: #4facfe;
+            --theme-gradient-end: #00f2fe;
+            --theme-primary: #4facfe;
+        }
+
+        [data-theme="green"] {
+            --theme-gradient-start: #43e97b;
+            --theme-gradient-end: #38f9d7;
+            --theme-primary: #43e97b;
+        }
+
+        [data-theme="orange"] {
+            --theme-gradient-start: #fa709a;
+            --theme-gradient-end: #fee140;
+            --theme-primary: #fa709a;
+        }
+
+        /* 深色模式 */
+        [data-mode="dark"] {
+            --bg-primary: #111827;
+            --text-primary: #f9fafb;
+        }
+
+        [data-mode="dark"] body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        [data-mode="dark"] .card {
+            background-color: #1f2937;
+            color: #f9fafb;
+        }
+
+        .test-btn {
+            background: linear-gradient(to right, var(--theme-gradient-start), var(--theme-gradient-end));
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            margin: 10px;
+        }
+
+        .theme-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .theme-box.active {
+            border-color: var(--theme-primary);
+            transform: scale(1.1);
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="card">
+        <h1 class="text-3xl font-bold mb-4">主题功能测试</h1>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">主题色切换</h2>
+            <div class="flex gap-3">
+                <div class="theme-box active" style="background: linear-gradient(135deg, #667eea, #764ba2)" onclick="setTheme('purple')"></div>
+                <div class="theme-box" style="background: linear-gradient(135deg, #f093fb, #f5576c)" onclick="setTheme('pink')"></div>
+                <div class="theme-box" style="background: linear-gradient(135deg, #4facfe, #00f2fe)" onclick="setTheme('blue')"></div>
+                <div class="theme-box" style="background: linear-gradient(135deg, #43e97b, #38f9d7)" onclick="setTheme('green')"></div>
+                <div class="theme-box" style="background: linear-gradient(135deg, #fa709a, #fee140)" onclick="setTheme('orange')"></div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">显示模式切换</h2>
+            <button onclick="setMode('light')" class="px-4 py-2 bg-gray-200 rounded-lg mr-2">浅色模式</button>
+            <button onclick="setMode('dark')" class="px-4 py-2 bg-gray-800 text-white rounded-lg">深色模式</button>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">主题色应用测试</h2>
+            <button class="test-btn">主题渐变按钮</button>
+            <p style="color: var(--theme-primary)">主题色文字</p>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">当前设置</h2>
+            <p>主题色: <span id="current-theme">purple</span></p>
+            <p>显示模式: <span id="current-mode">light</span></p>
+        </div>
+    </div>
+
+    <script>
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('current-theme').textContent = theme;
+
+            // 更新active状态
+            document.querySelectorAll('.theme-box').forEach((box, index) => {
+                box.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            localStorage.setItem('theme_color', theme);
+            console.log('主题色已切换到:', theme);
+        }
+
+        function setMode(mode) {
+            document.documentElement.setAttribute('data-mode', mode);
+            document.getElementById('current-mode').textContent = mode;
+            localStorage.setItem('display_mode', mode);
+            console.log('显示模式已切换到:', mode);
+        }
+
+        // 页面加载时恢复设置
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme_color') || 'purple';
+            const savedMode = localStorage.getItem('display_mode') || 'light';
+
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.documentElement.setAttribute('data-mode', savedMode);
+
+            document.getElementById('current-theme').textContent = savedTheme;
+            document.getElementById('current-mode').textContent = savedMode;
+
+            console.log('已加载保存的设置:', { theme: savedTheme, mode: savedMode });
+        });
+    </script>
+</body>
+</html>

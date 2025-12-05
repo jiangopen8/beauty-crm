@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户详细资料 - 演示页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="customers.html" class="p-2 text-gray-600 hover:text-blue-600">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">客户详细资料</h1>
+                        <p class="text-sm text-gray-500">基于模板的详细信息管理</p>
+                    </div>
+                </div>
+                <button onclick="saveProfile()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
+                    保存资料
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-6xl mx-auto px-4 py-6 mt-20">
+        <!-- 客户基本信息卡片 -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <span class="text-white text-2xl font-bold" id="customerInitial">张</span>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold text-gray-900" id="customerName">张小姐</h2>
+                    <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                        <span><i data-lucide="phone" class="w-4 h-4 inline mr-1"></i><span id="customerPhone">138****8888</span></span>
+                        <span><i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>会员等级: <span id="customerLevel" class="text-purple-600 font-medium">金卡会员</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模板信息 -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 mr-2"></i>
+                <div>
+                    <p class="text-sm font-medium text-blue-900">当前使用模板: <span id="templateName">标准客户资料模板</span></p>
+                    <p class="text-xs text-blue-700 mt-1">此模板定义了客户需要填写的详细资料字段</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细资料表单 -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-gray-900">
+                    <i data-lucide="file-text" class="w-5 h-5 inline mr-2 text-purple-600"></i>
+                    客户详细资料
+                </h3>
+                <span class="text-sm text-gray-500">
+                    <i data-lucide="clock" class="w-4 h-4 inline mr-1"></i>
+                    最后更新: <span id="lastUpdateTime">--</span>
+                </span>
+            </div>
+
+            <form id="profileForm">
+                <!-- 动态生成的表单字段将显示在这里 -->
+                <div id="profileFormFields">
+                    <div class="flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                            <p class="text-gray-500">正在加载模板...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 提交按钮 -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="window.location.href='customers.html'" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            取消
+                        </button>
+                        <button type="button" onclick="saveProfile()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
+                            保存资料
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 操作提示 -->
+        <div class="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">💡 使用说明</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>• 此页面根据<a href="customer-profile-templates.html" class="text-purple-600 hover:underline">客户资料模板</a>动态生成表单字段</li>
+                <li>• 带 <span class="text-red-500">*</span> 的字段为必填项</li>
+                <li>• 填写完成后点击"保存资料"按钮保存信息</li>
+                <li>• 可以随时返回此页面编辑资料</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- 引入客户资料管理脚本 -->
+    <script src="js/customerProfile.js"></script>
+
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 模拟客户ID（实际使用时从URL参数获取）
+        const customerId = new URLSearchParams(window.location.search).get('id') || 1;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // 初始化客户资料管理器
+                await CustomerProfileManager.init(customerId);
+
+                // 更新模板名称显示
+                if (CustomerProfileManager.currentTemplate) {
+                    document.getElementById('templateName').textContent =
+                        CustomerProfileManager.currentTemplate.template_name;
+                }
+
+                // 渲染表单
+                CustomerProfileManager.renderProfileForm('profileFormFields');
+
+                // 更新最后更新时间
+                if (CustomerProfileManager.currentProfileData) {
+                    const updateTime = new Date(CustomerProfileManager.currentProfileData.updated_at);
+                    document.getElementById('lastUpdateTime').textContent =
+                        updateTime.toLocaleString('zh-CN');
+                } else {
+                    document.getElementById('lastUpdateTime').textContent = '尚未填写';
+                }
+
+                // 重新初始化图标
+                lucide.createIcons();
+            } catch (error) {
+                console.error('初始化失败:', error);
+                document.getElementById('profileFormFields').innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="alert-circle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+                        <p class="text-red-600">加载失败: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        // 保存资料
+        async function saveProfile() {
+            const success = await CustomerProfileManager.saveProfile('profileForm', 1, 1);
+
+            if (success) {
+                // 更新最后更新时间
+                const now = new Date();
+                document.getElementById('lastUpdateTime').textContent = now.toLocaleString('zh-CN');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -102,7 +102,9 @@
                     </button>
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
-                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
                     </div>
                 </div>
 
@@ -152,8 +154,7 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14 md:pt-16">
-        <!-- 侧边栏 -->
+    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
         <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
             <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
                 <!-- 快速统计 -->
@@ -162,19 +163,19 @@
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">客户总数</span>
-                            <span class="font-semibold text-purple-600">128</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">今日新增</span>
-                            <span class="font-semibold text-green-600">5</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">待跟进</span>
-                            <span class="font-semibold text-orange-600">12</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600">本月订单</span>
-                            <span class="font-semibold text-blue-600">67</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
                         </div>
                     </div>
                 </div>
@@ -185,6 +186,7 @@
                     <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>数据看板</span>
+                        
                     </a>
                     <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="users" class="w-4 h-4"></i>
@@ -203,33 +205,72 @@
                     </a>
                 </div>
 
-                <!-- 智能功能 -->
+                <!-- 智能服务 -->
                 <div class="space-y-2">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
                     <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                         <span>客户案例</span>
-                    </a>
-                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
-                        <i data-lucide="layers" class="w-4 h-4"></i>
-                        <span>方案模板</span>
+                        
                     </a>
                     <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="store" class="w-4 h-4"></i>
                         <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
                     </a>
                 </div>
 
-                <!-- 系统设置 -->
+                    <!-- 系统管理 -->
                 <div class="space-y-2">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
                     <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                         <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
                     </a>
                 </div>
-            </div>
-        </aside>
+                </div>
+            </aside>
 
         <!-- 遮罩层 (移动端) -->
         <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
@@ -241,11 +282,27 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div class="mb-4 md:mb-0">
                         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">方案模板管理</h1>
-                        <p class="text-sm md:text-base text-gray-600">定义灵活的客户信息采集结构,支持客户资料、行为记录和方案模板</p>
+                        <p class="text-sm md:text-base text-gray-600">管理美业护理方案模板,包含疗程周期、护理频率、护理步骤和产品配置</p>
                     </div>
                     <button onclick="openCreateModal()" class="flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg">
                         <i data-lucide="plus" class="w-5 h-5"></i>
                         <span class="font-medium">创建模板</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                            <input type="text" id="searchInput" onkeyup="handleSearch()" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="搜索模板名称或编码...">
+                        </div>
+                    </div>
+                    <button onclick="loadTemplates()" class="flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        <span>刷新</span>
                     </button>
                 </div>
             </div>
@@ -256,19 +313,33 @@
                     <button onclick="filterCategory('all')" id="filter-all" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap bg-purple-600 text-white">
                         全部模板
                     </button>
-                    <button onclick="filterCategory('profile')" id="filter-profile" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
-                        客户信息资料
+                    <button onclick="filterCategory('hydration')" id="filter-hydration" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        补水保湿
                     </button>
-                    <button onclick="filterCategory('behavior')" id="filter-behavior" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
-                        客户行为模板
+                    <button onclick="filterCategory('whitening')" id="filter-whitening" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        美白亮肤
                     </button>
-                    <button onclick="filterCategory('plan')" id="filter-plan" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
-                        方案模板
+                    <button onclick="filterCategory('anti_aging')" id="filter-anti_aging" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        抗衰老
+                    </button>
+                    <button onclick="filterCategory('repair')" id="filter-repair" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        修复护理
+                    </button>
+                    <button onclick="filterCategory('hair_care')" id="filter-hair_care" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
+                        头发护理
                     </button>
                     <button onclick="filterCategory('other')" id="filter-other" class="category-filter-btn px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap text-gray-600 hover:bg-gray-100">
-                        其他表单
+                        其他方案
                     </button>
                 </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loading-state" class="hidden text-center py-12">
+                <div class="w-12 h-12 mx-auto mb-4">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                </div>
+                <p class="text-gray-500">加载中...</p>
             </div>
 
             <!-- 模板列表 -->
@@ -290,7 +361,7 @@
     <!-- 创建/编辑模板模态框 -->
     <div id="templateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 modal-overlay">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden modal-content">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden modal-content">
                 <!-- 模态框头部 -->
                 <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
                     <h2 id="modalTitle" class="text-xl font-bold text-white">创建新模板</h2>
@@ -312,49 +383,99 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     模板名称 <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 头皮检测分析">
+                                <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 深层补水保湿方案">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     所属分类 <span class="text-red-500">*</span>
                                 </label>
                                 <select id="templateCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
-                                    <option value="profile">客户信息资料</option>
-                                    <option value="behavior">客户行为模板</option>
-                                    <option value="plan">方案模板</option>
-                                    <option value="other">其他表单</option>
+                                    <option value="hydration">补水保湿</option>
+                                    <option value="whitening">美白亮肤</option>
+                                    <option value="anti_aging">抗衰老</option>
+                                    <option value="repair">修复护理</option>
+                                    <option value="hair_care">头发护理</option>
+                                    <option value="other">其他方案</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    目标肤质
+                                </label>
+                                <input type="text" id="targetSkinType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 干性、混合性、油性">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    目标年龄段
+                                </label>
+                                <input type="text" id="targetAgeRange" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 25-35岁">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    疗程周期
+                                </label>
+                                <input type="text" id="courseDuration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 4周">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    护理频率
+                                </label>
+                                <input type="text" id="treatmentFrequency" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="例如: 每周2次">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    模板描述
+                                    预期效果
                                 </label>
-                                <textarea id="templateDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="描述此模板用于收集什么数据..."></textarea>
+                                <textarea id="expectedEffects" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="描述此方案的预期效果..."></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 字段定义 -->
+                    <!-- 护理步骤 -->
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                                <i data-lucide="list" class="w-5 h-5 mr-2 text-purple-600"></i>
-                                字段定义
+                                <i data-lucide="list-ordered" class="w-5 h-5 mr-2 text-purple-600"></i>
+                                护理步骤
                             </h3>
-                            <button onclick="addField()" class="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                            <button onclick="addStep()" class="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 font-medium">
                                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                                <span>添加字段</span>
+                                <span>添加步骤</span>
                             </button>
                         </div>
-
-                        <div id="fieldsList" class="space-y-3">
-                            <!-- 字段项将通过 JavaScript 动态生成 -->
+                        <div id="stepsList" class="space-y-3"></div>
+                        <div id="noStepsMessage" class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <i data-lucide="list-ordered" class="w-12 h-12 mx-auto text-gray-400 mb-2"></i>
+                            <p class="text-gray-500 text-sm">暂无护理步骤,点击"添加步骤"开始配置</p>
                         </div>
+                    </div>
 
-                        <div id="noFieldsMessage" class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                            <i data-lucide="layers" class="w-12 h-12 mx-auto text-gray-400 mb-2"></i>
-                            <p class="text-gray-500 text-sm">暂无字段,点击"添加字段"开始配置</p>
+                    <!-- 所需产品 -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i data-lucide="package" class="w-5 h-5 mr-2 text-purple-600"></i>
+                                所需产品
+                            </h3>
+                            <button onclick="addProduct()" class="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span>添加产品</span>
+                            </button>
                         </div>
+                        <div id="productsList" class="space-y-3"></div>
+                        <div id="noProductsMessage" class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <i data-lucide="package" class="w-12 h-12 mx-auto text-gray-400 mb-2"></i>
+                            <p class="text-gray-500 text-sm">暂无产品,点击"添加产品"开始配置</p>
+                        </div>
+                    </div>
+
+                    <!-- 注意事项 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="alert-circle" class="w-5 h-5 mr-2 text-purple-600"></i>
+                            注意事项
+                        </h3>
+                        <textarea id="precautions" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="填写护理注意事项..."></textarea>
                     </div>
                 </div>
 
@@ -363,7 +484,7 @@
                     <button onclick="closeModal()" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                         取消
                     </button>
-                    <button onclick="saveTemplate()" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md">
+                    <button onclick="saveTemplate()" id="saveBtn" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-md">
                         保存模板
                     </button>
                 </div>
@@ -374,7 +495,7 @@
     <!-- 预览模态框 -->
     <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 modal-overlay">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden modal-content">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden modal-content">
                 <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-white">模板预览</h2>
                     <button onclick="closePreviewModal()" class="text-white hover:text-gray-200 transition-colors">
@@ -384,8 +505,12 @@
                 <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
                     <div id="previewContent"></div>
                 </div>
-                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end border-t border-gray-200">
-                    <button onclick="closePreviewModal()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t border-gray-200">
+                    <button onclick="editTemplateFromPreview()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
+                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        <span>编辑</span>
+                    </button>
+                    <button onclick="closePreviewModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                         关闭
                     </button>
                 </div>
@@ -393,79 +518,112 @@
         </div>
     </div>
 
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script>
         // 初始化图标
         lucide.createIcons();
 
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
+
+
         // ==================== 数据管理 ====================
 
-        // 字段类型映射
-        const FIELD_TYPES = {
-            text: '单行文本',
-            number: '数字',
-            select: '下拉单选',
-            date: '日期',
-            textarea: '多行文本',
-            boolean: '布尔值(是/否)'
-        };
+        // 搜索防抖timer
+        let searchTimer = null;
+        let currentSearch = '';
 
-        // 分类映射
+        // 分类映射 - 对应数据库 category 字段
         const CATEGORIES = {
-            profile: { label: '客户信息资料', class: 'category-profile', icon: 'user' },
-            behavior: { label: '客户行为模板', class: 'category-behavior', icon: 'activity' },
-            plan: { label: '方案模板', class: 'category-plan', icon: 'clipboard' },
-            other: { label: '其他表单模板', class: 'category-other', icon: 'file-text' }
+            hydration: { label: '补水保湿', class: 'category-profile', icon: 'droplet' },
+            whitening: { label: '美白亮肤', class: 'category-behavior', icon: 'sun' },
+            anti_aging: { label: '抗衰老', class: 'category-plan', icon: 'clock' },
+            repair: { label: '修复护理', class: 'category-other', icon: 'shield' },
+            hair_care: { label: '头发护理', class: 'category-profile', icon: 'scissors' },
+            other: { label: '其他方案', class: 'category-other', icon: 'file-text' }
         };
 
-        // 模拟数据存储
-        let templates = [
-            {
-                id: 'tpl_001',
-                name: '头皮检测分析',
-                category: 'profile',
-                description: '用于记录客户头皮健康状况和诊断结果',
-                schema: [
-                    { key: 'scalp_type', label: '头皮类型', type: 'select', options: ['油性', '干性', '混合性', '敏感性'], required: true },
-                    { key: 'hair_density', label: '发量密度', type: 'select', options: ['稀疏', '正常', '浓密'], required: true },
-                    { key: 'scalp_condition', label: '头皮状况', type: 'textarea', required: false },
-                    { key: 'detection_date', label: '检测日期', type: 'date', required: true }
-                ]
-            },
-            {
-                id: 'tpl_002',
-                name: '减重方案',
-                category: 'plan',
-                description: '为客户定制的减重护理方案',
-                schema: [
-                    { key: 'target_weight', label: '目标体重(kg)', type: 'number', required: true },
-                    { key: 'current_weight', label: '当前体重(kg)', type: 'number', required: true },
-                    { key: 'plan_duration', label: '方案周期(天)', type: 'number', required: true },
-                    { key: 'treatment_frequency', label: '护理频率', type: 'select', options: ['每天', '每周2次', '每周3次', '每周4次'], required: true },
-                    { key: 'special_notes', label: '特殊说明', type: 'textarea', required: false }
-                ]
-            },
-            {
-                id: 'tpl_003',
-                name: '体重记录',
-                category: 'behavior',
-                description: '客户每日体重变化跟踪',
-                schema: [
-                    { key: 'record_date', label: '记录日期', type: 'date', required: true },
-                    { key: 'weight', label: '体重(kg)', type: 'number', required: true },
-                    { key: 'body_fat', label: '体脂率(%)', type: 'number', required: false },
-                    { key: 'notes', label: '备注', type: 'textarea', required: false }
-                ]
-            }
-        ];
-
+        // 数据存储
+        let templates = [];
         let currentTemplate = null;
         let currentFilter = 'all';
+        let previewingTemplate = null;
+
+        // 获取当前组织ID
+        function getCurrentOrgId() {
+            return localStorage.getItem('currentOrgId') || '1';
+        }
+
+        // ==================== 加载状态管理 ====================
+
+        function showLoading() {
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('templates-grid').classList.add('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-state').classList.add('hidden');
+        }
 
         // ==================== 初始化 ====================
 
         function init() {
-            renderTemplates();
+            loadTemplates();
             lucide.createIcons();
+        }
+
+        // ==================== 加载模板数据 ====================
+
+        async function loadTemplates() {
+            try {
+                showLoading();
+                const orgId = getCurrentOrgId();
+                const response = await solutionTemplateAPI.getList({
+                    org_id: orgId,
+                    category: currentFilter === 'all' ? null : currentFilter,
+                    search: currentSearch || null,
+                    page: 1,
+                    pageSize: 100
+                });
+
+                hideLoading();
+
+                if (response.success) {
+                    templates = response.data.items || response.data || [];
+                    renderTemplates();
+                } else {
+                    console.error('加载模板失败:', response.error);
+                    showNotification('加载模板失败', 'error');
+                    templates = [];
+                    renderTemplates();
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('加载模板失败:', error);
+                showNotification('加载模板失败', 'error');
+                templates = [];
+                renderTemplates();
+            }
+        }
+
+        // 搜索处理函数
+        function handleSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                currentSearch = document.getElementById('searchInput').value.trim();
+                loadTemplates();
+            }, 500); // 500ms 防抖
         }
 
         // ==================== 渲染函数 ====================
@@ -479,10 +637,12 @@
                 : templates.filter(t => t.category === currentFilter);
 
             if (filteredTemplates.length === 0) {
+                grid.classList.add('hidden');
                 grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
             } else {
                 emptyState.classList.add('hidden');
+                grid.classList.remove('hidden');
                 grid.innerHTML = filteredTemplates.map(template => createTemplateCard(template)).join('');
             }
 
@@ -490,7 +650,11 @@
         }
 
         function createTemplateCard(template) {
-            const category = CATEGORIES[template.category];
+            const category = CATEGORIES[template.category] || CATEGORIES.other;
+            const steps = typeof template.steps === 'string' ? JSON.parse(template.steps || '[]') : (template.steps || []);
+            const products = typeof template.products === 'string' ? JSON.parse(template.products || '[]') : (template.products || []);
+            const services = typeof template.services === 'string' ? JSON.parse(template.services || '[]') : (template.services || []);
+
             return `
                 <div class="template-card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 relative group">
                     <!-- 操作按钮 -->
@@ -512,39 +676,52 @@
                             <i data-lucide="${category.icon}" class="w-6 h-6"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-gray-800 truncate" title="${template.name}">${template.name}</h3>
-                            <p class="text-xs text-gray-400 font-mono truncate">${template.id}</p>
+                            <h3 class="font-bold text-gray-800 truncate" title="${template.template_name}">${template.template_name}</h3>
+                            <p class="text-xs text-gray-400 font-mono truncate">${template.template_code}</p>
                         </div>
                     </div>
 
                     <!-- 分类标签 -->
-                    <div class="mb-4">
+                    <div class="mb-4 flex items-center justify-between">
                         <span class="inline-block px-2 py-1 text-xs rounded-lg ${category.class} font-semibold">
                             ${category.label}
                         </span>
+                        <span class="text-xs text-gray-500">使用 ${template.usage_count || 0} 次</span>
                     </div>
 
                     <!-- 描述 -->
                     <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
-                        ${template.description || '暂无描述'}
+                        ${template.expected_effects || '暂无描述'}
                     </p>
 
-                    <!-- 字段预览 -->
+                    <!-- 方案信息预览 -->
                     <div class="bg-gray-50 rounded-lg p-3">
                         <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase">字段预览</h4>
-                            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">${template.schema.length} 个字段</span>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase">方案信息</h4>
                         </div>
                         <div class="space-y-1">
-                            ${template.schema.slice(0, 3).map(field => `
+                            ${template.course_duration ? `
                                 <div class="flex justify-between text-xs">
-                                    <span class="text-gray-700 truncate max-w-[60%]">${field.label}</span>
-                                    <span class="text-gray-400 font-mono">${FIELD_TYPES[field.type]}</span>
+                                    <span class="text-gray-700">疗程周期</span>
+                                    <span class="text-gray-600">${template.course_duration}</span>
                                 </div>
-                            `).join('')}
-                            ${template.schema.length > 3 ? `
-                                <div class="text-center text-xs text-gray-400 pt-1 italic">
-                                    + ${template.schema.length - 3} 更多字段
+                            ` : ''}
+                            ${template.treatment_frequency ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">护理频率</span>
+                                    <span class="text-gray-600">${template.treatment_frequency}</span>
+                                </div>
+                            ` : ''}
+                            ${steps.length > 0 ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">护理步骤</span>
+                                    <span class="text-gray-600">${steps.length} 步</span>
+                                </div>
+                            ` : ''}
+                            ${products.length > 0 ? `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-700">所需产品</span>
+                                    <span class="text-gray-600">${products.length} 项</span>
                                 </div>
                             ` : ''}
                         </div>
@@ -568,7 +745,7 @@
             activeBtn.classList.add('bg-purple-600', 'text-white');
             activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
 
-            renderTemplates();
+            loadTemplates(); // 重新加载数据
         }
 
         // ==================== 模态框操作 ====================
@@ -577,210 +754,325 @@
             currentTemplate = null;
             document.getElementById('modalTitle').textContent = '创建新模板';
             document.getElementById('templateName').value = '';
-            document.getElementById('templateCategory').value = 'profile';
-            document.getElementById('templateDescription').value = '';
-            document.getElementById('fieldsList').innerHTML = '';
-            document.getElementById('noFieldsMessage').classList.remove('hidden');
+            document.getElementById('templateCategory').value = 'hydration';
+            document.getElementById('targetSkinType').value = '';
+            document.getElementById('targetAgeRange').value = '';
+            document.getElementById('courseDuration').value = '';
+            document.getElementById('treatmentFrequency').value = '';
+            document.getElementById('expectedEffects').value = '';
+            document.getElementById('precautions').value = '';
+            document.getElementById('stepsList').innerHTML = '';
+            document.getElementById('productsList').innerHTML = '';
+            document.getElementById('noStepsMessage').classList.remove('hidden');
+            document.getElementById('noProductsMessage').classList.remove('hidden');
             document.getElementById('templateModal').classList.remove('hidden');
             lucide.createIcons();
         }
 
-        function editTemplate(id) {
-            const template = templates.find(t => t.id === id);
-            if (!template) return;
+        async function editTemplate(id) {
+            try {
+                // 从服务器获取最新的模板数据
+                const response = await solutionTemplateAPI.getById(id);
 
-            currentTemplate = template;
-            document.getElementById('modalTitle').textContent = '编辑模板';
-            document.getElementById('templateName').value = template.name;
-            document.getElementById('templateCategory').value = template.category;
-            document.getElementById('templateDescription').value = template.description;
+                if (!response.success || !response.data) {
+                    showNotification('获取模板详情失败', 'error');
+                    return;
+                }
 
-            // 渲染字段
-            const fieldsList = document.getElementById('fieldsList');
-            fieldsList.innerHTML = template.schema.map((field, index) => createFieldItem(field, index)).join('');
-            document.getElementById('noFieldsMessage').classList.add('hidden');
+                const template = response.data;
+                currentTemplate = template;
 
-            document.getElementById('templateModal').classList.remove('hidden');
-            lucide.createIcons();
+                document.getElementById('modalTitle').textContent = '编辑模板';
+                document.getElementById('templateName').value = template.template_name || '';
+                document.getElementById('templateCategory').value = template.category || 'hydration';
+                document.getElementById('targetSkinType').value = template.target_skin_type || '';
+                document.getElementById('targetAgeRange').value = template.target_age_range || '';
+                document.getElementById('courseDuration').value = template.course_duration || '';
+                document.getElementById('treatmentFrequency').value = template.treatment_frequency || '';
+                document.getElementById('expectedEffects').value = template.expected_effects || '';
+                document.getElementById('precautions').value = template.precautions || '';
+
+                // 渲染护理步骤
+                const steps = typeof template.steps === 'string' ? JSON.parse(template.steps || '[]') : (template.steps || []);
+                const stepsList = document.getElementById('stepsList');
+                stepsList.innerHTML = steps.map((step, index) => createStepItem(step, index)).join('');
+                if (steps.length > 0) {
+                    document.getElementById('noStepsMessage').classList.add('hidden');
+                } else {
+                    document.getElementById('noStepsMessage').classList.remove('hidden');
+                }
+
+                // 渲染所需产品
+                const products = typeof template.products === 'string' ? JSON.parse(template.products || '[]') : (template.products || []);
+                const productsList = document.getElementById('productsList');
+                productsList.innerHTML = products.map((product, index) => createProductItem(product, index)).join('');
+                if (products.length > 0) {
+                    document.getElementById('noProductsMessage').classList.add('hidden');
+                } else {
+                    document.getElementById('noProductsMessage').classList.remove('hidden');
+                }
+
+                document.getElementById('templateModal').classList.remove('hidden');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('编辑模板失败:', error);
+                showNotification('获取模板详情失败', 'error');
+            }
         }
 
         function closeModal() {
             document.getElementById('templateModal').classList.add('hidden');
+            currentTemplate = null;
         }
 
-        // ==================== 字段管理 ====================
+        // ==================== 护理步骤管理 ====================
 
-        function addField() {
-            const fieldsList = document.getElementById('fieldsList');
-            const index = fieldsList.children.length;
-            const newField = {
-                key: `field_${Date.now()}`,
-                label: '新字段',
-                type: 'text',
-                required: false
+        function addStep() {
+            const stepsList = document.getElementById('stepsList');
+            const index = stepsList.children.length;
+            const newStep = {
+                step_number: index + 1,
+                description: '',
+                duration: ''
             };
 
-            fieldsList.insertAdjacentHTML('beforeend', createFieldItem(newField, index));
-            document.getElementById('noFieldsMessage').classList.add('hidden');
+            stepsList.insertAdjacentHTML('beforeend', createStepItem(newStep, index));
+            document.getElementById('noStepsMessage').classList.add('hidden');
             lucide.createIcons();
         }
 
-        function createFieldItem(field, index) {
+        function createStepItem(step, index) {
             return `
-                <div class="field-item p-4 bg-gray-50 rounded-xl border border-gray-200 relative" data-index="${index}">
+                <div class="step-item p-4 bg-gray-50 rounded-xl border border-gray-200 relative" data-index="${index}">
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600 rounded-l-xl"></div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-                        <!-- 显示标签 -->
-                        <div class="md:col-span-3">
-                            <label class="text-xs text-gray-500 mb-1 block">显示标签</label>
-                            <input type="text" value="${field.label}"
-                                onchange="updateFieldProperty(${index}, 'label', this.value)"
-                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="字段名称">
+                        <div class="md:col-span-1 flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">
+                                ${step.step_number || index + 1}
+                            </div>
                         </div>
 
-                        <!-- 数据库键 -->
-                        <div class="md:col-span-3">
-                            <label class="text-xs text-gray-500 mb-1 block">数据库键</label>
-                            <input type="text" value="${field.key}"
-                                onchange="updateFieldProperty(${index}, 'key', this.value)"
-                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg font-mono text-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="field_key">
+                        <div class="md:col-span-9">
+                            <label class="text-xs text-gray-500 mb-1 block">步骤描述</label>
+                            <textarea rows="2"
+                                class="step-description w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="描述这一步的操作...">${step.description || ''}</textarea>
                         </div>
 
-                        <!-- 类型 -->
                         <div class="md:col-span-2">
-                            <label class="text-xs text-gray-500 mb-1 block">类型</label>
-                            <select onchange="updateFieldProperty(${index}, 'type', this.value)"
-                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                                ${Object.entries(FIELD_TYPES).map(([value, label]) =>
-                                    `<option value="${value}" ${field.type === value ? 'selected' : ''}>${label}</option>`
-                                ).join('')}
-                            </select>
-                        </div>
-
-                        <!-- 选项 (仅下拉框显示) -->
-                        <div class="md:col-span-3 ${field.type === 'select' ? '' : 'hidden'}" id="options-${index}">
-                            <label class="text-xs text-gray-500 mb-1 block">选项 (逗号分隔)</label>
-                            <input type="text" value="${field.options ? field.options.join(',') : ''}"
-                                onchange="updateFieldProperty(${index}, 'options', this.value.split(','))"
-                                class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="选项1,选项2">
-                        </div>
-
-                        <!-- 必填 -->
-                        <div class="md:col-span-1 flex items-center justify-center pt-4">
-                            <label class="flex items-center gap-2 cursor-pointer" title="必填项">
-                                <input type="checkbox" ${field.required ? 'checked' : ''}
-                                    onchange="updateFieldProperty(${index}, 'required', this.checked)"
-                                    class="rounded text-purple-600 focus:ring-purple-500">
-                                <span class="text-xs font-bold text-red-500">*</span>
-                            </label>
+                            <label class="text-xs text-gray-500 mb-1 block">时长(分钟)</label>
+                            <input type="number"
+                                class="step-duration w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="10" value="${step.duration || ''}">
                         </div>
                     </div>
 
-                    <!-- 删除按钮 -->
-                    <button onclick="removeField(${index})"
+                    <button onclick="removeStep(${index})"
                         class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                        title="删除字段">
+                        title="删除步骤">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
             `;
         }
 
-        function updateFieldProperty(index, property, value) {
-            // 如果改变类型,更新选项显示
-            if (property === 'type') {
-                const optionsDiv = document.getElementById(`options-${index}`);
-                if (optionsDiv) {
-                    if (value === 'select') {
-                        optionsDiv.classList.remove('hidden');
-                    } else {
-                        optionsDiv.classList.add('hidden');
-                    }
-                }
+        function removeStep(index) {
+            const stepsList = document.getElementById('stepsList');
+            const stepItems = stepsList.querySelectorAll('.step-item');
+            if (stepItems[index]) {
+                stepItems[index].remove();
+            }
+
+            // 重新编号
+            const remainingSteps = stepsList.querySelectorAll('.step-item');
+            remainingSteps.forEach((item, idx) => {
+                item.dataset.index = idx;
+                const numberEl = item.querySelector('.w-8.h-8');
+                if (numberEl) numberEl.textContent = idx + 1;
+            });
+
+            if (stepsList.children.length === 0) {
+                document.getElementById('noStepsMessage').classList.remove('hidden');
             }
         }
 
-        function removeField(index) {
-            const fieldsList = document.getElementById('fieldsList');
-            const fieldItems = fieldsList.querySelectorAll('.field-item');
-            if (fieldItems[index]) {
-                fieldItems[index].remove();
+        // ==================== 产品管理 ====================
+
+        function addProduct() {
+            const productsList = document.getElementById('productsList');
+            const index = productsList.children.length;
+            const newProduct = {
+                name: '',
+                quantity: '',
+                usage: ''
+            };
+
+            productsList.insertAdjacentHTML('beforeend', createProductItem(newProduct, index));
+            document.getElementById('noProductsMessage').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        function createProductItem(product, index) {
+            return `
+                <div class="product-item p-4 bg-gray-50 rounded-xl border border-gray-200 relative" data-index="${index}">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-pink-600 rounded-l-xl"></div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-6">
+                            <label class="text-xs text-gray-500 mb-1 block">产品名称</label>
+                            <input type="text"
+                                class="product-name w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="例如: 深层保湿精华" value="${product.name || ''}">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="text-xs text-gray-500 mb-1 block">用量</label>
+                            <input type="text"
+                                class="product-quantity w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="例如: 2-3滴" value="${product.quantity || ''}">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="text-xs text-gray-500 mb-1 block">使用方法</label>
+                            <input type="text"
+                                class="product-usage w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="例如: 均匀涂抹" value="${product.usage || ''}">
+                        </div>
+                    </div>
+
+                    <button onclick="removeProduct(${index})"
+                        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        title="删除产品">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function removeProduct(index) {
+            const productsList = document.getElementById('productsList');
+            const productItems = productsList.querySelectorAll('.product-item');
+            if (productItems[index]) {
+                productItems[index].remove();
             }
 
-            // 如果没有字段了,显示提示
-            if (fieldsList.children.length === 0) {
-                document.getElementById('noFieldsMessage').classList.remove('hidden');
+            if (productsList.children.length === 0) {
+                document.getElementById('noProductsMessage').classList.remove('hidden');
             }
         }
 
         // ==================== 保存模板 ====================
 
-        function saveTemplate() {
-            const name = document.getElementById('templateName').value.trim();
+        async function saveTemplate() {
+            const templateName = document.getElementById('templateName').value.trim();
             const category = document.getElementById('templateCategory').value;
-            const description = document.getElementById('templateDescription').value.trim();
+            const targetSkinType = document.getElementById('targetSkinType').value.trim();
+            const targetAgeRange = document.getElementById('targetAgeRange').value.trim();
+            const courseDuration = document.getElementById('courseDuration').value.trim();
+            const treatmentFrequency = document.getElementById('treatmentFrequency').value.trim();
+            const expectedEffects = document.getElementById('expectedEffects').value.trim();
+            const precautions = document.getElementById('precautions').value.trim();
 
-            if (!name) {
+            // 验证必填字段
+            if (!templateName) {
                 showNotification('请输入模板名称', 'error');
                 return;
             }
 
-            // 收集字段数据
-            const fieldItems = document.querySelectorAll('.field-item');
-            const schema = Array.from(fieldItems).map(item => {
-                const index = item.dataset.index;
-                const inputs = item.querySelectorAll('input, select');
+            // 收集护理步骤数据
+            const stepItems = document.querySelectorAll('.step-item');
+            const steps = Array.from(stepItems).map((item, index) => {
+                const description = item.querySelector('.step-description').value.trim();
+                const duration = item.querySelector('.step-duration').value;
                 return {
-                    label: inputs[0].value,
-                    key: inputs[1].value,
-                    type: inputs[2].value,
-                    options: inputs[2].value === 'select' ? inputs[3].value.split(',').filter(o => o.trim()) : undefined,
-                    required: inputs[inputs.length - 1].checked
+                    step_number: index + 1,
+                    description,
+                    duration: duration ? parseInt(duration) : null
                 };
             });
 
-            if (schema.length === 0) {
-                showNotification('请至少添加一个字段', 'error');
-                return;
-            }
+            // 收集产品数据
+            const productItems = document.querySelectorAll('.product-item');
+            const products = Array.from(productItems).map(item => {
+                return {
+                    name: item.querySelector('.product-name').value.trim(),
+                    quantity: item.querySelector('.product-quantity').value.trim(),
+                    usage: item.querySelector('.product-usage').value.trim()
+                };
+            }).filter(p => p.name); // 过滤掉名称为空的产品
 
-            const template = {
-                id: currentTemplate ? currentTemplate.id : `tpl_${Date.now()}`,
-                name,
-                category,
-                description,
-                schema
+            // 构建请求数据
+            const data = {
+                template_name: templateName,
+                category: category,
+                org_id: parseInt(getCurrentOrgId()),
+                scope: 'organization', // 默认组织级别
+                target_skin_type: targetSkinType || null,
+                target_age_range: targetAgeRange || null,
+                course_duration: courseDuration || null,
+                treatment_frequency: treatmentFrequency || null,
+                expected_effects: expectedEffects || null,
+                precautions: precautions || null,
+                steps: JSON.stringify(steps),
+                products: JSON.stringify(products),
+                services: JSON.stringify([]), // 暂时为空数组
+                status: 'active'
             };
 
-            if (currentTemplate) {
-                // 编辑现有模板
-                const index = templates.findIndex(t => t.id === currentTemplate.id);
-                templates[index] = template;
-                showNotification('模板更新成功', 'success');
-            } else {
-                // 创建新模板
-                templates.push(template);
-                showNotification('模板创建成功', 'success');
-            }
+            // 禁用保存按钮
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '保存中...';
 
-            closeModal();
-            renderTemplates();
+            try {
+                let response;
+                if (currentTemplate) {
+                    // 更新现有模板
+                    response = await solutionTemplateAPI.update(currentTemplate.id, data);
+                } else {
+                    // 创建新模板
+                    response = await solutionTemplateAPI.create(data);
+                }
+
+                saveBtn.disabled = false;
+                saveBtn.textContent = '保存模板';
+
+                if (response.success) {
+                    showNotification(currentTemplate ? '模板更新成功' : '模板创建成功', 'success');
+                    closeModal();
+                    loadTemplates(); // 重新加载模板列表
+                } else {
+                    showNotification(response.error?.message || '保存失败', 'error');
+                }
+            } catch (error) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '保存模板';
+                console.error('保存模板失败:', error);
+                showNotification('保存模板失败', 'error');
+            }
         }
 
         // ==================== 删除模板 ====================
 
-        function deleteTemplate(id) {
-            if (!confirm('确定要删除此模板吗?相关联的数据可能无法正确显示。')) {
+        async function deleteTemplate(id) {
+            if (!confirm('确定要删除此模板吗?此操作不可撤销。')) {
                 return;
             }
 
-            templates = templates.filter(t => t.id !== id);
-            showNotification('模板已删除', 'success');
-            renderTemplates();
+            try {
+                const response = await solutionTemplateAPI.delete(id);
+
+                if (response.success) {
+                    showNotification('模板已删除', 'success');
+                    loadTemplates(); // 重新加载数据
+                } else {
+                    showNotification(response.error?.message || '删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除模板失败:', error);
+                showNotification('删除模板失败', 'error');
+            }
         }
 
         // ==================== 预览模板 ====================
@@ -789,7 +1081,11 @@
             const template = templates.find(t => t.id === id);
             if (!template) return;
 
-            const category = CATEGORIES[template.category];
+            previewingTemplate = template;
+            const category = CATEGORIES[template.category] || CATEGORIES.other;
+            const steps = typeof template.steps === 'string' ? JSON.parse(template.steps || '[]') : (template.steps || []);
+            const products = typeof template.products === 'string' ? JSON.parse(template.products || '[]') : (template.products || []);
+
             const content = `
                 <div class="space-y-6">
                     <!-- 模板信息 -->
@@ -799,45 +1095,108 @@
                                 <i data-lucide="${category.icon}" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-gray-900">${template.name}</h3>
-                                <p class="text-sm text-gray-500">${template.id}</p>
+                                <h3 class="text-xl font-bold text-gray-900">${template.template_name}</h3>
+                                <p class="text-sm text-gray-500">${template.template_code || ''}</p>
                             </div>
                         </div>
-                        <div class="mb-2">
+                        <div class="mb-3 flex items-center gap-2">
                             <span class="inline-block px-3 py-1 text-sm rounded-lg ${category.class} font-semibold">
                                 ${category.label}
                             </span>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">使用 ${template.usage_count || 0} 次</span>
                         </div>
-                        <p class="text-gray-600 text-sm">${template.description || '暂无描述'}</p>
                     </div>
 
-                    <!-- 字段列表 -->
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-800 mb-4">字段列表 (${template.schema.length} 个)</h4>
-                        <div class="space-y-3">
-                            ${template.schema.map(field => `
-                                <div class="preview-field">
-                                    <div class="flex items-start justify-between mb-2">
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <span class="font-medium text-gray-900">${field.label}</span>
-                                                ${field.required ? '<span class="text-red-500 text-xs font-bold">* 必填</span>' : ''}
-                                            </div>
-                                            <div class="text-xs text-gray-500 font-mono">键值: ${field.key}</div>
-                                        </div>
-                                        <span class="text-sm text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">
-                                            ${FIELD_TYPES[field.type]}
-                                        </span>
-                                    </div>
-                                    ${field.type === 'select' && field.options ? `
-                                        <div class="mt-2 text-xs text-gray-600">
-                                            <span class="font-medium">选项:</span> ${field.options.join(', ')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
+                    <!-- 基本信息 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        ${template.target_skin_type ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">目标肤质</h5>
+                                <p class="text-gray-700">${template.target_skin_type}</p>
+                            </div>
+                        ` : ''}
+                        ${template.target_age_range ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">目标年龄段</h5>
+                                <p class="text-gray-700">${template.target_age_range}</p>
+                            </div>
+                        ` : ''}
+                        ${template.course_duration ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">疗程周期</h5>
+                                <p class="text-gray-700">${template.course_duration}</p>
+                            </div>
+                        ` : ''}
+                        ${template.treatment_frequency ? `
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-500 mb-1">护理频率</h5>
+                                <p class="text-gray-700">${template.treatment_frequency}</p>
+                            </div>
+                        ` : ''}
                     </div>
+
+                    <!-- 预期效果 -->
+                    ${template.expected_effects ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">预期效果</h4>
+                            <p class="text-gray-600 bg-gray-50 p-3 rounded-lg">${template.expected_effects}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- 护理步骤 -->
+                    ${steps.length > 0 ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="list-ordered" class="w-5 h-5"></i>
+                                护理步骤 (${steps.length} 步)
+                            </h4>
+                            <div class="space-y-3">
+                                ${steps.map(step => `
+                                    <div class="flex gap-3 bg-gray-50 p-3 rounded-lg">
+                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">
+                                            ${step.step_number}
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-gray-700">${step.description}</p>
+                                            ${step.duration ? `<p class="text-xs text-gray-500 mt-1">时长: ${step.duration} 分钟</p>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- 所需产品 -->
+                    ${products.length > 0 ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="package" class="w-5 h-5"></i>
+                                所需产品 (${products.length} 项)
+                            </h4>
+                            <div class="space-y-2">
+                                ${products.map(product => `
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-900">${product.name}</span>
+                                            ${product.quantity ? `<span class="text-sm text-purple-600">${product.quantity}</span>` : ''}
+                                        </div>
+                                        ${product.usage ? `<p class="text-sm text-gray-600">${product.usage}</p>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- 注意事项 -->
+                    ${template.precautions ? `
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                                注意事项
+                            </h4>
+                            <p class="text-gray-600 bg-amber-50 p-3 rounded-lg border border-amber-200">${template.precautions}</p>
+                        </div>
+                    ` : ''}
                 </div>
             `;
 
@@ -846,8 +1205,16 @@
             lucide.createIcons();
         }
 
+        function editTemplateFromPreview() {
+            closePreviewModal();
+            if (previewingTemplate) {
+                editTemplate(previewingTemplate.id);
+            }
+        }
+
         function closePreviewModal() {
             document.getElementById('previewModal').classList.add('hidden');
+            previewingTemplate = null;
         }
 
         // ==================== 通知系统 ====================

@@ -94,7 +94,12 @@
                     </button>
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
-                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                        <div>
+                            <h1 class="text-lg md:text-xl font-bold text-gray-900">
+                                美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
+                        </div>
                     </div>
                 </div>
 
@@ -144,8 +149,7 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14 md:pt-16">
-        <!-- 侧边栏 -->
+    <div class="flex h-screen pt-16 md:pt-16">        <!-- 侧边栏 -->
         <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
             <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
                 <!-- 快速统计 -->
@@ -177,6 +181,7 @@
                     <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>数据看板</span>
+                        
                     </a>
                     <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="users" class="w-4 h-4"></i>
@@ -195,61 +200,100 @@
                     </a>
                 </div>
 
-                <!-- 智能功能 -->
+                <!-- 智能服务 -->
                 <div class="space-y-2">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
                     <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                         <span>客户案例</span>
+                        
                     </a>
-                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <i data-lucide="layers" class="w-4 h-4"></i>
-                        <span>方案模板</span>
-                    </a>
-                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg transition-colors">
                         <i data-lucide="store" class="w-4 h-4"></i>
                         <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
                     </a>
                 </div>
 
-                <!-- 系统设置 -->
+                    <!-- 系统管理 -->
                 <div class="space-y-2">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
                     <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                         <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
                     </a>
                 </div>
-            </div>
-        </aside>
+                </div>
+            </aside>
 
         <!-- 遮罩层 (移动端) -->
         <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
 
         <!-- 主要内容区域 -->
-        <main class="flex-1 overflow-auto p-4 md:p-6">
+        <main class="flex-1 overflow-auto p-3 md:p-6">
             <!-- 页面标题 -->
-            <div class="mb-6">
+            <div class="mb-4 md:mb-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div class="mb-4 md:mb-0">
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                            <i data-lucide="store" class="w-7 h-7 text-purple-600"></i>
+                    <div class="mb-3 md:mb-0">
+                        <h1 class="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2 flex items-center gap-2">
+                            <i data-lucide="store" class="w-5 h-5 md:w-7 md:h-7 text-purple-600"></i>
                             加盟商管理
                         </h1>
-                        <p class="text-sm md:text-base text-gray-600">管理全国加盟店信息与业绩</p>
+                        <p class="text-xs md:text-base text-gray-600">管理全国加盟店信息与业绩</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="generateDemoData()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
+                        <button onclick="showCreateModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
                             <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span class="hidden md:inline">生成演示数据</span>
-                            <span class="md:hidden">演示数据</span>
+                            <span class="hidden md:inline">新建加盟商</span>
+                            <span class="md:hidden">新建</span>
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- 统计卡片 -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-4 md:mb-6">
                 <div class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="store" class="w-4 h-4 text-indigo-600"></i>
@@ -264,19 +308,12 @@
                     </div>
                     <p class="text-xl md:text-2xl font-bold text-green-700" id="statActive">0</p>
                 </div>
-                <div class="bg-yellow-50 p-3 md:p-4 rounded-xl shadow-sm border border-yellow-100">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="clock" class="w-4 h-4 text-yellow-600"></i>
-                        <p class="text-xs text-yellow-700 font-medium">待审核</p>
-                    </div>
-                    <p class="text-xl md:text-2xl font-bold text-yellow-700" id="statPending">0</p>
-                </div>
                 <div class="bg-orange-50 p-3 md:p-4 rounded-xl shadow-sm border border-orange-100">
                     <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-orange-600"></i>
-                        <p class="text-xs text-orange-700 font-medium">已暂停</p>
+                        <i data-lucide="x-circle" class="w-4 h-4 text-orange-600"></i>
+                        <p class="text-xs text-orange-700 font-medium">已禁用</p>
                     </div>
-                    <p class="text-xl md:text-2xl font-bold text-orange-700" id="statSuspended">0</p>
+                    <p class="text-xl md:text-2xl font-bold text-orange-700" id="statInactive">0</p>
                 </div>
                 <div class="bg-blue-50 p-3 md:p-4 rounded-xl shadow-sm border border-blue-100">
                     <div class="flex items-center gap-2 mb-2">
@@ -295,7 +332,7 @@
             </div>
 
             <!-- 搜索和筛选 -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 mb-4 md:mb-6">
                 <div class="flex flex-col md:flex-row gap-3 md:gap-4">
                     <div class="flex-1 relative">
                         <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -313,10 +350,8 @@
                         class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="all">所有状态</option>
-                        <option value="pending">待审核</option>
                         <option value="active">运营中</option>
-                        <option value="suspended">已暂停</option>
-                        <option value="terminated">已终止</option>
+                        <option value="inactive">已禁用</option>
                     </select>
                 </div>
             </div>
@@ -354,11 +389,138 @@
         </div>
     </div>
 
-    <script src="js/db.js"></script>
+    <!-- 创建/编辑加盟商模态框 -->
+    <div id="formModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 p-4" onclick="closeFormModal(event)">
+        <div class="modal-content bg-white rounded-2xl max-w-2xl w-full mx-auto my-8 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 md:p-6 flex justify-between items-start z-10">
+                <h2 class="text-xl font-bold text-gray-900" id="formModalTitle">新建加盟商</h2>
+                <button onclick="closeFormModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-gray-400"></i>
+                </button>
+            </div>
+
+            <form id="franchiseeForm" class="p-4 md:p-6 space-y-4">
+                <input type="hidden" id="editId" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">加盟商名称 *</label>
+                        <input type="text" id="orgName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 上海静安旗舰店" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">机构编码 * <span class="text-xs text-gray-500">(创建后不可修改)</span></label>
+                        <input type="text" id="orgCode" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: FC001" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">联系人 *</label>
+                        <input type="text" id="contactPerson" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 王美丽" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">联系电话 *</label>
+                        <input type="tel" id="contactPhone" required pattern="1[3-9]\d{9}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 13800138000" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                    <input type="email" id="contactEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: contact@example.com" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">省份 *</label>
+                        <input type="text" id="province" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 上海市" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">城市 *</label>
+                        <input type="text" id="city" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 上海市" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">区县</label>
+                        <input type="text" id="district" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 静安区" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">详细地址 *</label>
+                    <input type="text" id="address" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 南京西路1788号" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">加盟级别</label>
+                        <select id="franchiseeLevel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="community">社区店</option>
+                            <option value="standard" selected>标准店</option>
+                            <option value="flagship">旗舰店</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                        <select id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="active">运营中</option>
+                            <option value="inactive">已禁用</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">合同编号</label>
+                        <input type="text" id="contractNo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">合同开始日期</label>
+                        <input type="date" id="contractStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">合同结束日期</label>
+                        <input type="date" id="contractEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">分成比例 (%)</label>
+                    <input type="number" id="revenueShareRate" step="0.1" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 8.5" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                    <textarea id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="填写加盟商相关备注信息..."></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        保存
+                    </button>
+                    <button type="button" onclick="closeFormModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
     <script>
         // 初始化图标
         lucide.createIcons();
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
 
         let allFranchisees = [];
 
@@ -368,37 +530,61 @@
         });
 
         // 加载加盟商数据
-        function loadFranchisees() {
-            allFranchisees = db.getFranchisees();
-            updateStats();
-            filterFranchisees();
+        async function loadFranchisees() {
+            try {
+                const result = await franchiseeAPI.getList();
+                if (result.success) {
+                    allFranchisees = result.data.items.map(f => ({
+                        id: f.id,
+                        franchiseeName: f.org_name,
+                        city: f.city,
+                        province: f.province,
+                        address: f.address,
+                        contactPerson: f.contact_person,
+                        phone: f.contact_phone,
+                        email: f.contact_email,
+                        legalPerson: f.contact_person,
+                        storeArea: 200,
+                        employeeCount: 10,
+                        status: f.status,
+                        contract: {
+                            contractNumber: f.contract_no || 'N/A',
+                            signedDate: f.contract_start_date,
+                            startDate: f.contract_start_date,
+                            endDate: f.contract_end_date,
+                            franchiseFee: 300000,
+                            depositAmount: 50000,
+                            royaltyRate: f.revenue_share_rate || 8
+                        },
+                        performance: [],
+                        notes: f.description
+                    }));
+                    updateStats();
+                    filterFranchisees();
+                } else {
+                    showNotification('加载加盟商数据失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载失败:', error);
+                showNotification('加载加盟商数据失败: ' + error.message, 'error');
+            }
         }
 
         // 更新统计数据
-        function updateStats() {
-            const stats = {
-                total: allFranchisees.length,
-                active: allFranchisees.filter(f => f.status === 'active').length,
-                pending: allFranchisees.filter(f => f.status === 'pending').length,
-                suspended: allFranchisees.filter(f => f.status === 'suspended').length,
-                totalRevenue: 0,
-                totalRoyalty: 0
-            };
-
-            allFranchisees.forEach(f => {
-                if (f.performance && f.performance.length > 0) {
-                    const latestPerf = f.performance[0];
-                    stats.totalRevenue += latestPerf.revenue || 0;
-                    stats.totalRoyalty += latestPerf.royaltyPaid || 0;
+        async function updateStats() {
+            try {
+                const result = await franchiseeAPI.getStats();
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('statTotal').textContent = stats.total || 0;
+                    document.getElementById('statActive').textContent = stats.active_count || 0;
+                    document.getElementById('statInactive').textContent = stats.inactive_count || 0;
+                    document.getElementById('statRevenue').textContent = '¥0';
+                    document.getElementById('statRoyalty').textContent = '¥0';
                 }
-            });
-
-            document.getElementById('statTotal').textContent = stats.total;
-            document.getElementById('statActive').textContent = stats.active;
-            document.getElementById('statPending').textContent = stats.pending;
-            document.getElementById('statSuspended').textContent = stats.suspended;
-            document.getElementById('statRevenue').textContent = `¥${(stats.totalRevenue / 10000).toFixed(1)}万`;
-            document.getElementById('statRoyalty').textContent = `¥${(stats.totalRoyalty / 10000).toFixed(1)}万`;
+            } catch (error) {
+                console.error('更新统计失败:', error);
+            }
         }
 
         // 筛选加盟商
@@ -546,10 +732,18 @@
                             查看详情
                         </button>
                         <button
-                            onclick="deleteFranchisee('${franchisee.id}')"
-                            class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                            onclick="showEditModal('${franchisee.id}')"
+                            class="px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                         >
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button
+                            onclick="toggleFranchiseeStatus('${franchisee.id}', '${franchisee.status}')"
+                            class="px-4 py-2 border ${franchisee.status === 'active' ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'border-green-300 text-green-600 hover:bg-green-50'} rounded-lg transition-colors"
+                            title="${franchisee.status === 'active' ? '禁用' : '启用'}"
+                        >
+                            <i data-lucide="${franchisee.status === 'active' ? 'x-circle' : 'check-circle'}" class="w-4 h-4"></i>
+                            <span class="text-xs ml-1">${franchisee.status === 'active' ? '禁用' : '启用'}</span>
                         </button>
                     </div>
                 </div>
@@ -559,12 +753,10 @@
         // 获取状态信息
         function getStatusInfo(status) {
             const statusMap = {
-                'pending': { label: '待审核', icon: 'clock', colorClass: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
                 'active': { label: '运营中', icon: 'check-circle', colorClass: 'bg-green-100 text-green-700 border-green-300' },
-                'suspended': { label: '已暂停', icon: 'alert-circle', colorClass: 'bg-orange-100 text-orange-700 border-orange-300' },
-                'terminated': { label: '已终止', icon: 'x-circle', colorClass: 'bg-red-100 text-red-700 border-red-300' }
+                'inactive': { label: '已禁用', icon: 'x-circle', colorClass: 'bg-gray-100 text-gray-700 border-gray-300' }
             };
-            return statusMap[status] || statusMap['pending'];
+            return statusMap[status] || statusMap['active'];
         }
 
         // 查看加盟商详情
@@ -693,25 +885,204 @@
             }
         }
 
-        // 删除加盟商
-        function deleteFranchisee(id) {
-            if (confirm('确定要删除这个加盟商吗？此操作不可恢复。')) {
-                db.deleteFranchisee(id);
-                showNotification('加盟商已删除', 'success');
-                loadFranchisees();
+        // 切换加盟商启用/禁用状态
+        async function toggleFranchiseeStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const action = newStatus === 'active' ? '启用' : '禁用';
+
+            if (confirm(`确定要${action}这个加盟商吗？`)) {
+                try {
+                    const result = await franchiseeAPI.updateStatus(id, newStatus);
+                    if (result.success) {
+                        showNotification(`加盟商已${action}`, 'success');
+                        loadFranchisees();
+                    } else {
+                        showNotification(`${action}失败: ` + result.error.message, 'error');
+                    }
+                } catch (error) {
+                    console.error(`${action}失败:`, error);
+                    showNotification(`${action}失败: ` + error.message, 'error');
+                }
             }
         }
 
-        // 生成演示数据
-        function generateDemoData() {
-            if (typeof db.generateFranchiseeDemoData === 'function') {
-                const result = db.generateFranchiseeDemoData();
-                showNotification(`演示数据生成成功！生成了 ${result.franchisees} 个加盟商数据`, 'success');
-                loadFranchisees();
-            } else {
-                showNotification('演示数据生成功能暂未实现', 'error');
+        // 已移除生成演示数据功能，新建后会自动刷新
+
+        // 显示创建模态框
+        function showCreateModal() {
+            document.getElementById('formModalTitle').textContent = '新建加盟商';
+            document.getElementById('franchiseeForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('orgCode').disabled = false; // 新建时启用机构编码
+            document.getElementById('formModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // 显示编辑模态框
+        async function showEditModal(id) {
+            const franchisee = allFranchisees.find(f => f.id == id);
+            if (!franchisee) return;
+
+            try {
+                const result = await franchiseeAPI.getById(id);
+                if (result.success) {
+                    const data = result.data;
+                    document.getElementById('formModalTitle').textContent = '编辑加盟商';
+                    document.getElementById('editId').value = data.id;
+                    document.getElementById('orgName').value = data.org_name || '';
+                    document.getElementById('orgCode').value = data.org_code || '';
+                    document.getElementById('orgCode').disabled = true; // 编辑时禁用机构编码
+                    document.getElementById('contactPerson').value = data.contact_person || '';
+                    document.getElementById('contactPhone').value = data.contact_phone || '';
+                    document.getElementById('contactEmail').value = data.contact_email || '';
+                    document.getElementById('province').value = data.province || '';
+                    document.getElementById('city').value = data.city || '';
+                    document.getElementById('district').value = data.district || '';
+                    document.getElementById('address').value = data.address || '';
+                    document.getElementById('franchiseeLevel').value = data.franchisee_level || 'standard';
+                    document.getElementById('status').value = data.status || 'active';
+                    document.getElementById('contractNo').value = data.contract_no || '';
+
+                    // 格式化日期为 YYYY-MM-DD
+                    if (data.contract_start_date) {
+                        document.getElementById('contractStartDate').value = formatDateForInput(data.contract_start_date);
+                    }
+                    if (data.contract_end_date) {
+                        document.getElementById('contractEndDate').value = formatDateForInput(data.contract_end_date);
+                    }
+
+                    document.getElementById('revenueShareRate').value = data.revenue_share_rate || '';
+                    document.getElementById('description').value = data.description || '';
+
+                    document.getElementById('formModal').classList.remove('hidden');
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error('获取详情失败:', error);
+                showNotification('获取详情失败', 'error');
             }
         }
+
+        // 格式化日期为 input[type="date"] 需要的格式 (YYYY-MM-DD)
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 关闭表单模态框
+        function closeFormModal(event) {
+            if (!event || event.target.id === 'formModal') {
+                document.getElementById('formModal').classList.add('hidden');
+            }
+        }
+
+        // 提交表单
+        document.getElementById('franchiseeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // 显示加载状态
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '保存中...';
+
+            const editId = document.getElementById('editId').value;
+            const data = {
+                org_name: document.getElementById('orgName').value.trim(),
+                org_code: document.getElementById('orgCode').value.trim(),
+                contact_person: document.getElementById('contactPerson').value.trim(),
+                contact_phone: document.getElementById('contactPhone').value.trim(),
+                contact_email: document.getElementById('contactEmail').value.trim() || null,
+                province: document.getElementById('province').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                district: document.getElementById('district').value.trim() || null,
+                address: document.getElementById('address').value.trim(),
+                franchisee_level: document.getElementById('franchiseeLevel').value,
+                status: document.getElementById('status').value,
+                contract_no: document.getElementById('contractNo').value.trim() || null,
+                contract_start_date: document.getElementById('contractStartDate').value || null,
+                contract_end_date: document.getElementById('contractEndDate').value || null,
+                revenue_share_rate: parseFloat(document.getElementById('revenueShareRate').value) || 0,
+                description: document.getElementById('description').value.trim() || null
+            };
+
+            // 验证必填字段
+            if (!data.org_name) {
+                showNotification('请填写加盟商名称', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+            if (!data.org_code && !editId) {
+                showNotification('请填写机构编码', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+            if (!data.contact_person) {
+                showNotification('请填写联系人', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+            if (!data.contact_phone) {
+                showNotification('请填写联系电话', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+
+            // 验证手机号格式
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            if (!phoneRegex.test(data.contact_phone)) {
+                showNotification('请输入正确的手机号码', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+
+            // 验证邮箱格式（如果填写了）
+            if (data.contact_email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(data.contact_email)) {
+                    showNotification('请输入正确的邮箱地址', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    return;
+                }
+            }
+
+            try {
+                let result;
+                if (editId) {
+                    // 编辑时不传递 org_code
+                    delete data.org_code;
+                    result = await franchiseeAPI.update(editId, data);
+                } else {
+                    result = await franchiseeAPI.create(data);
+                }
+
+                if (result.success) {
+                    showNotification(editId ? '✅ 更新成功' : '✅ 创建成功', 'success');
+                    closeFormModal();
+                    loadFranchisees();
+                } else {
+                    showNotification('❌ ' + result.error.message, 'error');
+                }
+            } catch (error) {
+                console.error('保存失败:', error);
+                showNotification('❌ 保存失败: ' + error.message, 'error');
+            } finally {
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
 
         // 用户菜单切换
         function toggleUserMenu() {

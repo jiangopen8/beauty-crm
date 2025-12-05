@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 美业客户洞察 CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <style>
+        /* 移动端优化样式 */
+        @media (max-width: 768px) {
+            .mobile-hidden { display: none !important; }
+            .mobile-full { width: 100% !important; }
+            .mobile-p-4 { padding: 1rem !important; }
+            .mobile-text-sm { font-size: 0.875rem !important; }
+        }
+
+        /* 卡片悬停效果 */
+        .user-card {
+            transition: all 0.3s ease;
+        }
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 状态标签动画 */
+        .status-badge {
+            transition: all 0.2s ease;
+        }
+
+        /* 侧边栏过渡 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+
+        /* 模态框动画 */
+        .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 头像样式 */
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <!-- 左侧Logo和移动端菜单按钮 -->
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <button id="mobile-menu-toggle" class="md:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
+                        <div>
+                            <h1 class="text-lg md:text-xl font-bold text-gray-900">
+                                美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧用户信息 -->
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <!-- 系统状态 (桌面端显示) -->
+                    <div class="hidden md:flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">系统正常</span>
+                    </div>
+
+                    <!-- 通知铃铛 -->
+                    <div class="relative">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+
+                    <!-- 用户菜单 -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">李</span>
+                            </div>
+                            <span class="hidden md:block text-sm font-medium">李美容师</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                                个人资料
+                            </a>
+                            <a href="settings.html" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                系统设置
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                                退出登录
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen pt-16 md:pt-16">        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+                <!-- 快速统计 -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">客户总数</span>
+                            <span class="font-semibold text-purple-600" id="totalCustomers">128</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">今日新增</span>
+                            <span class="font-semibold text-green-600" id="newCustomers">5</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">待跟进</span>
+                            <span class="font-semibold text-orange-600" id="pendingCustomers">12</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">本月订单</span>
+                            <span class="font-semibold text-blue-600" id="monthlyOrders">67</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主导航菜单 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">主要功能</h3>
+                    <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>数据看板</span>
+                        
+                    </a>
+                    <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>客户管理</span>
+                        <span class="ml-auto bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">128</span>
+                    </a>
+                    <a href="orders.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        <span>订单管理</span>
+                        <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">67</span>
+                    </a>
+                    <a href="tasks.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                        <span>任务管理</span>
+                        <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">24</span>
+                    </a>
+                </div>
+
+                <!-- 智能服务 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
+                    <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>客户案例</span>
+                        
+                    </a>
+                    <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="store" class="w-4 h-4"></i>
+                        <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 font-medium rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
+                    </a>
+                </div>
+
+                    <!-- 系统管理 -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
+                    </a>
+                </div>
+                </div>
+            </aside>
+
+        <!-- 遮罩层 (移动端) -->
+        <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 主要内容区域 -->
+        <main class="flex-1 overflow-auto p-3 md:p-6">
+            <!-- 页面标题 -->
+            <div class="mb-4 md:mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-3 md:mb-0">
+                        <h1 class="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2 flex items-center gap-2">
+                            <i data-lucide="user-cog" class="w-5 h-5 md:w-7 md:h-7 text-purple-600"></i>
+                            用户管理
+                        </h1>
+                        <p class="text-xs md:text-base text-gray-600">管理当前组织的内部员工</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="showCreateModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span class="hidden md:inline">新建用户</span>
+                            <span class="md:hidden">新建</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 当前组织信息 -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 mb-4 md:mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <i data-lucide="building-2" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">当前组织</p>
+                            <p class="text-lg font-bold text-gray-900" id="currentOrgName">加载中...</p>
+                        </div>
+                    </div>
+                    <a href="settings.html#switch-org" class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        <span>切换组织</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+                <div class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="users" class="w-4 h-4 text-indigo-600"></i>
+                        <p class="text-xs text-gray-500 font-medium">用户总数</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900" id="statTotal">0</p>
+                </div>
+                <div class="bg-green-50 p-3 md:p-4 rounded-xl shadow-sm border border-green-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="user-check" class="w-4 h-4 text-green-600"></i>
+                        <p class="text-xs text-green-700 font-medium">活跃用户</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-green-700" id="statActive">0</p>
+                </div>
+                <div class="bg-orange-50 p-3 md:p-4 rounded-xl shadow-sm border border-orange-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="user-x" class="w-4 h-4 text-orange-600"></i>
+                        <p class="text-xs text-orange-700 font-medium">停用用户</p>
+                    </div>
+                    <p class="text-xl md:text-2xl font-bold text-orange-700" id="statInactive">0</p>
+                </div>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100 mb-4 md:mb-6">
+                <div class="flex flex-col md:flex-row gap-3 md:gap-4">
+                    <div class="flex-1 relative">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="搜索用户姓名、用户名或手机号..."
+                            onkeyup="filterUsers()"
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        />
+                    </div>
+                    <select
+                        id="statusFilter"
+                        onchange="filterUsers()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                    >
+                        <option value="all">所有状态</option>
+                        <option value="active">活跃</option>
+                        <option value="inactive">停用</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 用户列表 -->
+            <div id="userList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 用户卡片将在这里动态生成 -->
+            </div>
+
+            <!-- 空状态 -->
+            <div id="emptyState" class="hidden text-center py-12 text-gray-400">
+                <i data-lucide="users" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
+                <p class="text-lg">暂无用户数据</p>
+                <p class="text-sm mt-2">点击右上角"新建用户"按钮添加员工</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 创建/编辑用户模态框 -->
+    <div id="formModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 p-4" onclick="closeFormModal(event)">
+        <div class="modal-content bg-white rounded-2xl max-w-2xl w-full mx-auto my-8 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 md:p-6 flex justify-between items-start z-10">
+                <h2 class="text-xl font-bold text-gray-900" id="formModalTitle">新建用户</h2>
+                <button onclick="closeFormModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-gray-400"></i>
+                </button>
+            </div>
+
+            <form id="userForm" class="p-4 md:p-6 space-y-4">
+                <input type="hidden" id="editId" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">用户名 * <span class="text-xs text-gray-500">(登录账号，创建后不可修改)</span></label>
+                        <input type="text" id="username" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: zhangsan" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">真实姓名 *</label>
+                        <input type="text" id="realName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 张三" />
+                    </div>
+                </div>
+
+                <!-- 默认密码提示 -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3" id="passwordNotice">
+                    <div class="flex items-start space-x-2">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                        <div class="text-sm text-blue-800">
+                            <strong>默认密码:</strong> 新用户初始密码统一为 <code class="bg-blue-100 px-2 py-0.5 rounded font-mono">123456</code>，用户登录后可在个人设置中修改密码。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">手机号 *</label>
+                        <input type="tel" id="phone" required pattern="1[3-9]\d{9}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 13800138000" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: user@example.com" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">职位</label>
+                        <input type="text" id="position" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="例如: 美容顾问" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                        <select id="gender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="">不设置</option>
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">分配角色 *</label>
+                    <div id="roleSelection" class="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                        <!-- 角色复选框将在这里动态生成 -->
+                        <p class="text-sm text-gray-400">加载中...</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">用户将拥有所选角色的所有权限</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                    <select id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="active">活跃</option>
+                        <option value="inactive">停用</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        保存
+                    </button>
+                    <button type="button" onclick="closeFormModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        // 错误处理：防止浏览器扩展（如钱包注入）导致的页面崩溃
+        window.addEventListener('error', function(event) {
+            if (event.message && (event.message.includes('solana') || event.message.includes('inpage'))) {
+                console.warn('浏览器扩展注入错误已处理，页面继续运行:', event.message);
+                event.preventDefault();
+                return false;
+            }
+        }, true);
+
+        // 初始化图标
+        try {
+            lucide.createIcons();
+        } catch (e) {
+            console.warn('lucide初始化失败:', e);
+        }
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
+
+        let allUsers = [];
+        let allRoles = [];
+        let currentOrgId = null;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentOrg();
+            loadUsers();
+            loadRoles();
+        });
+
+        // 加载当前组织信息
+        function loadCurrentOrg() {
+            // 从localStorage获取当前组织ID
+            const orgId = localStorage.getItem('currentOrgId');
+            const orgName = localStorage.getItem('currentOrgName');
+
+            if (orgId) {
+                currentOrgId = parseInt(orgId);
+                document.getElementById('currentOrgName').textContent = orgName || '未知组织';
+            } else {
+                // 默认使用第一个组织 (示例)
+                currentOrgId = 7; // 上海加盟商
+                document.getElementById('currentOrgName').textContent = '上海静安旗舰店';
+            }
+        }
+
+        // 加载用户数据
+        async function loadUsers() {
+            try {
+                const result = await userAPI.getList({ org_id: currentOrgId });
+                if (result.success) {
+                    allUsers = result.data.items;
+                    updateStats();
+                    filterUsers();
+                } else {
+                    showNotification('加载用户数据失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载失败:', error);
+                showNotification('加载用户数据失败: ' + error.message, 'error');
+            }
+        }
+
+        // 更新统计数据
+        async function updateStats() {
+            try {
+                const result = await userAPI.getStats(currentOrgId);
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('statTotal').textContent = stats.total || 0;
+                    document.getElementById('statActive').textContent = stats.active_count || 0;
+                    document.getElementById('statInactive').textContent = stats.inactive_count || 0;
+                }
+            } catch (error) {
+                console.error('更新统计失败:', error);
+            }
+        }
+
+        // 加载所有角色
+        async function loadRoles() {
+            try {
+                const result = await roleAPI.getList({ status: 'active' });
+                if (result.success) {
+                    allRoles = result.data.items || [];
+                } else {
+                    console.error('加载角色失败:', result.error);
+                }
+            } catch (error) {
+                console.error('加载角色失败:', error);
+            }
+        }
+
+        // 渲染角色选择器
+        function renderRoleSelection(selectedRoleIds = []) {
+            const container = document.getElementById('roleSelection');
+
+            if (allRoles.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400">暂无可用角色</p>';
+                return;
+            }
+
+            container.innerHTML = allRoles.map(role => {
+                const isChecked = selectedRoleIds.includes(role.id);
+                return `
+                    <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="role"
+                            value="${role.id}"
+                            ${isChecked ? 'checked' : ''}
+                            class="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                        />
+                        <div class="flex-1">
+                            <span class="text-sm font-medium text-gray-900">${role.role_name}</span>
+                            ${role.description ? `<p class="text-xs text-gray-500">${role.description}</p>` : ''}
+                        </div>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        // 获取选中的角色ID列表
+        function getSelectedRoleIds() {
+            const checkboxes = document.querySelectorAll('input[name="role"]:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+
+        // 筛选用户
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const filtered = allUsers.filter(u => {
+                const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
+                const matchesSearch = !searchTerm ||
+                    u.real_name.toLowerCase().includes(searchTerm) ||
+                    u.username.toLowerCase().includes(searchTerm) ||
+                    (u.phone && u.phone.includes(searchTerm));
+                return matchesStatus && matchesSearch;
+            });
+
+            renderUsers(filtered);
+        }
+
+        // 渲染用户列表
+        function renderUsers(users) {
+            const container = document.getElementById('userList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (users.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = users.map(u => createUserCard(u)).join('');
+            lucide.createIcons();
+
+            // 异步加载每个用户的角色信息
+            users.forEach(user => loadUserRoles(user.id));
+        }
+
+        // 加载并显示用户的角色
+        async function loadUserRoles(userId) {
+            const rolesContainer = document.getElementById(`user-roles-${userId}`);
+            if (!rolesContainer) return;
+
+            try {
+                const result = await roleAPI.getUserRoles(userId);
+                if (result.success && result.data && result.data.length > 0) {
+                    rolesContainer.innerHTML = result.data.map(role => `
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                            ${role.role_name}
+                        </span>
+                    `).join('');
+                } else {
+                    rolesContainer.innerHTML = '<span class="text-xs text-gray-400">暂无角色</span>';
+                }
+            } catch (error) {
+                console.error(`加载用户${userId}的角色失败:`, error);
+                rolesContainer.innerHTML = '<span class="text-xs text-gray-400">加载失败</span>';
+            }
+        }
+
+        // 创建用户卡片
+        function createUserCard(user) {
+            const statusInfo = getStatusInfo(user.status);
+            const avatarColor = getAvatarColor(user.real_name);
+            const initial = user.real_name.charAt(0);
+
+            return `
+                <div class="user-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <!-- Header -->
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="avatar" style="background: ${avatarColor}">
+                            ${initial}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-900">${user.real_name}</h3>
+                            <p class="text-sm text-gray-500">@${user.username}</p>
+                        </div>
+                        <span class="status-badge px-2 py-1 rounded-full text-xs font-medium ${statusInfo.colorClass}">
+                            ${statusInfo.label}
+                        </span>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="space-y-2 mb-4">
+                        ${user.position ? `
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-gray-400"></i>
+                            <span>${user.position}</span>
+                        </div>
+                        ` : ''}
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="shield" class="w-4 h-4 text-gray-400"></i>
+                            <div class="flex-1 flex flex-wrap gap-1" id="user-roles-${user.id}">
+                                <span class="text-xs text-gray-400">加载角色中...</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                            <span>${user.phone || '未设置'}</span>
+                        </div>
+                        ${user.email ? `
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i data-lucide="mail" class="w-4 h-4 text-gray-400"></i>
+                            <span>${user.email}</span>
+                        </div>
+                        ` : ''}
+                        ${user.last_login_at ? `
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
+                            <span>最后登录: ${new Date(user.last_login_at).toLocaleString('zh-CN')}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        <button
+                            onclick="showEditModal('${user.id}')"
+                            class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-1"
+                        >
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                            <span>编辑</span>
+                        </button>
+                        <button
+                            onclick="toggleUserStatus('${user.id}', '${user.status}')"
+                            class="px-3 py-2 border ${user.status === 'active' ? 'border-orange-300 text-orange-600 hover:bg-orange-50' : 'border-green-300 text-green-600 hover:bg-green-50'} rounded-lg transition-colors text-sm"
+                            title="${user.status === 'active' ? '停用' : '启用'}"
+                        >
+                            <i data-lucide="${user.status === 'active' ? 'user-x' : 'user-check'}" class="w-4 h-4"></i>
+                        </button>
+                        <button
+                            onclick="resetPassword('${user.id}')"
+                            class="px-3 py-2 border border-purple-300 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors text-sm"
+                            title="重置密码"
+                        >
+                            <i data-lucide="key" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 获取状态信息
+        function getStatusInfo(status) {
+            const statusMap = {
+                'active': { label: '活跃', colorClass: 'bg-green-100 text-green-700', icon: 'check-circle' },
+                'inactive': { label: '停用', colorClass: 'bg-gray-100 text-gray-700', icon: 'x-circle' }
+            };
+            return statusMap[status] || statusMap['active'];
+        }
+
+        // 获取头像颜色
+        function getAvatarColor(name) {
+            const colors = [
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+            ];
+            const index = name.charCodeAt(0) % colors.length;
+            return colors[index];
+        }
+
+        // 显示创建模态框
+        function showCreateModal() {
+            document.getElementById('formModalTitle').textContent = '新建用户';
+            document.getElementById('userForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('username').disabled = false;
+            // 显示密码提示
+            document.getElementById('passwordNotice').style.display = 'block';
+            // 渲染角色选择（无选中项）
+            renderRoleSelection([]);
+            document.getElementById('formModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // 显示编辑模态框
+        async function showEditModal(id) {
+            const user = allUsers.find(u => u.id == id);
+            if (!user) return;
+
+            try {
+                const result = await userAPI.getById(id);
+                if (result.success) {
+                    const data = result.data;
+                    document.getElementById('formModalTitle').textContent = '编辑用户';
+                    document.getElementById('editId').value = data.id;
+                    document.getElementById('username').value = data.username || '';
+                    document.getElementById('username').disabled = true;
+                    document.getElementById('realName').value = data.real_name || '';
+                    document.getElementById('phone').value = data.phone || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('position').value = data.position || '';
+                    document.getElementById('gender').value = data.gender || '';
+                    document.getElementById('status').value = data.status || 'active';
+
+                    // 隐藏密码提示（编辑时不显示）
+                    document.getElementById('passwordNotice').style.display = 'none';
+
+                    // 获取用户的角色并渲染角色选择器
+                    try {
+                        const rolesResult = await roleAPI.getUserRoles(id);
+                        const userRoleIds = rolesResult.success ? rolesResult.data.map(r => r.id) : [];
+                        renderRoleSelection(userRoleIds);
+                    } catch (error) {
+                        console.error('获取用户角色失败:', error);
+                        renderRoleSelection([]);
+                    }
+
+                    document.getElementById('formModal').classList.remove('hidden');
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error('获取详情失败:', error);
+                showNotification('获取详情失败', 'error');
+            }
+        }
+
+        // 关闭表单模态框
+        function closeFormModal(event) {
+            if (!event || event.target.id === 'formModal') {
+                document.getElementById('formModal').classList.add('hidden');
+            }
+        }
+
+        // 提交表单
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '保存中...';
+
+            const editId = document.getElementById('editId').value;
+            const username = document.getElementById('username').value.trim();
+            const realName = document.getElementById('realName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const position = document.getElementById('position').value.trim();
+            const gender = document.getElementById('gender').value;
+            const status = document.getElementById('status').value;
+
+            // 验证必填字段
+            if (!username || !realName || !phone) {
+                showNotification('请填写所有必填字段', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+
+            // 新用户使用默认密码"123456"
+            const defaultPassword = '123456';
+
+            try {
+                const data = {
+                    username,
+                    real_name: realName,
+                    org_id: currentOrgId,
+                    phone,
+                    email: email || null,
+                    position: position || null,
+                    gender: gender || null,
+                    status
+                };
+
+                let result;
+                if (editId) {
+                    result = await userAPI.update(editId, data);
+                } else {
+                    // 新建用户时使用默认密码
+                    data.password = defaultPassword;
+                    result = await userAPI.create(data);
+                }
+
+                if (result.success) {
+                    // 获取用户ID（编辑时使用editId，创建时从返回结果获取）
+                    const userId = editId || result.data.id;
+
+                    // 分配角色
+                    const selectedRoleIds = getSelectedRoleIds();
+                    if (selectedRoleIds.length > 0) {
+                        try {
+                            await roleAPI.assignToUser(userId, selectedRoleIds);
+                        } catch (roleError) {
+                            console.error('分配角色失败:', roleError);
+                            showNotification('⚠️ 用户保存成功，但角色分配失败', 'warning');
+                        }
+                    }
+
+                    showNotification(editId ? '✅ 更新成功' : '✅ 创建成功', 'success');
+                    closeFormModal();
+                    loadUsers();
+                } else {
+                    showNotification('❌ ' + result.error.message, 'error');
+                }
+            } catch (error) {
+                console.error('保存失败:', error);
+                showNotification('❌ 保存失败: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // 切换用户状态
+        async function toggleUserStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const action = newStatus === 'active' ? '启用' : '停用';
+
+            if (confirm(`确定要${action}这个用户吗？`)) {
+                try {
+                    const result = await userAPI.updateStatus(id, newStatus);
+                    if (result.success) {
+                        showNotification(`用户已${action}`, 'success');
+                        loadUsers();
+                    } else {
+                        showNotification(`${action}失败: ` + result.error.message, 'error');
+                    }
+                } catch (error) {
+                    console.error(`${action}失败:`, error);
+                    showNotification(`${action}失败: ` + error.message, 'error');
+                }
+            }
+        }
+
+        // 重置密码
+        async function resetPassword(id) {
+            const user = allUsers.find(u => u.id == id);
+            if (!user) return;
+
+            if (confirm(`确定要重置用户「${user.real_name}」的密码吗？\n\n密码将被重置为默认密码：123456\n用户可在登录后自行修改密码。`)) {
+                try {
+                    const result = await userAPI.resetPassword(id);
+                    if (result.success) {
+                        showNotification('✅ 密码已重置为：123456', 'success');
+                    } else {
+                        showNotification('❌ ' + (result.error?.message || '重置密码失败'), 'error');
+                    }
+                } catch (error) {
+                    console.error('重置密码失败:', error);
+                    showNotification('❌ 重置密码失败: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // 用户菜单切换
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击外部关闭用户菜单
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = event.target.closest('button[onclick="toggleUserMenu()"]');
+
+            if (!userButton && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('mobile-menu-toggle').addEventListener('click', toggleSidebar);
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

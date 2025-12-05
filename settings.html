@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-mode="light" data-theme="purple">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,136 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/mobile-optimizations.css">
     <style>
+        /* CSS 变量定义 - 主题色系统 */
+        :root {
+            /* 紫色渐变 (默认) */
+            --theme-gradient-start: #667eea;
+            --theme-gradient-end: #764ba2;
+            --theme-primary: #667eea;
+            --theme-primary-light: #7c8ff1;
+            --theme-primary-dark: #5568d3;
+            --theme-bg-light: #f3f4f6;
+            --theme-border: #e5e7eb;
+        }
+
+        /* 粉色主题 */
+        [data-theme="pink"] {
+            --theme-gradient-start: #f093fb;
+            --theme-gradient-end: #f5576c;
+            --theme-primary: #f093fb;
+            --theme-primary-light: #f4a8fc;
+            --theme-primary-dark: #e47efa;
+            --theme-bg-light: #fef3fb;
+            --theme-border: #fce4f4;
+        }
+
+        /* 蓝色主题 */
+        [data-theme="blue"] {
+            --theme-gradient-start: #4facfe;
+            --theme-gradient-end: #00f2fe;
+            --theme-primary: #4facfe;
+            --theme-primary-light: #6dbdfe;
+            --theme-primary-dark: #359bee;
+            --theme-bg-light: #f0f9ff;
+            --theme-border: #e0f2fe;
+        }
+
+        /* 绿色主题 */
+        [data-theme="green"] {
+            --theme-gradient-start: #43e97b;
+            --theme-gradient-end: #38f9d7;
+            --theme-primary: #43e97b;
+            --theme-primary-light: #5fed8f;
+            --theme-primary-dark: #2ed567;
+            --theme-bg-light: #f0fdf4;
+            --theme-border: #dcfce7;
+        }
+
+        /* 橙色主题 */
+        [data-theme="orange"] {
+            --theme-gradient-start: #fa709a;
+            --theme-gradient-end: #fee140;
+            --theme-primary: #fa709a;
+            --theme-primary-light: #fb88ad;
+            --theme-primary-dark: #f95887;
+            --theme-bg-light: #fffbeb;
+            --theme-border: #fef3c7;
+        }
+
+        /* 深色模式变量 */
+        [data-mode="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #e5e7eb;
+            --text-tertiary: #d1d5db;
+            --border-color: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 浅色模式变量 */
+        [data-mode="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-tertiary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* 应用深色模式样式 */
+        [data-mode="dark"] body {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        [data-mode="dark"] nav,
+        [data-mode="dark"] aside,
+        [data-mode="dark"] .bg-white {
+            background-color: var(--bg-primary) !important;
+            color: var(--text-primary);
+        }
+
+        [data-mode="dark"] .settings-card,
+        [data-mode="dark"] .bg-gradient-to-r,
+        [data-mode="dark"] .bg-gradient-to-br {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        [data-mode="dark"] .text-gray-900 {
+            color: var(--text-primary) !important;
+        }
+
+        [data-mode="dark"] .text-gray-600,
+        [data-mode="dark"] .text-gray-700 {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-mode="dark"] .text-gray-500 {
+            color: var(--text-tertiary) !important;
+        }
+
+        [data-mode="dark"] .border-gray-200,
+        [data-mode="dark"] .border-gray-300 {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-mode="dark"] input,
+        [data-mode="dark"] select,
+        [data-mode="dark"] textarea {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-mode="dark"] .shadow-sm,
+        [data-mode="dark"] .shadow-lg {
+            box-shadow: 0 1px 3px 0 var(--shadow-color), 0 1px 2px 0 var(--shadow-color);
+        }
+
         /* 移动端优化样式 */
         @media (max-width: 768px) {
             .mobile-hidden { display: none !important; }
@@ -24,8 +154,8 @@
         }
 
         .tab-button.active {
-            color: #667eea;
-            background-color: #f3f4f6;
+            color: var(--theme-primary);
+            background-color: var(--theme-bg-light);
         }
 
         .tab-button.active::after {
@@ -35,7 +165,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--theme-gradient-start) 0%, var(--theme-gradient-end) 100%);
         }
 
         .tab-content {
@@ -127,8 +257,40 @@
         }
 
         .theme-color-option.active {
-            border-color: #667eea;
+            border-color: var(--theme-primary);
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* 应用主题色到按钮和渐变 */
+        .btn-theme-gradient {
+            background: linear-gradient(to right, var(--theme-gradient-start), var(--theme-gradient-end)) !important;
+        }
+
+        .text-theme-primary {
+            color: var(--theme-primary) !important;
+        }
+
+        .bg-theme-primary {
+            background-color: var(--theme-primary) !important;
+        }
+
+        .border-theme-primary {
+            border-color: var(--theme-primary) !important;
+        }
+
+        /* 显示模式切换按钮样式 */
+        .mode-button {
+            transition: all 0.3s ease;
+        }
+
+        .mode-button.active {
+            border-color: var(--theme-primary) !important;
+            background-color: var(--theme-bg-light) !important;
+        }
+
+        .mode-button.active .mode-icon {
+            color: var(--theme-primary) !important;
         }
 
         @media (max-width: 768px) {
@@ -151,7 +313,12 @@
                     </button>
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
-                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                        <div>
+                            <h1 class="text-lg md:text-xl font-bold text-gray-900">
+                                美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
+                        </div>
                     </div>
                 </div>
 
@@ -201,8 +368,7 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14 md:pt-16">
-        <!-- 侧边栏 -->
+    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
         <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
             <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
                 <!-- 快速统计 -->
@@ -234,6 +400,7 @@
                     <a href="index.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>数据看板</span>
+                        
                     </a>
                     <a href="customers.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="users" class="w-4 h-4"></i>
@@ -252,36 +419,170 @@
                     </a>
                 </div>
 
-                <!-- 智能功能 -->
+                <!-- 智能服务 -->
                 <div class="space-y-2">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">智能服务</h3>
                     <a href="cases.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                         <span>客户案例</span>
-                    </a>
-                    <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <i data-lucide="layers" class="w-4 h-4"></i>
-                        <span>方案模板</span>
+                        
                     </a>
                     <a href="franchisees.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="store" class="w-4 h-4"></i>
                         <span>加盟管理</span>
+                        
+                    </a>
+                    <!-- 二级菜单：用户管理和角色管理 -->
+                    <a href="users.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        <span>用户管理</span>
+                        <span class="ml-auto text-xs text-gray-500">(内部员工)</span>
+                    </a>
+                    <a href="roles.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>角色管理</span>
+                        
                     </a>
                 </div>
 
-                <!-- 系统设置 -->
+                    <!-- 系统管理 -->
                 <div class="space-y-2">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统设置</h3>
-                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg font-medium">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">系统管理</h3>
+                    <!-- 模板管理（一级菜单） -->
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 font-medium">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>模板管理</span>
+                        </div>
+                        <!-- 模板管理二级菜单 - 按业务流程排序 -->
+                        <a href="customer-profile-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="user-square" class="w-4 h-4"></i>
+                            <span>客户模板</span>
+                        </a>
+                        <a href="diagnosis-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                            <span>诊断模板</span>
+                        </a>
+                        <a href="templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>方案模板</span>
+                        </a>
+                        <a href="task-templates.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors ml-4">
+                            <i data-lucide="list-checks" class="w-4 h-4"></i>
+                            <span>任务模板</span>
+                        </a>
+                    </div>
+                    <a href="settings.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                         <span>系统设置</span>
+
+                    </a>
+                    <a href="organizations.html" class="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>组织管理</span>
+
                     </a>
                 </div>
-            </div>
-        </aside>
+                </div>
+            </aside>
 
         <!-- 遮罩层 (移动端) -->
         <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
+
+        <!-- 修改密码模态框 -->
+        <div id="change-password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="key" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">修改密码</h3>
+                    </div>
+                    <button onclick="closePasswordModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                    </button>
+                </div>
+
+                <form id="change-password-form" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">当前密码 *</label>
+                        <div class="relative">
+                            <input type="password" id="current-password" required
+                                class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="请输入当前密码">
+                            <button type="button" onclick="togglePasswordVisibility('current-password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">新密码 *</label>
+                        <div class="relative">
+                            <input type="password" id="new-password" required
+                                class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="请输入新密码（至少6位）"
+                                minlength="6">
+                            <button type="button" onclick="togglePasswordVisibility('new-password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div id="password-strength" class="mt-2 hidden">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div id="password-strength-bar" class="h-full transition-all"></div>
+                                </div>
+                                <span id="password-strength-text" class="text-xs font-medium"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">确认新密码 *</label>
+                        <div class="relative">
+                            <input type="password" id="confirm-password" required
+                                class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="请再次输入新密码"
+                                minlength="6">
+                            <button type="button" onclick="togglePasswordVisibility('confirm-password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p id="password-match-hint" class="mt-1 text-xs hidden"></p>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-2">
+                            <i data-lucide="info" class="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"></i>
+                            <div class="text-xs text-blue-800">
+                                <p class="font-medium mb-1">密码安全建议</p>
+                                <ul class="space-y-1">
+                                    <li>• 密码长度至少6位，建议8位以上</li>
+                                    <li>• 包含大小写字母、数字和特殊字符</li>
+                                    <li>• 不要使用生日、电话等易猜测信息</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-4">
+                        <button type="button" onclick="closePasswordModal()"
+                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            取消
+                        </button>
+                        <button type="submit"
+                            class="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-sm flex items-center justify-center space-x-2">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>确认修改</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <!-- 主要内容区域 -->
         <main class="flex-1 overflow-auto">
@@ -309,17 +610,9 @@
                             <i data-lucide="building" class="w-4 h-4"></i>
                             <span>组织信息</span>
                         </button>
-                        <button onclick="switchTab('switch-org')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                            <span>组织切换</span>
-                        </button>
                         <button onclick="switchTab('user-info')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
                             <i data-lucide="user" class="w-4 h-4"></i>
                             <span>用户信息</span>
-                        </button>
-                        <button onclick="switchTab('data-management')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
-                            <i data-lucide="database" class="w-4 h-4"></i>
-                            <span>数据管理</span>
                         </button>
                         <button onclick="switchTab('system-config')" class="tab-button flex items-center space-x-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">
                             <i data-lucide="sliders" class="w-4 h-4"></i>
@@ -412,31 +705,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 组织切换 -->
-                <div id="tab-switch-org" class="tab-content">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="layers" class="w-5 h-5 text-green-600"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-lg font-bold text-gray-900">组织列表</h2>
-                                    <p class="text-sm text-gray-500">管理和切换不同的组织</p>
-                                </div>
-                            </div>
-                            <button onclick="showCreateOrgModal()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                                <span class="hidden md:inline">创建组织</span>
-                            </button>
-                        </div>
-
-                        <div id="org-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- 组织卡片将动态加载 -->
                         </div>
                     </div>
                 </div>
@@ -557,137 +825,6 @@
                     </div>
                 </div>
 
-                <!-- 数据管理 -->
-                <div id="tab-data-management" class="tab-content">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- 数据导入导出 -->
-                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div class="flex items-center space-x-3 mb-6">
-                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="download" class="w-5 h-5 text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-lg font-bold text-gray-900">数据导入导出</h2>
-                                    <p class="text-sm text-gray-500">备份和恢复数据</p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div>
-                                            <h3 class="text-sm font-medium text-gray-900">导出数据</h3>
-                                            <p class="text-xs text-gray-600 mt-1">导出当前组织的所有数据</p>
-                                        </div>
-                                        <i data-lucide="download-cloud" class="w-8 h-8 text-blue-600"></i>
-                                    </div>
-                                    <button onclick="exportData()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                        <i data-lucide="download" class="w-4 h-4 inline-block mr-2"></i>
-                                        导出为JSON文件
-                                    </button>
-                                    <p class="text-xs text-gray-500 mt-2">包含: 客户、订单、任务、模板、案例等数据</p>
-                                </div>
-
-                                <div class="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div>
-                                            <h3 class="text-sm font-medium text-gray-900">导入数据</h3>
-                                            <p class="text-xs text-gray-600 mt-1">从JSON文件导入数据</p>
-                                        </div>
-                                        <i data-lucide="upload-cloud" class="w-8 h-8 text-green-600"></i>
-                                    </div>
-                                    <label class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer flex items-center justify-center">
-                                        <i data-lucide="upload" class="w-4 h-4 inline-block mr-2"></i>
-                                        选择文件导入
-                                        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
-                                    </label>
-                                    <p class="text-xs text-gray-500 mt-2">仅支持JSON格式的数据文件</p>
-                                </div>
-
-                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                    <div class="flex items-start space-x-2">
-                                        <i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-600 mt-0.5"></i>
-                                        <div class="text-xs text-yellow-800">
-                                            <p class="font-medium mb-1">重要提示</p>
-                                            <ul class="space-y-1">
-                                                <li>• 导入数据会与现有数据合并</li>
-                                                <li>• 建议导入前先备份当前数据</li>
-                                                <li>• 导入的数据将归属于当前组织</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 数据清理 -->
-                        <div class="settings-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div class="flex items-center space-x-3 mb-6">
-                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-lg font-bold text-gray-900">数据清理</h2>
-                                    <p class="text-sm text-gray-500">管理和清理数据</p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="border border-gray-200 rounded-lg p-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-sm font-medium text-gray-900">数据统计</h3>
-                                        <i data-lucide="pie-chart" class="w-5 h-5 text-gray-400"></i>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-600">客户数据</span>
-                                            <span class="font-medium" id="stat-customers">0 条</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-600">订单数据</span>
-                                            <span class="font-medium" id="stat-orders">0 条</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-600">任务数据</span>
-                                            <span class="font-medium" id="stat-tasks">0 条</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-600">模板数据</span>
-                                            <span class="font-medium" id="stat-templates">0 条</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
-                                    <div class="flex items-start space-x-3 mb-4">
-                                        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5"></i>
-                                        <div>
-                                            <h3 class="text-sm font-medium text-red-900">危险操作</h3>
-                                            <p class="text-xs text-red-700 mt-1">清空数据后无法恢复,请谨慎操作</p>
-                                        </div>
-                                    </div>
-                                    <button onclick="clearAllData()" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                        <i data-lucide="trash-2" class="w-4 h-4 inline-block mr-2"></i>
-                                        清空当前组织所有数据
-                                    </button>
-                                </div>
-
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <h3 class="text-sm font-medium text-gray-900 mb-3">生成测试数据</h3>
-                                    <div class="space-y-2">
-                                        <button onclick="generateDemoCustomers()" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
-                                            生成演示客户 (5个)
-                                        </button>
-                                        <button onclick="generateFullDemoData()" class="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
-                                            生成完整演示数据
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 系统配置 -->
                 <div id="tab-system-config" class="tab-content">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -718,21 +855,21 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-3">显示模式</label>
                                     <div class="grid grid-cols-2 gap-3">
-                                        <button class="px-4 py-3 border-2 border-purple-500 bg-purple-50 rounded-lg text-left">
+                                        <button id="mode-light-btn" onclick="switchDisplayMode('light')" class="mode-button px-4 py-3 border-2 border-gray-300 rounded-lg text-left hover:border-purple-500">
                                             <div class="flex items-center space-x-3">
-                                                <i data-lucide="sun" class="w-5 h-5 text-purple-600"></i>
+                                                <i data-lucide="sun" class="mode-icon w-5 h-5 text-gray-600"></i>
                                                 <div>
                                                     <p class="text-sm font-medium text-gray-900">浅色模式</p>
-                                                    <p class="text-xs text-gray-500">当前使用</p>
+                                                    <p class="text-xs text-gray-500" id="light-mode-status">-</p>
                                                 </div>
                                             </div>
                                         </button>
-                                        <button class="px-4 py-3 border-2 border-gray-300 rounded-lg text-left hover:border-purple-500">
+                                        <button id="mode-dark-btn" onclick="switchDisplayMode('dark')" class="mode-button px-4 py-3 border-2 border-gray-300 rounded-lg text-left hover:border-purple-500">
                                             <div class="flex items-center space-x-3">
-                                                <i data-lucide="moon" class="w-5 h-5 text-gray-600"></i>
+                                                <i data-lucide="moon" class="mode-icon w-5 h-5 text-gray-600"></i>
                                                 <div>
                                                     <p class="text-sm font-medium text-gray-900">深色模式</p>
-                                                    <p class="text-xs text-gray-500">即将推出</p>
+                                                    <p class="text-xs text-gray-500" id="dark-mode-status">-</p>
                                                 </div>
                                             </div>
                                         </button>
@@ -1032,9 +1169,22 @@
 
     <script src="js/utils.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/api.js"></script>
     <script>
         // 初始化图标
         lucide.createIcons();
+
+        // 更新顶部标题栏显示当前组织名称
+        function updateHeaderOrgName() {
+            const headerOrgNameEl = document.getElementById('header-org-name');
+            const currentOrgName = localStorage.getItem('currentOrgName');
+            if (headerOrgNameEl && currentOrgName) {
+                headerOrgNameEl.textContent = ' - ' + currentOrgName;
+            }
+        }
+
+        // 页面加载时更新标题
+        updateHeaderOrgName();
 
         // ==================== 用户菜单 ====================
 
@@ -1097,9 +1247,6 @@
                 case 'organization':
                     loadOrganizationInfo();
                     break;
-                case 'switch-org':
-                    loadOrganizationList();
-                    break;
                 case 'data-management':
                     loadDataStatistics();
                     break;
@@ -1108,30 +1255,63 @@
 
         // ==================== 组织信息管理 ====================
 
-        function loadOrganizationInfo() {
-            const currentOrg = db.getCurrentOrg();
-            if (currentOrg) {
-                document.getElementById('org-name').value = currentOrg.name || '';
-                document.getElementById('org-contact').value = currentOrg.contactPerson || '';
-                document.getElementById('org-phone').value = currentOrg.phone || '';
-                document.getElementById('org-address').value = currentOrg.address || '';
+        async function loadOrganizationInfo() {
+            try {
+                const currentOrgId = parseInt(localStorage.getItem('currentOrgId'));
+                if (!currentOrgId) {
+                    console.warn('未设置当前组织ID');
+                    return;
+                }
+
+                const result = await organizationAPI.getById(currentOrgId);
+                if (result.success && result.data) {
+                    const currentOrg = result.data;
+                    const orgNameEl = document.getElementById('org-name');
+                    const orgContactEl = document.getElementById('org-contact');
+                    const orgPhoneEl = document.getElementById('org-phone');
+                    const orgAddressEl = document.getElementById('org-address');
+
+                    if (orgNameEl) orgNameEl.value = currentOrg.org_name || '';
+                    if (orgContactEl) orgContactEl.value = currentOrg.contact_person || '';
+                    if (orgPhoneEl) orgPhoneEl.value = currentOrg.contact_phone || '';
+                    if (orgAddressEl) orgAddressEl.value = currentOrg.address || '';
+                }
+            } catch (error) {
+                console.error('加载组织信息失败:', error);
             }
         }
 
-        function saveOrganizationInfo() {
-            const currentOrg = db.getCurrentOrg();
-            if (!currentOrg) {
-                UIUtils.notify('未找到当前组织', 'error');
-                return;
+        async function saveOrganizationInfo() {
+            try {
+                const currentOrgId = parseInt(localStorage.getItem('currentOrgId'));
+                if (!currentOrgId) {
+                    UIUtils.notify('未找到当前组织', 'error');
+                    return;
+                }
+
+                const orgNameEl = document.getElementById('org-name');
+                const orgContactEl = document.getElementById('org-contact');
+                const orgPhoneEl = document.getElementById('org-phone');
+                const orgAddressEl = document.getElementById('org-address');
+
+                const data = {
+                    org_name: orgNameEl ? orgNameEl.value : '',
+                    contact_person: orgContactEl ? orgContactEl.value : '',
+                    contact_phone: orgPhoneEl ? orgPhoneEl.value : '',
+                    address: orgAddressEl ? orgAddressEl.value : ''
+                };
+
+                const result = await organizationAPI.update(currentOrgId, data);
+
+                if (result.success) {
+                    UIUtils.notify('组织信息保存成功', 'success');
+                } else {
+                    UIUtils.notify(result.error.message || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存组织信息失败:', error);
+                UIUtils.notify('保存失败', 'error');
             }
-
-            currentOrg.name = document.getElementById('org-name').value;
-            currentOrg.contactPerson = document.getElementById('org-contact').value;
-            currentOrg.phone = document.getElementById('org-phone').value;
-            currentOrg.address = document.getElementById('org-address').value;
-
-            db.saveOrganization(currentOrg);
-            UIUtils.notify('组织信息保存成功', 'success');
         }
 
         // ==================== Logo上传 ====================
@@ -1195,97 +1375,6 @@
             };
 
             img.src = objectUrl;
-        }
-
-        // ==================== 组织列表和切换 ====================
-
-        function loadOrganizationList() {
-            const orgs = db.getOrganizations();
-            const currentOrgId = db.getCurrentOrgId();
-            const container = document.getElementById('org-list');
-
-            container.innerHTML = orgs.map(org => `
-                <div class="settings-card bg-white rounded-lg shadow-sm border ${org.id === currentOrgId ? 'border-purple-500 bg-purple-50' : 'border-gray-200'} p-4">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                            <h3 class="text-base font-bold text-gray-900 mb-1">${org.name}</h3>
-                            <p class="text-sm text-gray-600 mb-2">${org.contactPerson || '未设置联系人'}</p>
-                            <p class="text-xs text-gray-500">${org.phone || '未设置电话'}</p>
-                        </div>
-                        ${org.id === currentOrgId ? `
-                            <span class="px-2 py-1 bg-purple-500 text-white text-xs rounded-full">当前</span>
-                        ` : ''}
-                    </div>
-                    <div class="flex space-x-2">
-                        ${org.id !== currentOrgId ? `
-                            <button onclick="switchOrganization('${org.id}')" class="flex-1 px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
-                                <i data-lucide="refresh-cw" class="w-3 h-3 inline-block mr-1"></i>
-                                切换
-                            </button>
-                        ` : `
-                            <button class="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg cursor-default text-sm">
-                                <i data-lucide="check" class="w-3 h-3 inline-block mr-1"></i>
-                                使用中
-                            </button>
-                        `}
-                        <button onclick="editOrganization('${org.id}')" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                            <i data-lucide="edit" class="w-3 h-3"></i>
-                        </button>
-                        ${orgs.length > 1 ? `
-                            <button onclick="deleteOrganization('${org.id}')" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                                <i data-lucide="trash-2" class="w-3 h-3"></i>
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
-        function switchOrganization(orgId) {
-            if (confirm('切换组织将刷新页面,是否继续?')) {
-                db.setCurrentOrgId(orgId);
-            }
-        }
-
-        function showCreateOrgModal() {
-            const orgName = prompt('请输入新组织名称:');
-            if (!orgName || !orgName.trim()) {
-                return;
-            }
-
-            const newOrg = db.createOrganization({
-                name: orgName.trim(),
-                contactPerson: '',
-                phone: '',
-                address: ''
-            });
-
-            UIUtils.notify('组织创建成功', 'success');
-            loadOrganizationList();
-        }
-
-        function editOrganization(orgId) {
-            const orgs = db.getOrganizations();
-            const org = orgs.find(o => o.id === orgId);
-            if (!org) return;
-
-            const newName = prompt('修改组织名称:', org.name);
-            if (newName && newName.trim()) {
-                org.name = newName.trim();
-                db.saveOrganization(org);
-                UIUtils.notify('组织名称修改成功', 'success');
-                loadOrganizationList();
-            }
-        }
-
-        function deleteOrganization(orgId) {
-            if (confirm('删除组织将同时删除该组织下的所有数据,此操作不可恢复!确定要删除吗?')) {
-                db.deleteOrganization(orgId);
-                UIUtils.notify('组织删除成功', 'success');
-                loadOrganizationList();
-            }
         }
 
         // ==================== 数据导入导出 ====================
@@ -1386,13 +1475,111 @@
         // ==================== 主题配置 ====================
 
         function selectThemeColor(color) {
+            // 移除所有主题色选项的active状态
             document.querySelectorAll('.theme-color-option').forEach(option => {
                 option.classList.remove('active');
             });
+
+            // 添加active状态到选中的主题色
             event.target.classList.add('active');
 
+            // 应用主题色到document根元素
+            applyThemeColor(color);
+
+            // 保存到localStorage
             StorageManager.set('theme_color', color);
             UIUtils.notify('主题色已更新', 'success');
+        }
+
+        function applyThemeColor(color) {
+            // 设置data-theme属性
+            document.documentElement.setAttribute('data-theme', color);
+
+            // 更新所有使用渐变的元素
+            updateGradientButtons();
+        }
+
+        function updateGradientButtons() {
+            // 获取当前CSS变量值
+            const root = document.documentElement;
+            const startColor = getComputedStyle(root).getPropertyValue('--theme-gradient-start').trim();
+            const endColor = getComputedStyle(root).getPropertyValue('--theme-gradient-end').trim();
+
+            // 更新保存按钮的渐变
+            const saveButton = document.querySelector('button[onclick="saveAllSettings()"]');
+            if (saveButton) {
+                saveButton.style.background = `linear-gradient(to right, ${startColor}, ${endColor})`;
+            }
+
+            // 更新其他渐变按钮
+            document.querySelectorAll('.btn-theme-gradient').forEach(btn => {
+                btn.style.background = `linear-gradient(to right, ${startColor}, ${endColor})`;
+            });
+        }
+
+        // ==================== 显示模式切换 ====================
+
+        function switchDisplayMode(mode) {
+            // 应用显示模式
+            applyDisplayMode(mode);
+
+            // 保存到localStorage
+            StorageManager.set('display_mode', mode);
+
+            // 更新按钮状态
+            updateModeButtons(mode);
+
+            // 刷新图标
+            lucide.createIcons();
+
+            UIUtils.notify(`已切换到${mode === 'light' ? '浅色' : '深色'}模式`, 'success');
+        }
+
+        function applyDisplayMode(mode) {
+            // 设置data-mode属性
+            document.documentElement.setAttribute('data-mode', mode);
+        }
+
+        function updateModeButtons(mode) {
+            const lightBtn = document.getElementById('mode-light-btn');
+            const darkBtn = document.getElementById('mode-dark-btn');
+            const lightStatus = document.getElementById('light-mode-status');
+            const darkStatus = document.getElementById('dark-mode-status');
+
+            if (mode === 'light') {
+                lightBtn.classList.add('active');
+                darkBtn.classList.remove('active');
+                lightStatus.textContent = '当前使用';
+                darkStatus.textContent = '-';
+            } else {
+                darkBtn.classList.add('active');
+                lightBtn.classList.remove('active');
+                darkStatus.textContent = '当前使用';
+                lightStatus.textContent = '-';
+            }
+        }
+
+        // ==================== 初始化主题设置 ====================
+
+        function initializeThemeSettings() {
+            // 加载保存的主题色
+            const savedThemeColor = StorageManager.get('theme_color') || 'purple';
+            applyThemeColor(savedThemeColor);
+
+            // 设置主题色选择器的active状态
+            const themeColors = ['purple', 'pink', 'blue', 'green', 'orange'];
+            const colorIndex = themeColors.indexOf(savedThemeColor);
+            if (colorIndex !== -1) {
+                const colorOptions = document.querySelectorAll('.theme-color-option');
+                if (colorOptions[colorIndex]) {
+                    colorOptions[colorIndex].classList.add('active');
+                }
+            }
+
+            // 加载保存的显示模式
+            const savedDisplayMode = StorageManager.get('display_mode') || 'light';
+            applyDisplayMode(savedDisplayMode);
+            updateModeButtons(savedDisplayMode);
         }
 
         // ==================== 界面缩放 ====================
@@ -1407,8 +1594,196 @@
         // ==================== 修改密码 ====================
 
         function changePassword() {
-            alert('密码修改功能开发中...');
+            const modal = document.getElementById('change-password-modal');
+            modal.classList.remove('hidden');
+
+            // 重置表单
+            document.getElementById('change-password-form').reset();
+            document.getElementById('password-strength').classList.add('hidden');
+            document.getElementById('password-match-hint').classList.add('hidden');
+
+            // 刷新图标
+            setTimeout(() => lucide.createIcons(), 100);
         }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('change-password-modal');
+            modal.classList.add('hidden');
+
+            // 清空表单
+            document.getElementById('change-password-form').reset();
+        }
+
+        // 切换密码可见性
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const button = event.currentTarget;
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+
+            lucide.createIcons();
+        }
+
+        // 计算密码强度
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+
+            if (password.length >= 6) strength += 1;
+            if (password.length >= 8) strength += 1;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+            if (/\d/.test(password)) strength += 1;
+            if (/[^a-zA-Z\d]/.test(password)) strength += 1;
+
+            return strength;
+        }
+
+        // 更新密码强度显示
+        function updatePasswordStrength(password) {
+            const strengthContainer = document.getElementById('password-strength');
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthText = document.getElementById('password-strength-text');
+
+            if (!password) {
+                strengthContainer.classList.add('hidden');
+                return;
+            }
+
+            strengthContainer.classList.remove('hidden');
+            const strength = calculatePasswordStrength(password);
+
+            const levels = [
+                { width: '20%', color: 'bg-red-500', text: '很弱', textColor: 'text-red-600' },
+                { width: '40%', color: 'bg-orange-500', text: '弱', textColor: 'text-orange-600' },
+                { width: '60%', color: 'bg-yellow-500', text: '中等', textColor: 'text-yellow-600' },
+                { width: '80%', color: 'bg-blue-500', text: '强', textColor: 'text-blue-600' },
+                { width: '100%', color: 'bg-green-500', text: '很强', textColor: 'text-green-600' }
+            ];
+
+            const level = levels[strength] || levels[0];
+            strengthBar.style.width = level.width;
+            strengthBar.className = `h-full transition-all ${level.color}`;
+            strengthText.textContent = level.text;
+            strengthText.className = `text-xs font-medium ${level.textColor}`;
+        }
+
+        // 检查密码是否匹配
+        function checkPasswordMatch() {
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const hint = document.getElementById('password-match-hint');
+
+            if (!confirmPassword) {
+                hint.classList.add('hidden');
+                return true;
+            }
+
+            if (newPassword === confirmPassword) {
+                hint.textContent = '密码匹配';
+                hint.className = 'mt-1 text-xs text-green-600';
+                hint.classList.remove('hidden');
+                return true;
+            } else {
+                hint.textContent = '两次输入的密码不一致';
+                hint.className = 'mt-1 text-xs text-red-600';
+                hint.classList.remove('hidden');
+                return false;
+            }
+        }
+
+        // 监听新密码输入
+        document.addEventListener('DOMContentLoaded', function() {
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+
+            if (newPasswordInput) {
+                newPasswordInput.addEventListener('input', function(e) {
+                    updatePasswordStrength(e.target.value);
+                    checkPasswordMatch();
+                });
+            }
+
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+            }
+        });
+
+        // 处理修改密码表单提交
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('change-password-form');
+
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const currentPassword = document.getElementById('current-password').value;
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmPassword = document.getElementById('confirm-password').value;
+
+                    // 前端验证
+                    if (!currentPassword || !newPassword || !confirmPassword) {
+                        UIUtils.notify('请填写所有必填字段', 'error');
+                        return;
+                    }
+
+                    if (newPassword.length < 6) {
+                        UIUtils.notify('新密码长度至少为6位', 'error');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        UIUtils.notify('两次输入的密码不一致', 'error');
+                        return;
+                    }
+
+                    if (currentPassword === newPassword) {
+                        UIUtils.notify('新密码不能与当前密码相同', 'error');
+                        return;
+                    }
+
+                    // 禁用提交按钮，防止重复提交
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>修改中...</span>';
+                    lucide.createIcons();
+
+                    try {
+                        // 获取当前用户ID - 优先从localStorage，否则使用默认值1
+                        const currentUserId = parseInt(StorageManager.get('currentUserId')) || 1;
+
+                        const result = await userAPI.updatePassword(currentUserId, currentPassword, newPassword);
+
+                        if (result.success) {
+                            UIUtils.notify('密码修改成功，请使用新密码登录', 'success');
+                            closePasswordModal();
+
+                            // 可选：3秒后跳转到登录页
+                            // setTimeout(() => {
+                            //     window.location.href = '/login.html';
+                            // }, 3000);
+                        } else {
+                            const errorMessage = result.error?.message || '密码修改失败';
+                            UIUtils.notify(errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        console.error('修改密码失败:', error);
+                        UIUtils.notify('网络错误，请稍后重试', 'error');
+                    } finally {
+                        // 恢复提交按钮
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                        lucide.createIcons();
+                    }
+                });
+            }
+        });
 
         // ==================== 保存所有设置 ====================
 
@@ -1421,6 +1796,9 @@
         // ==================== 页面初始化 ====================
 
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化主题设置(必须最先执行)
+            initializeThemeSettings();
+
             // 加载组织信息
             loadOrganizationInfo();
 
