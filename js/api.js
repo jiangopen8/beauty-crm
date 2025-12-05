@@ -5,9 +5,44 @@
 // API基础URL - 配置后端服务器地址
 // 开发环境: http://localhost:5004
 // 生产环境: http://8.210.246.101:5004
-const API_BASE_URL = window.location.hostname === 'localhost'
+let API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:5004'
     : `http://${window.location.hostname}:5004`;
+
+/**
+ * 获取 API 基础 URL，支持多个候选地址的回退
+ */
+function getAPIBaseURL() {
+    return API_BASE_URL;
+}
+
+/**
+ * 为 API 调用添加重试机制
+ */
+async function fetchWithRetry(url, options = {}, maxRetries = 2) {
+    let lastError = null;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            return response;
+        } catch (error) {
+            lastError = error;
+
+            // 如果不是第一次尝试或最后一次，等待后重试
+            if (attempt < maxRetries) {
+                const delayMs = Math.min(1000 * Math.pow(2, attempt), 5000);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                continue;
+            }
+        }
+    }
+
+    throw lastError;
+}
 
 /**
  * 封装fetch请求
@@ -23,10 +58,10 @@ const api = {
             .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
         const queryString = new URLSearchParams(filteredParams).toString();
-        const fullUrl = `${API_BASE_URL}${url}${queryString ? '?' + queryString : ''}`;
+        const fullUrl = `${getAPIBaseURL()}${url}${queryString ? '?' + queryString : ''}`;
 
         try {
-            const response = await fetch(fullUrl, {
+            const response = await fetchWithRetry(fullUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -45,7 +80,7 @@ const api = {
      */
     async post(url, data) {
         try {
-            const response = await fetch(`${API_BASE_URL}${url}`, {
+            const response = await fetchWithRetry(`${getAPIBaseURL()}${url}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -65,7 +100,7 @@ const api = {
      */
     async put(url, data) {
         try {
-            const response = await fetch(`${API_BASE_URL}${url}`, {
+            const response = await fetchWithRetry(`${getAPIBaseURL()}${url}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -85,7 +120,7 @@ const api = {
      */
     async patch(url, data) {
         try {
-            const response = await fetch(`${API_BASE_URL}${url}`, {
+            const response = await fetchWithRetry(`${getAPIBaseURL()}${url}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -105,7 +140,7 @@ const api = {
      */
     async delete(url) {
         try {
-            const response = await fetch(`${API_BASE_URL}${url}`, {
+            const response = await fetchWithRetry(`${getAPIBaseURL()}${url}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
