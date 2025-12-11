@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>客户详情 - 美业客户洞察 CRM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -281,7 +284,8 @@
         }
 
         .status-pending { background: #fef3c7; color: #92400e; }
-        .status-paid { background: #dbeafe; color: #1e40af; }
+        .status-confirmed { background: #dbeafe; color: #1e40af; }
+        .status-paid { background: #c7d2fe; color: #4338ca; }
         .status-in-progress { background: #e0e7ff; color: #3730a3; }
         .status-completed { background: #d1fae5; color: #065f46; }
         .status-cancelled { background: #fee2e2; color: #991b1b; }
@@ -370,6 +374,37 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
+
+        /* 任务状态样式 */
+        .task-status-pending,
+        .task-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .task-status-in_progress,
+        .task-in_progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .task-status-completed,
+        .task-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .task-status-cancelled,
+        .task-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .task-status-overdue,
+        .task-overdue {
+            background: #fde68a;
+            color: #78350f;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -384,7 +419,9 @@
                     </button>
                     <div class="flex items-center space-x-2">
                         <i data-lucide="sparkles" class="w-6 h-6 md:w-8 md:h-8 text-purple-600"></i>
-                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM</h1>
+                        <h1 class="text-lg md:text-xl font-bold text-gray-900">美业洞察CRM
+                                <span id="header-org-name" class="hidden md:inline text-purple-600"></span>
+                            </h1>
                     </div>
                 </div>
 
@@ -431,19 +468,19 @@
         </div>
     </nav>
 
-    <div class="pt-14 md:pt-16">
+    <div class="pt-20 md:pt-16">
         <!-- 主要内容区域 -->
-        <main class="max-w-7xl mx-auto p-4 md:p-6">
+        <main class="max-w-7xl mx-auto p-3 md:p-6">
             <!-- 客户基本信息头部 -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 md:p-6 mb-4 md:mb-6">
                 <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                     <!-- 头像 -->
-                    <div class="customer-avatar" id="customerAvatar">陈</div>
+                    <div class="customer-avatar" id="customerAvatar">?</div>
 
                     <!-- 基本信息 -->
                     <div class="flex-1">
                         <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-2">
-                            <h2 class="text-2xl font-bold text-gray-900" id="customerName">陈爱丽</h2>
+                            <h2 class="text-xl md:text-2xl font-bold text-gray-900" id="customerName">加载中...</h2>
                             <div class="flex items-center space-x-2 mt-2 md:mt-0">
                                 <span class="badge badge-purple" id="customerVipLevel">金卡会员</span>
                                 <span class="badge badge-green">活跃</span>
@@ -452,7 +489,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600">
                             <div class="flex items-center space-x-2">
                                 <i data-lucide="phone" class="w-4 h-4"></i>
-                                <span id="customerPhone">13800138000</span>
+                                <span id="customerPhone">加载中...</span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i data-lucide="calendar" class="w-4 h-4"></i>
@@ -518,73 +555,15 @@
 
                     <!-- 诊断管理标签页 -->
                     <div id="diagnosisTab" class="tab-content">
-                        <div class="split-layout">
-                            <!-- 左侧：身体组成分析数据录入 -->
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900 mb-4">身体组成分析</h3>
-                                <div class="form-card">
-                                    <div class="space-y-4">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">体重 (kg)</label>
-                                                <input type="number" step="0.1" id="bodyWeight" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="65.0">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">体脂率 (%)</label>
-                                                <input type="number" step="0.1" id="bodyFat" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="28.5">
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">肌肉量 (kg)</label>
-                                                <input type="number" step="0.1" id="muscleMass" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="45.0">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">BMI</label>
-                                                <input type="number" step="0.1" id="bmi" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="22.5">
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">内脏脂肪等级</label>
-                                                <input type="number" id="visceralFat" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="8">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">基础代谢率</label>
-                                                <input type="number" id="bmr" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="1350">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">测量备注</label>
-                                            <textarea id="measurementNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="记录测量时的特殊情况..."></textarea>
-                                        </div>
-                                        <button onclick="submitBodyAnalysis()" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                                            提交并AI诊断
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- 诊断历史 -->
-                                <div class="mt-6">
-                                    <h3 class="text-lg font-bold text-gray-900 mb-4">诊断历史</h3>
-                                    <div id="diagnosisHistoryContainer">
-                                        <!-- 动态加载诊断历史 -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 右侧：AI诊断结果 -->
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900 mb-4">AI诊断结果</h3>
-                                <div class="diagnosis-card" id="diagnosisResultCard">
-                                    <div class="flex items-center justify-center h-full text-gray-400">
-                                        <div class="text-center">
-                                            <i data-lucide="brain" class="w-16 h-16 mx-auto mb-3"></i>
-                                            <p>提交数据后将显示AI诊断结果</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-900">诊断历史记录</h3>
+                            <button onclick="showNewDiagnosisModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                                新建诊断
+                            </button>
+                        </div>
+                        <div id="diagnosisHistoryContainer">
+                            <!-- 动态加载诊断历史 -->
                         </div>
                     </div>
 
@@ -600,25 +579,22 @@
                                         刷新
                                     </button>
                                 </div>
-                                <div id="availablePlansContainer" class="space-y-3">
+                                <div id="availablePlansContainer" class="space-y-3 mb-4">
                                     <!-- 动态加载的方案列表 -->
                                 </div>
+                                <button onclick="addSelectedPlans()" class="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium" id="addPlansBtn" disabled>
+                                    <i data-lucide="plus-circle" class="w-5 h-5 inline mr-2"></i>
+                                    添加已选方案 (<span id="selectedCount">0</span>)
+                                </button>
                             </div>
 
-                            <!-- 右侧：已分配方案 -->
+                            <!-- 右侧：客户方案组 -->
                             <div>
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-bold text-gray-900">已分配方案</h3>
-                                    <button onclick="generateOrder()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm" id="generateOrderBtn" disabled>
-                                        <i data-lucide="plus" class="w-4 h-4 inline"></i>
-                                        生成订单
-                                    </button>
+                                    <h3 class="text-lg font-bold text-gray-900">客户方案组</h3>
                                 </div>
-                                <div id="assignedPlansContainer" class="space-y-3">
-                                    <div class="text-center text-gray-400 py-8">
-                                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
-                                        <p>暂无已分配方案</p>
-                                    </div>
+                                <div id="customerSolutionGroupsContainer" class="space-y-4">
+                                    <!-- 动态加载客户的方案组 -->
                                 </div>
                             </div>
                         </div>
@@ -626,12 +602,8 @@
 
                     <!-- 订单管理标签页 -->
                     <div id="ordersTab" class="tab-content">
-                        <div class="flex items-center justify-between mb-4">
+                        <div class="mb-4">
                             <h3 class="text-lg font-bold text-gray-900">客户订单列表</h3>
-                            <button onclick="createNewOrder()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
-                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
-                                新建订单
-                            </button>
                         </div>
                         <div id="ordersContainer">
                             <!-- 动态加载的订单列表 -->
@@ -655,8 +627,8 @@
                                 <button onclick="filterTasks('completed')" class="task-filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm" data-status="completed">
                                     已完成
                                 </button>
-                                <button onclick="filterTasks('skipped')" class="task-filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm" data-status="skipped">
-                                    已跳过
+                                <button onclick="filterTasks('cancelled')" class="task-filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm" data-status="cancelled">
+                                    已取消
                                 </button>
                             </div>
                         </div>
@@ -669,19 +641,28 @@
                     <div id="chatTab" class="tab-content">
                         <div class="bg-white rounded-lg border border-gray-200 h-[600px] flex flex-col">
                             <!-- 对话头部 -->
-                            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                        <i data-lucide="bot" class="w-5 h-5 text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold text-gray-900">AI美容助手</h3>
-                                        <p class="text-xs text-gray-500">24/7在线服务</p>
+                            <div class="px-4 py-3 border-b border-gray-200">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                            <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-900">AI美容助手</h3>
+                                            <p class="text-xs text-gray-500">24/7在线服务</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <button onclick="clearChatHistory()" class="text-sm text-gray-500 hover:text-gray-700">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
+                                <!-- 日期筛选 -->
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm text-gray-600">日期筛选:</label>
+                                    <input type="date" id="chatStartDate" class="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500" onchange="loadChatHistory()">
+                                    <span class="text-sm text-gray-500">至</span>
+                                    <input type="date" id="chatEndDate" class="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500" onchange="loadChatHistory()">
+                                    <button onclick="resetChatDateFilter()" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded hover:bg-gray-50">
+                                        重置
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- 对话内容区 -->
@@ -707,15 +688,30 @@
 
     <!-- AI客户画像模态框 -->
     <div id="aiProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">AI客户画像分析</h3>
+                    <div class="flex items-center space-x-4">
+                        <h3 class="text-xl font-bold text-gray-900">AI客户画像分析</h3>
+                        <button id="viewHistoryBtn" onclick="toggleProfileView()" class="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors hidden">
+                            <i data-lucide="history" class="w-4 h-4 inline-block mr-1"></i>
+                            <span id="viewHistoryText">查看历史</span>
+                        </button>
+                    </div>
                     <button onclick="closeAIProfileModal()" class="text-gray-400 hover:text-gray-600">
                         <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
+
+                <!-- 当前画像内容 -->
                 <div id="aiProfileContent" class="space-y-4">
+                    <div class="flex items-center justify-center py-8">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+
+                <!-- 历史版本列表 -->
+                <div id="aiProfileHistory" class="hidden space-y-4">
                     <div class="flex items-center justify-center py-8">
                         <div class="loading-spinner"></div>
                     </div>
@@ -724,8 +720,328 @@
         </div>
     </div>
 
+    <!-- 新建诊断模态框 -->
+    <div id="diagnosisModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+            <!-- 模态框头部 -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">新建诊断</h2>
+                <button onclick="closeDiagnosisModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <form id="diagnosisForm" class="space-y-6">
+                    <!-- 基本信息 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">诊断日期 *</label>
+                            <input type="date" id="diagnoseDate" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">诊断人 *</label>
+                            <select id="diagnosedBy" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">请选择诊断人</option>
+                                <option value="1">李美容师</option>
+                                <!-- 动态加载用户列表 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 动态表单字段容器 -->
+                    <div id="dynamicFieldsContainer" class="space-y-6">
+                        <!-- 根据模板动态渲染 -->
+                    </div>
+
+                    <!-- 诊断建议 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">诊断建议</label>
+                        <textarea id="suggestions" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="记录诊断建议和注意事项..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeDiagnosisModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button onclick="saveDiagnosis()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    保存诊断
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 生成订单确认模态框 -->
+    <div id="generateOrderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+            <!-- 模态框头部 -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">确认生成订单</h2>
+                    <p class="text-sm text-gray-500 mt-1">请确认方案信息,可调整周期、次数和价格</p>
+                </div>
+                <button onclick="closeGenerateOrderModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="orderSolutionsContainer" class="space-y-4">
+                    <!-- 动态加载的方案列表 -->
+                </div>
+
+                <!-- 总金额显示 -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">订单总金额</span>
+                        <span class="text-2xl font-bold text-green-600" id="totalAmount">¥0.00</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">将为客户生成 <span id="orderCount" class="font-medium text-purple-600">0</span> 个订单</p>
+                </div>
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeGenerateOrderModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button onclick="confirmGenerateOrders()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
+                    确认生成订单
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改订单模态框 -->
+    <div id="editOrderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+            <!-- 模态框头部 -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">修改订单</h2>
+                    <p class="text-sm text-gray-500 mt-1">修改订单信息</p>
+                </div>
+                <button onclick="closeEditOrderModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <form id="editOrderForm" class="space-y-4">
+                    <input type="hidden" id="editOrderId" />
+
+                    <!-- 服务日期 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">服务日期</label>
+                        <input type="date" id="editServiceDate"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- 服务时间 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
+                            <input type="time" id="editServiceStartTime"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">结束时间</label>
+                            <input type="time" id="editServiceEndTime"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- 金额信息 -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">原价（元）</label>
+                            <input type="number" id="editOriginalAmount" step="0.01" min="0"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   onchange="calculateFinalAmount()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">折扣（元）</label>
+                            <input type="number" id="editDiscountAmount" step="0.01" min="0"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   onchange="calculateFinalAmount()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">实付（元）</label>
+                            <input type="number" id="editFinalAmount" step="0.01" min="0" readonly
+                                   class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- 备注 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                        <textarea id="editRemark" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="订单备注信息..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeEditOrderModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button onclick="saveOrderEdit()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <i data-lucide="save" class="w-4 h-4 inline mr-1"></i>
+                    保存修改
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 生成任务模态框 -->
+    <div id="generateTaskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">生成任务</h2>
+                    <p class="text-xs text-gray-500 mt-1">为订单选择合适的任务模板</p>
+                </div>
+                <button onclick="closeGenerateTaskModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 订单信息摘要 -->
+                <div id="orderSummaryForTask" class="mb-4 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 text-purple-600"></i>
+                        <span class="font-semibold text-gray-900">订单信息</span>
+                    </div>
+                    <div class="text-sm text-gray-700">
+                        <span id="orderServiceName">-</span> ·
+                        <span id="orderServiceDate">-</span>
+                    </div>
+                </div>
+
+                <!-- 加载状态 -->
+                <div id="taskTemplatesLoading" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                    <p class="text-sm text-gray-500 mt-2">加载任务模板...</p>
+                </div>
+
+                <!-- 推荐模板 -->
+                <div id="recommendedTemplates" class="hidden mb-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="star" class="w-4 h-4 text-amber-500"></i>
+                        <h3 class="font-semibold text-gray-900">推荐模板</h3>
+                        <span class="text-xs text-gray-500">根据订单服务内容智能推荐</span>
+                    </div>
+                    <div id="recommendedTemplatesList" class="space-y-2">
+                        <!-- 动态生成推荐的任务模板 -->
+                    </div>
+                </div>
+
+                <!-- 其他模板 -->
+                <div id="otherTemplates" class="hidden">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="list" class="w-4 h-4 text-gray-500"></i>
+                        <h3 class="font-semibold text-gray-900">其他可用模板</h3>
+                    </div>
+                    <div id="otherTemplatesList" class="space-y-2">
+                        <!-- 动态生成其他任务模板 -->
+                    </div>
+                </div>
+
+                <!-- 空状态 -->
+                <div id="noTemplatesMessage" class="hidden text-center py-8">
+                    <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mx-auto mb-2"></i>
+                    <p class="text-gray-500">暂无可用的任务模板</p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    已选择 <span id="selectedTemplateCount" class="font-semibold text-purple-600">0</span> 个模板
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeGenerateTaskModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button onclick="confirmGenerateTasks()" class="px-4 py-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md">
+                        <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
+                        生成任务
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更新任务状态模态框 -->
+    <div id="updateTaskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full modal-enter">
+            <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-900">更新任务状态</h2>
+                <button onclick="closeUpdateTaskModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <input type="hidden" id="updateTaskId">
+
+                <!-- 任务信息显示 -->
+                <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-900" id="updateTaskTitle">任务标题</h3>
+                    <p class="text-sm text-gray-600 mt-1" id="updateTaskDescription">任务描述</p>
+                    <div class="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                        <span id="updateTaskDate">
+                            <i data-lucide="calendar" class="w-3 h-3 inline"></i>
+                            <span id="updateTaskDateText">-</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-xs font-medium" id="updateTaskCurrentStatus">当前状态</span>
+                    </div>
+                </div>
+
+                <!-- 状态选择 -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">更新状态 *</label>
+                    <select id="newTaskStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="pending">待执行</option>
+                        <option value="in_progress">进行中</option>
+                        <option value="completed">已完成</option>
+                        <option value="cancelled">已取消</option>
+                    </select>
+                </div>
+
+                <!-- 完成备注 -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">备注说明</label>
+                    <textarea id="taskCompletionNote" rows="3" placeholder="请输入备注信息（选填）" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="flex items-center justify-end space-x-3">
+                    <button onclick="closeUpdateTaskModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button onclick="confirmUpdateTaskStatus()" class="px-4 py-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md">
+                        确认更新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/core/ApiClient.js"></script>
+    <script src="js/core/ApiModules.js"></script>
     <script src="js/modules/customer-profile.js"></script>
     <script>
         // 全局变量
@@ -734,6 +1050,7 @@
         let selectedPlans = [];
         let allTasks = [];
         let currentTaskFilter = 'all';
+        let currentGeneratingOrder = null; // 当前要生成任务的订单
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
@@ -742,6 +1059,18 @@
             console.log('URL参数:', window.location.search);
 
             lucide.createIcons();
+
+            // 更新顶部标题栏显示当前组织名称
+            function updateHeaderOrgName() {
+                const headerOrgNameEl = document.getElementById('header-org-name');
+                const currentOrgName = localStorage.getItem('currentOrgName');
+                if (headerOrgNameEl && currentOrgName) {
+                    headerOrgNameEl.textContent = ' - ' + currentOrgName;
+                }
+            }
+
+            // 页面加载时更新标题
+            updateHeaderOrgName();
 
             try {
                 loadCustomerData();
@@ -752,65 +1081,146 @@
         });
 
         // 加载客户数据
-        function loadCustomerData() {
+        async function loadCustomerData() {
             const customerId = URLUtils.getParam('id');
-            console.log('获取到的客户ID:', customerId);
+            console.log('📍 获取到的客户ID:', customerId);
 
             if (!customerId) {
-                UIUtils.notify('未找到客户ID', 'error');
-                setTimeout(() => window.location.href = 'customers.html', 1500);
+                UIUtils.notify('未找到客户ID，您可以创建新客户', 'warning');
+                // 创建空客户对象，允许继续操作
+                currentCustomer = createEmptyCustomer();
+                displayCustomerHeader();
+                loadProfileForms();
                 return;
             }
 
-            // 直接从存储中获取所有客户（不经过 db.js 的过滤）
-            const allCustomers = StorageManager.get('customers', []);
-            console.log('所有客户列表:', allCustomers);
-            console.log('客户数量:', allCustomers.length);
+            try {
+                console.log('📡 从真实数据库 API 加载客户数据...');
 
-            // 直接查找客户
-            currentCustomer = allCustomers.find(c => c.id === customerId);
-            console.log('查找到的客户:', currentCustomer);
+                // 调用真实 API 获取客户详情
+                const response = await window.apiClient.get(`/api/customers/${customerId}`);
 
-            if (!currentCustomer) {
-                console.error('客户不存在,customerId:', customerId);
-                console.error('可用的客户IDs:', allCustomers.map(c => c.id));
-                UIUtils.notify('客户不存在', 'error');
-                setTimeout(() => window.location.href = 'customers.html', 1500);
-                return;
+                console.log('✅ API 响应:', response);
+
+                if (response.success && response.data) {
+                    // 转换 API 数据格式为页面需要的格式
+                    const apiCustomer = response.data;
+
+                    // 安全解析 JSON tags
+                    let tags = [];
+                    if (apiCustomer.tags) {
+                        try {
+                            tags = typeof apiCustomer.tags === 'string' ? JSON.parse(apiCustomer.tags) : apiCustomer.tags;
+                            if (!Array.isArray(tags)) tags = [];
+                        } catch (e) {
+                            console.warn('解析tags失败:', e);
+                            tags = [];
+                        }
+                    }
+
+                    currentCustomer = {
+                        id: apiCustomer.id,
+                        name: apiCustomer.name,
+                        phone: apiCustomer.phone,
+                        gender: apiCustomer.gender || '未知',
+                        age: calculateAge(apiCustomer.birth_date) || 0,
+                        source: mapSourceChannel(apiCustomer.source_channel),
+                        status: apiCustomer.status || 'active',
+                        tags: tags,
+                        notes: apiCustomer.remark || '',
+                        createdAt: apiCustomer.created_at,
+                        lastContact: apiCustomer.last_visit_at || apiCustomer.created_at,
+                        // 兼容旧字段结构
+                        data: {},
+                        diagnosisHistory: [],
+                        chatHistory: []
+                    };
+
+                    console.log('✅ 客户数据转换完成:', currentCustomer);
+
+                    // 显示客户基本信息
+                    displayCustomerHeader();
+
+                    // 加载标签页内容
+                    loadProfileForms();
+                    loadDiagnosisHistory();
+                    loadAvailablePlans();
+                    loadCustomerSolutionGroups();
+                    loadOrders();
+                    loadTasks();
+                    loadChatHistory();
+
+                } else {
+                    throw new Error(response.message || '获取客户数据失败');
+                }
+
+            } catch (error) {
+                console.error('❌ 加载客户数据失败:', error);
+
+                // 不跳转，而是创建空客户对象允许继续操作
+                UIUtils.notify('客户数据加载失败，已创建空白资料供您填写', 'warning');
+
+                currentCustomer = createEmptyCustomer(customerId);
+                displayCustomerHeader();
+
+                // 仍然尝试加载各个模块（可能部分功能可用）
+                loadProfileForms();
+                loadDiagnosisHistory();
+                loadAvailablePlans();
+                loadCustomerSolutionGroups();
+                loadOrders();
+                loadTasks();
+                loadChatHistory();
             }
-
-            // 初始化客户数据结构
-            if (!currentCustomer.data) {
-                currentCustomer.data = {};
-            }
-            if (!currentCustomer.diagnosisHistory) {
-                currentCustomer.diagnosisHistory = [];
-            }
-            if (!currentCustomer.chatHistory) {
-                currentCustomer.chatHistory = [];
-            }
-
-            // 显示客户基本信息
-            displayCustomerHeader();
-
-            // 加载标签页内容
-            loadProfileForms();
-            loadDiagnosisHistory();
-            loadAvailablePlans();
-            loadOrders();
-            loadTasks();
-            loadChatHistory();
         }
 
-        // 保存客户数据（替代 db.saveCustomer）
-        function saveCurrentCustomer() {
-            const allCustomers = StorageManager.get('customers', []);
-            const index = allCustomers.findIndex(c => c.id === currentCustomer.id);
-            if (index >= 0) {
-                allCustomers[index] = currentCustomer;
-                StorageManager.set('customers', allCustomers);
-            }
+        // 创建空客户对象
+        function createEmptyCustomer(customerId = null) {
+            return {
+                id: customerId || 'new',
+                name: '新客户',
+                phone: '',
+                gender: '未知',
+                age: 0,
+                source: '未知',
+                status: 'active',
+                tags: [],
+                notes: '',
+                createdAt: new Date().toISOString(),
+                lastContact: new Date().toISOString(),
+                data: {},
+                diagnosisHistory: [],
+                chatHistory: []
+            };
         }
+
+        // 计算年龄（从生日）
+        function calculateAge(birthday) {
+            if (!birthday) return null;
+            const birthDate = new Date(birthday);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // 映射来源渠道枚举值
+        function mapSourceChannel(sourceChannel) {
+            const sourceMap = {
+                'walk_in': '到店',
+                'referral': '推荐',
+                'online': '线上',
+                'event': '活动',
+                'other': '其他'
+            };
+            return sourceMap[sourceChannel] || '未知';
+        }
+
+        // 注意：客户数据现在从真实数据库 API 获取，不再使用 localStorage
+        // 如需更新客户数据，应调用 PUT /api/customers/:id
 
         // 显示客户头部信息
         function displayCustomerHeader() {
@@ -877,295 +1287,188 @@
             lucide.createIcons();
         }
 
-        // 提交身体分析数据并AI诊断
-        function submitBodyAnalysis() {
-            const data = {
-                weight: parseFloat(document.getElementById('bodyWeight').value) || 0,
-                bodyFat: parseFloat(document.getElementById('bodyFat').value) || 0,
-                muscleMass: parseFloat(document.getElementById('muscleMass').value) || 0,
-                bmi: parseFloat(document.getElementById('bmi').value) || 0,
-                visceralFat: parseInt(document.getElementById('visceralFat').value) || 0,
-                bmr: parseInt(document.getElementById('bmr').value) || 0,
-                notes: document.getElementById('measurementNotes').value
-            };
-
-            // 验证必填字段
-            if (!data.weight || !data.bodyFat) {
-                UIUtils.notify('请填写体重和体脂率', 'warning');
-                return;
-            }
-
-            // 显示加载状态
-            const resultCard = document.getElementById('diagnosisResultCard');
-            resultCard.innerHTML = '<div class="flex items-center justify-center h-full"><div class="loading-spinner"></div></div>';
-
-            // 模拟AI诊断
-            setTimeout(() => {
-                const diagnosis = generateAIDiagnosis(data);
-
-                // 保存诊断记录
-                if (!currentCustomer.diagnosisHistory) {
-                    currentCustomer.diagnosisHistory = [];
-                }
-                currentCustomer.diagnosisHistory.unshift({
-                    ...data,
-                    diagnosis: diagnosis,
-                    timestamp: new Date().toISOString()
-                });
-
-                saveCurrentCustomer();
-
-                displayDiagnosisResult(diagnosis);
-                loadDiagnosisHistory();
-                UIUtils.notify('AI诊断完成', 'success');
-            }, 2000);
-        }
-
-        // 生成AI诊断结果(智能分析)
-        function generateAIDiagnosis(data) {
-            let overall = '';
-            let bodyComposition = '';
-            const recommendations = [];
-            let riskLevel = 'low';
-
-            // 分析体重和BMI
-            if (data.bmi < 18.5) {
-                overall = '体重偏轻';
-                riskLevel = 'medium';
-                recommendations.push('建议增加营养摄入,每日增加300-500卡路里');
-                recommendations.push('进行适度力量训练,增加肌肉量');
-            } else if (data.bmi >= 18.5 && data.bmi < 24) {
-                overall = '体重正常';
-                riskLevel = 'low';
-            } else if (data.bmi >= 24 && data.bmi < 28) {
-                overall = '体重偏高';
-                riskLevel = 'medium';
-                recommendations.push('建议控制每日热量摄入在1200-1500卡路里');
-                recommendations.push('每周进行3-4次有氧运动,每次30-45分钟');
-            } else {
-                overall = '体重超标,需要重视';
-                riskLevel = 'high';
-                recommendations.push('强烈建议咨询专业营养师,制定减重计划');
-                recommendations.push('每周进行4-5次有氧运动,每次45-60分钟');
-            }
-
-            // 分析体脂率
-            const gender = currentCustomer.data?.tpl_basic_info?.gender || '女';
-            const normalBodyFat = gender === '女' ? 25 : 20;
-
-            if (data.bodyFat > normalBodyFat + 8) {
-                overall += ',体脂率超标';
-                riskLevel = riskLevel === 'low' ? 'medium' : 'high';
-                bodyComposition = '体脂率明显偏高,需要通过有氧运动和饮食控制来降低体脂率';
-                recommendations.push('增加有氧运动频率,如快走、游泳、骑行等');
-                recommendations.push('减少高糖高脂食物摄入,增加蔬菜和优质蛋白');
-            } else if (data.bodyFat > normalBodyFat + 3) {
-                overall += ',体脂率偏高';
-                bodyComposition = '体脂率略高于标准,建议通过运动和合理饮食来改善';
-                recommendations.push('保持规律运动习惯,每周至少3次有氧运动');
-            } else {
-                bodyComposition = '体脂率在正常范围内,继续保持良好的生活习惯';
-            }
-
-            // 分析肌肉量
-            if (data.muscleMass > 0) {
-                const muscleMassRatio = (data.muscleMass / data.weight) * 100;
-                if (muscleMassRatio < 30) {
-                    bodyComposition += ',肌肉量偏低,建议增加力量训练';
-                    recommendations.push('每周进行2-3次力量训练,提高肌肉量');
-                    recommendations.push('增加蛋白质摄入,每日1.2-1.5克/公斤体重');
-                }
-            }
-
-            // 分析内脏脂肪
-            if (data.visceralFat >= 15) {
-                riskLevel = 'high';
-                recommendations.push('内脏脂肪等级偏高,存在健康风险,建议医学检查');
-                recommendations.push('严格控制饮食,避免高油高糖食物');
-            } else if (data.visceralFat >= 10) {
-                riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
-                recommendations.push('内脏脂肪需要注意,建议增加运动量');
-            }
-
-            // 分析基础代谢率
-            if (data.bmr > 0) {
-                bodyComposition += `。基础代谢率为${data.bmr}卡路里/天`;
-            }
-
-            // 通用建议
-            recommendations.push('定期监测体重和体脂率变化,建议每周测量1-2次');
-            recommendations.push('保证充足睡眠,每天7-8小时');
-            recommendations.push('保持良好心态,避免压力过大影响代谢');
-
-            return {
-                overall,
-                bodyComposition,
-                recommendations: recommendations.slice(0, 6), // 最多6条建议
-                riskLevel,
-                timestamp: new Date().toISOString()
-            };
-        }
-
-        // 显示诊断结果
-        function displayDiagnosisResult(diagnosis) {
-            const resultCard = document.getElementById('diagnosisResultCard');
-
-            const riskColors = {
-                low: { bg: 'green', text: '低风险' },
-                medium: { bg: 'yellow', text: '中等风险' },
-                high: { bg: 'red', text: '高风险' }
-            };
-            const risk = riskColors[diagnosis.riskLevel] || riskColors.low;
-
-            resultCard.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-semibold text-gray-900">综合评估</h4>
-                        <span class="px-3 py-1 bg-${risk.bg}-100 text-${risk.bg}-800 text-xs rounded-full">
-                            ${risk.text}
-                        </span>
-                    </div>
-                    <p class="text-gray-700 font-medium">${diagnosis.overall}</p>
-
-                    <div>
-                        <h5 class="font-semibold text-gray-900 mb-2">详细分析</h5>
-                        <p class="text-sm text-gray-600">${diagnosis.bodyComposition}</p>
-                    </div>
-
-                    <div>
-                        <h5 class="font-semibold text-gray-900 mb-2">改善建议</h5>
-                        <ul class="space-y-2">
-                            ${diagnosis.recommendations.map(rec => `
-                                <li class="flex items-start space-x-2 text-sm text-gray-600">
-                                    <i data-lucide="check" class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0"></i>
-                                    <span>${rec}</span>
-                                </li>
-                            `).join('')}
-                        </ul>
-                    </div>
-
-                    <div class="text-xs text-gray-500 pt-3 border-t">
-                        诊断时间: ${DateUtils.format(new Date(diagnosis.timestamp), 'YYYY-MM-DD HH:mm')}
-                    </div>
-                </div>
-            `;
-
-            lucide.createIcons();
-        }
 
         // 加载诊断历史
-        function loadDiagnosisHistory() {
+        async function loadDiagnosisHistory() {
             const container = document.getElementById('diagnosisHistoryContainer');
 
-            // 从客户数据中读取诊断信息
-            const history = [];
+            try {
+                // 从API获取客户诊断历史
+                console.log('📡 从真实数据库 API 加载诊断历史...');
+                const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses?customer_id=${currentCustomer.id}`);
+                const result = await response.json();
 
-            // 如果有 AI 诊断和身体组成数据,添加到历史记录
-            if (currentCustomer.aiDiagnosis && currentCustomer.bodyComposition) {
-                history.push({
-                    timestamp: currentCustomer.aiDiagnosis.diagnosedAt,
-                    weight: currentCustomer.bodyComposition.weight,
-                    bodyFat: currentCustomer.bodyComposition.bodyFat,
-                    bmi: currentCustomer.bodyComposition.bmi,
-                    diagnosis: currentCustomer.aiDiagnosis
-                });
-            }
+                if (!result.success) {
+                    throw new Error(result.message || '加载诊断历史失败');
+                }
 
-            // 如果有旧的诊断历史数据,也添加进来
-            if (currentCustomer.diagnosisHistory && currentCustomer.diagnosisHistory.length > 0) {
-                history.push(...currentCustomer.diagnosisHistory);
-            }
+                const history = result.data || [];
+                console.log(`✅ 成功加载 ${history.length} 条诊断记录`);
 
-            if (history.length === 0) {
+                if (history.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-gray-400 py-8 bg-white rounded-lg border border-gray-200">
+                            <i data-lucide="stethoscope" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p class="text-sm">暂无诊断记录</p>
+                            <p class="text-xs mt-2 text-gray-500">点击"新建诊断"开始记录客户健康信息</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // 渲染诊断历史列表
+                container.innerHTML = history.map((record, index) => {
+                    const diagnoseData = typeof record.diagnose_data === 'string'
+                        ? JSON.parse(record.diagnose_data)
+                        : record.diagnose_data || {};
+
+                    return `
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow relative">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-900">
+                                    ${DateUtils.format(new Date(record.diagnose_date), 'YYYY-MM-DD HH:mm')}
+                                </span>
+                                <div class="flex items-center space-x-1">
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                                        综合诊断
+                                    </span>
+                                    <button onclick="showDiagnosisSummary(${record.id})"
+                                            class="text-blue-500 hover:text-blue-700 transition-colors p-1"
+                                            title="查看摘要">
+                                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="editDiagnosis(${record.id})"
+                                            class="text-green-500 hover:text-green-700 transition-colors p-1"
+                                            title="编辑诊断">
+                                        <i data-lucide="edit" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="deleteDiagnosis(${record.id})"
+                                            class="text-red-500 hover:text-red-700 transition-colors p-1"
+                                            title="删除诊断记录">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                ${record.skin_type ? `<div>肤质: ${translateSkinType(record.skin_type)}</div>` : ''}
+                                ${record.hair_type ? `<div>发质: ${translateHairType(record.hair_type)}</div>` : ''}
+                                ${Object.keys(diagnoseData).length > 0 ? `<div>记录项: ${Object.keys(diagnoseData).length} 项</div>` : ''}
+                            </div>
+                            ${record.suggestions ? `
+                                <div class="text-xs text-gray-500 mt-2 line-clamp-2">
+                                    ${record.suggestions}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                lucide.createIcons();
+            } catch (error) {
+                console.error('❌ 加载诊断历史失败:', error);
                 container.innerHTML = `
-                    <div class="text-center text-gray-400 py-4">
-                        <p class="text-sm">暂无诊断历史</p>
-                        <button onclick="runAIDiagnosis()" class="mt-2 text-purple-600 hover:text-purple-700 text-sm">
-                            <i data-lucide="zap" class="w-4 h-4 inline mr-1"></i>
-                            立即诊断
-                        </button>
+                    <div class="text-center text-red-400 py-8 bg-red-50 rounded-lg border border-red-200">
+                        <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-2"></i>
+                        <p class="text-sm">加载诊断历史失败</p>
+                        <p class="text-xs mt-2">${error.message}</p>
                     </div>
                 `;
                 lucide.createIcons();
-                return;
-            }
-
-            container.innerHTML = history.slice(0, 5).map((record, index) => `
-                <div class="diagnosis-history-item" onclick="showDiagnosisRecord(${index})">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-900">
-                            ${DateUtils.format(new Date(record.timestamp), 'YYYY-MM-DD HH:mm')}
-                        </span>
-                        <span class="text-xs px-2 py-0.5 rounded-full ${
-                            record.diagnosis.riskLevel === 'low' ? 'bg-green-100 text-green-800' :
-                            record.diagnosis.riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                        }">
-                            ${record.diagnosis.riskLevel === 'low' ? '低风险' :
-                              record.diagnosis.riskLevel === 'medium' ? '中等' : '高风险'}
-                        </span>
-                    </div>
-                    <div class="text-xs text-gray-600">
-                        体重: ${record.weight}kg | 体脂率: ${record.bodyFat}% | BMI: ${record.bmi}
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">
-                        ${record.diagnosis.healthStatus}
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
-        // 显示历史诊断记录
-        function showDiagnosisRecord(index) {
-            const record = currentCustomer.diagnosisHistory[index];
-            if (record) {
-                // 填充表单数据
-                document.getElementById('bodyWeight').value = record.weight;
-                document.getElementById('bodyFat').value = record.bodyFat;
-                document.getElementById('muscleMass').value = record.muscleMass;
-                document.getElementById('bmi').value = record.bmi;
-                document.getElementById('visceralFat').value = record.visceralFat;
-                document.getElementById('bmr').value = record.bmr;
-                document.getElementById('measurementNotes').value = record.notes || '';
-
-                // 显示诊断结果
-                displayDiagnosisResult(record.diagnosis);
             }
         }
 
-        // 加载可用方案
-        function loadAvailablePlans() {
+        // 翻译肤质类型
+        function translateSkinType(type) {
+            const types = {
+                'dry': '干性',
+                'oily': '油性',
+                'combination': '混合性',
+                'sensitive': '敏感性',
+                'normal': '中性'
+            };
+            return types[type] || type;
+        }
+
+        // 翻译发质类型
+        function translateHairType(type) {
+            const types = {
+                'dry': '干性',
+                'oily': '油性',
+                'normal': '中性',
+                'damaged': '受损'
+            };
+            return types[type] || type;
+        }
+
+
+        // 加载可用方案模板
+        async function loadAvailablePlans() {
             const container = document.getElementById('availablePlansContainer');
-            const templates = db.getTemplatesByCategory(TemplateCategory.PLAN);
 
-            if (templates.length === 0) {
+            try {
+                console.log('📡 从真实数据库 API 加载方案模板...');
+
+                // 调用真实 API 获取方案模板列表
+                const response = await window.apiClient.get('/api/solution-templates', {
+                    page: 1,
+                    pageSize: 100
+                });
+
+                console.log('✅ 方案模板 API 响应:', response);
+
+                if (!response.success || !response.data || !response.data.items) {
+                    throw new Error(response.message || '获取方案模板失败');
+                }
+
+                const templates = response.data.items;
+
+                if (templates.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-gray-400 py-8 bg-white rounded-lg border border-gray-200">
+                            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>暂无方案模板</p>
+                            <p class="text-xs mt-2 text-gray-500">请先在方案模板管理中添加方案模板</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // 渲染方案模板列表
+                container.innerHTML = templates.map(template => `
+                    <div class="plan-card" onclick="togglePlanSelection(${template.id})">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1 mr-3">
+                                <h4 class="font-semibold text-gray-900">${template.template_name}</h4>
+                                <p class="text-sm text-gray-600 mt-1 line-clamp-2">${template.expected_effects || '暂无描述'}</p>
+                                <div class="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                                    ${template.category ? `<span class="badge badge-blue">${template.category}</span>` : ''}
+                                    ${template.course_duration ? `<span>${template.course_duration}</span>` : ''}
+                                    ${template.estimated_price_min && template.estimated_price_max ?
+                                        `<span class="text-purple-600 font-medium">¥${template.estimated_price_min}-${template.estimated_price_max}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="ml-2">
+                                <input type="checkbox" id="plan_${template.id}" class="w-5 h-5 text-purple-600 rounded pointer-events-none">
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载方案模板失败:', error);
                 container.innerHTML = `
-                    <div class="text-center text-gray-400 py-8">
-                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
-                        <p>暂无方案模板</p>
+                    <div class="text-center text-red-400 py-8 bg-red-50 rounded-lg border border-red-200">
+                        <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-2"></i>
+                        <p>加载方案模板失败</p>
+                        <p class="text-xs mt-2">${error.message}</p>
                     </div>
                 `;
                 lucide.createIcons();
-                return;
             }
-
-            container.innerHTML = templates.map(plan => `
-                <div class="plan-card" onclick="togglePlanSelection('${plan.id}')">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-900">${plan.name}</h4>
-                            <p class="text-sm text-gray-600 mt-1">${plan.description}</p>
-                        </div>
-                        <div class="ml-4">
-                            <input type="checkbox" id="plan_${plan.id}" class="w-5 h-5 text-purple-600 rounded pointer-events-none">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
         }
 
         // 切换方案选择
@@ -1176,122 +1479,221 @@
             const card = checkbox.closest('.plan-card');
             if (checkbox.checked) {
                 card.classList.add('selected');
-                selectedPlans.push(planId);
+                if (!selectedPlans.includes(planId)) {
+                    selectedPlans.push(planId);
+                }
             } else {
                 card.classList.remove('selected');
                 selectedPlans = selectedPlans.filter(id => id !== planId);
             }
 
-            updateAssignedPlans();
+            updateSelectedCount();
         }
 
-        // 更新已分配方案
-        function updateAssignedPlans() {
-            const container = document.getElementById('assignedPlansContainer');
-            const generateBtn = document.getElementById('generateOrderBtn');
+        // 更新选中计数
+        function updateSelectedCount() {
+            const countSpan = document.getElementById('selectedCount');
+            const addBtn = document.getElementById('addPlansBtn');
 
-            if (selectedPlans.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-gray-400 py-8">
-                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
-                        <p>暂无已分配方案</p>
-                    </div>
-                `;
-                generateBtn.disabled = true;
-                generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            countSpan.textContent = selectedPlans.length;
+
+            if (selectedPlans.length > 0) {
+                addBtn.disabled = false;
+                addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                container.innerHTML = selectedPlans.map(planId => {
-                    const plan = db.getTemplateById(planId);
-                    return `
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">${plan.name}</h4>
-                                    <p class="text-sm text-gray-600 mt-1">${plan.description}</p>
-                                </div>
-                                <button onclick="event.stopPropagation(); removePlan('${planId}')" class="text-red-600 hover:text-red-700">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                generateBtn.disabled = false;
-                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                addBtn.disabled = true;
+                addBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
-
-            lucide.createIcons();
         }
 
-        // 移除方案
-        function removePlan(planId) {
-            const checkbox = document.getElementById('plan_' + planId);
-            if (checkbox) {
-                checkbox.checked = false;
-                checkbox.closest('.plan-card').classList.remove('selected');
-            }
-            selectedPlans = selectedPlans.filter(id => id !== planId);
-            updateAssignedPlans();
-        }
-
-        // 生成订单
-        function generateOrder() {
+        // 添加已选方案(创建方案组)
+        async function addSelectedPlans() {
             if (selectedPlans.length === 0) {
                 UIUtils.notify('请先选择方案', 'warning');
                 return;
             }
 
-            // 创建订单项
-            const items = selectedPlans.map(planId => {
-                const plan = db.getTemplateById(planId);
-                return {
-                    planTemplateId: plan.id,
-                    planTemplateName: plan.name,
-                    quantity: 1,
-                    unitPrice: 3500, // 默认价格
-                    totalPrice: 3500
-                };
-            });
+            try {
+                console.log('📡 添加已选方案到客户方案组...', selectedPlans);
 
-            const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0);
+                // 提交到 API
+                const response = await window.apiClient.post('/api/customer-solutions', {
+                    customer_id: currentCustomer.id,
+                    org_id: currentCustomer.org_id || 1,
+                    solution_template_ids: selectedPlans,
+                    created_by: 1  // TODO: 获取当前登录用户ID
+                });
 
-            // 创建订单对象
-            const order = {
-                id: `order_${Date.now()}`,
-                orgId: db.getCurrentOrgId(),
-                customerId: currentCustomer.id,
-                customerName: currentCustomer.name,
-                orderNumber: `ORD${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
-                items: items,
-                totalAmount: totalAmount,
-                discountAmount: 0,
-                finalAmount: totalAmount,
-                status: OrderStatus.PENDING,
-                paymentMethod: '',
-                paymentTime: null,
-                notes: `从方案管理生成的订单`,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                createdBy: 'admin'
-            };
+                console.log('✅ 添加方案成功:', response);
 
-            // 保存订单
-            db.saveOrder(order);
+                if (!response.success) {
+                    throw new Error(response.message || '添加方案失败');
+                }
 
-            UIUtils.notify('订单已创建', 'success');
+                UIUtils.notify(`✅ 成功添加 ${selectedPlans.length} 个方案`, 'success');
 
-            // 清空选择
-            selectedPlans = [];
-            document.querySelectorAll('.plan-card').forEach(card => {
-                card.classList.remove('selected');
-                card.querySelector('input[type="checkbox"]').checked = false;
-            });
-            updateAssignedPlans();
+                // 清空选中状态
+                selectedPlans.forEach(planId => {
+                    const checkbox = document.getElementById('plan_' + planId);
+                    if (checkbox) {
+                        checkbox.checked = false;
+                        checkbox.closest('.plan-card').classList.remove('selected');
+                    }
+                });
+                selectedPlans = [];
+                updateSelectedCount();
 
-            // 切换到订单标签页
-            switchTab('orders');
-            loadOrders();
+                // 重新加载客户方案组
+                await loadCustomerSolutionGroups();
+
+            } catch (error) {
+                console.error('❌ 添加方案失败:', error);
+                UIUtils.notify('添加失败: ' + error.message, 'error');
+            }
+        }
+
+        // 加载客户方案组
+        async function loadCustomerSolutionGroups() {
+            const container = document.getElementById('customerSolutionGroupsContainer');
+
+            try {
+                console.log('📡 从真实数据库 API 加载客户方案组...');
+
+                // 调用真实 API 获取客户方案组
+                const response = await window.apiClient.get('/api/customer-solutions', {
+                    customer_id: currentCustomer.id
+                });
+
+                console.log('✅ 客户方案组 API 响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '获取客户方案组失败');
+                }
+
+                const groups = response.data || [];
+
+                if (groups.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-gray-400 py-8 bg-white rounded-lg border border-gray-200">
+                            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>暂无方案组</p>
+                            <p class="text-xs mt-2 text-gray-500">请从左侧选择方案模板添加</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // 渲染方案组列表
+                container.innerHTML = groups.map((group, index) => `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h4 class="font-semibold text-gray-900">方案组 ${groups.length - index}</h4>
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                                        ${group.solutions.length} 个方案
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    创建时间: ${DateUtils.format(new Date(group.created_at), 'YYYY-MM-DD HH:mm')}
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                ${(() => {
+                                    // 检查是否已生成订单（任一方案有order_generated=1则整个组已生成）
+                                    const isGenerated = group.solutions.some(s => s.order_generated === 1);
+
+                                    if (isGenerated) {
+                                        return `
+                                            <button disabled
+                                                    class="px-3 py-1.5 bg-gray-400 text-white rounded-lg cursor-not-allowed text-sm font-medium"
+                                                    title="该方案组已生成订单">
+                                                <i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>
+                                                已生成订单
+                                            </button>
+                                        `;
+                                    } else {
+                                        return `
+                                            <button onclick="showGenerateOrderModal('${group.plan_group_id}')"
+                                                    class="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                                    title="生成订单">
+                                                <i data-lucide="plus-square" class="w-4 h-4 inline mr-1"></i>
+                                                生成订单
+                                            </button>
+                                        `;
+                                    }
+                                })()}
+                                <button onclick="deleteSolutionGroup('${group.plan_group_id}')"
+                                        class="text-red-500 hover:text-red-700 transition-colors p-1"
+                                        title="删除方案组">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            ${group.solutions.map(solution => `
+                                <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <h5 class="font-medium text-gray-900 text-sm">${solution.template_name}</h5>
+                                            ${solution.expected_effects ?
+                                                `<p class="text-xs text-gray-600 mt-1 line-clamp-2">${solution.expected_effects}</p>` : ''}
+                                            <div class="flex items-center space-x-2 mt-2 text-xs">
+                                                ${solution.category ? `<span class="badge badge-blue">${solution.category}</span>` : ''}
+                                                ${solution.course_duration ? `<span class="text-gray-500">${solution.course_duration}</span>` : ''}
+                                                ${solution.estimated_price_min && solution.estimated_price_max ?
+                                                    `<span class="text-purple-600 font-medium">¥${solution.estimated_price_min}-${solution.estimated_price_max}</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载客户方案组失败:', error);
+                container.innerHTML = `
+                    <div class="text-center text-red-400 py-8 bg-red-50 rounded-lg border border-red-200">
+                        <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-2"></i>
+                        <p>加载客户方案组失败</p>
+                        <p class="text-xs mt-2">${error.message}</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // 删除方案组
+        async function deleteSolutionGroup(groupId) {
+            if (!confirm('确定要删除这个方案组吗？此操作不可恢复。')) {
+                return;
+            }
+
+            try {
+                console.log('📡 删除方案组:', groupId);
+
+                const response = await window.apiClient.delete(`/api/customer-solutions/group/${groupId}`);
+
+                console.log('✅ 删除方案组成功:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '删除方案组失败');
+                }
+
+                UIUtils.notify('方案组已删除', 'success');
+
+                // 重新加载客户方案组
+                await loadCustomerSolutionGroups();
+
+            } catch (error) {
+                console.error('❌ 删除方案组失败:', error);
+                UIUtils.notify('删除失败: ' + error.message, 'error');
+            }
         }
 
         // 刷新方案
@@ -1301,54 +1703,104 @@
         }
 
         // 加载订单
-        function loadOrders() {
+        async function loadOrders() {
             const container = document.getElementById('ordersContainer');
-            const orders = db.getOrdersByCustomerId(currentCustomer.id);
 
-            if (orders.length === 0) {
+            try {
+                console.log('📡 从真实数据库 API 加载订单数据...');
+
+                // 调用真实 API 获取客户订单列表
+                const response = await window.apiClient.get('/api/orders', {
+                    customer_id: currentCustomer.id,
+                    page: 1,
+                    pageSize: 100  // 获取所有订单
+                });
+
+                console.log('✅ 订单 API 响应:', response);
+
+                if (!response.success || !response.data || !response.data.list) {
+                    throw new Error(response.message || '获取订单数据失败');
+                }
+
+                const orders = response.data.list;
+
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-gray-400 py-8 bg-white rounded-lg border border-gray-200">
+                            <i data-lucide="shopping-cart" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>暂无订单记录</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = orders.map(order => {
+                    const isPending = order.order_status === 'pending';
+                    const canEdit = isPending;  // 只有待确认状态的订单可以修改
+
+                    return `
+                        <div class="order-card bg-white rounded-lg border border-gray-200 p-4 mb-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <h4 class="font-semibold text-gray-900">订单 ${order.order_no || order.id}</h4>
+                                    <span class="status-badge status-${order.order_status || 'pending'}">${getOrderStatusText(order.order_status || 'pending')}</span>
+                                </div>
+                                <span class="text-lg font-bold text-purple-600">${NumberUtils.formatMoney(order.final_amount || 0)}</span>
+                            </div>
+                            <div class="space-y-1 mb-3">
+                                <div class="text-sm text-gray-600">
+                                    <p>服务日期: ${order.service_date || '待定'}</p>
+                                    ${order.remark ? `<p class="mt-1 text-xs text-gray-500">备注: ${order.remark}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+                                <span class="text-xs text-gray-500">创建时间: ${DateUtils.format(new Date(order.created_at), 'YYYY-MM-DD HH:mm')}</span>
+                                <div class="flex items-center space-x-2">
+                                    ${canEdit ? `
+                                        <button onclick="event.stopPropagation(); showEditOrderModal(${order.id})"
+                                                class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                            <i data-lucide="edit" class="w-3 h-3 inline mr-1"></i>
+                                            修改
+                                        </button>
+                                        <button onclick="event.stopPropagation(); confirmOrder(${order.id})"
+                                                class="px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                            <i data-lucide="check" class="w-3 h-3 inline mr-1"></i>
+                                            确认
+                                        </button>
+                                    ` : ''}
+                                    ${(order.order_status === 'pending' || order.order_status === 'confirmed' || order.order_status === 'in_progress') ? `
+                                        <button onclick="event.stopPropagation(); showGenerateTaskModal(${order.id})"
+                                                class="px-3 py-1 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                            <i data-lucide="list-checks" class="w-3 h-3 inline mr-1"></i>
+                                            生成任务
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载订单数据失败:', error);
                 container.innerHTML = `
-                    <div class="text-center text-gray-400 py-8 bg-white rounded-lg border border-gray-200">
-                        <i data-lucide="shopping-cart" class="w-12 h-12 mx-auto mb-2"></i>
-                        <p>暂无订单记录</p>
+                    <div class="text-center text-red-400 py-8 bg-white rounded-lg border border-red-200">
+                        <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-2"></i>
+                        <p>加载订单失败: ${error.message}</p>
                     </div>
                 `;
                 lucide.createIcons();
-                return;
             }
-
-            container.innerHTML = orders.map(order => `
-                <div class="order-card" onclick="viewOrderDetail('${order.id}')">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center space-x-3">
-                            <h4 class="font-semibold text-gray-900">订单 ${order.orderNumber}</h4>
-                            <span class="status-badge status-${order.status}">${getOrderStatusText(order.status)}</span>
-                        </div>
-                        <span class="text-lg font-bold text-purple-600">${NumberUtils.formatMoney(order.finalAmount)}</span>
-                    </div>
-                    <div class="space-y-1 mb-3">
-                        ${order.items.map(item => `
-                            <div class="text-sm text-gray-600 flex items-center justify-between">
-                                <span>${item.planTemplateName}</span>
-                                <span class="text-xs">× ${item.quantity}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="pt-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                        <span>创建时间: ${DateUtils.format(new Date(order.createdAt), 'YYYY-MM-DD HH:mm')}</span>
-                        <span class="text-purple-600 hover:text-purple-700 font-medium">
-                            查看详情 →
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
         }
 
         // 获取订单状态文本
         function getOrderStatusText(status) {
             const statusMap = {
-                pending: '待支付',
+                pending: '待确认',
+                confirmed: '已确认',
                 paid: '已支付',
                 in_progress: '进行中',
                 completed: '已完成',
@@ -1372,9 +1824,31 @@
         }
 
         // 加载任务
-        function loadTasks() {
-            allTasks = db.getTasksByCustomerId(currentCustomer.id);
-            renderTasks();
+        async function loadTasks() {
+            try {
+                console.log('📡 从真实数据库 API 加载任务数据...');
+
+                // 调用真实 API 获取客户任务列表
+                const response = await window.apiClient.get('/api/tasks', {
+                    customer_id: currentCustomer.id,
+                    page: 1,
+                    pageSize: 100  // 获取所有任务
+                });
+
+                console.log('✅ 任务 API 响应:', response);
+
+                if (!response.success || !response.data || !response.data.list) {
+                    throw new Error(response.message || '获取任务数据失败');
+                }
+
+                allTasks = response.data.list;
+                renderTasks();
+
+            } catch (error) {
+                console.error('❌ 加载任务数据失败:', error);
+                allTasks = [];
+                renderTasks();
+            }
         }
 
         // 渲染任务列表
@@ -1425,9 +1899,14 @@
                                                 ${task.frequency ? `<span class="badge badge-gray">${task.frequency === 'daily' ? '每日' : task.frequency === 'weekly' ? '每周' : '一次性'}</span>` : ''}
                                             </div>
                                         </div>
-                                        <div class="ml-4 flex space-x-2">
-                                            <button onclick="updateTaskStatus('${task.id}')" class="text-sm text-purple-600 hover:text-purple-700 px-3 py-1 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
-                                                更新状态
+                                        <div class="ml-4 flex flex-col space-y-2">
+                                            ${task.status !== 'completed' && task.status !== 'cancelled' ? `
+                                                <button onclick="showUpdateTaskModal(${task.id})" class="text-sm text-purple-600 hover:text-purple-700 px-3 py-1 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors whitespace-nowrap">
+                                                    更新状态
+                                                </button>
+                                            ` : ''}
+                                            <button onclick="viewTaskDetail(${task.id})" class="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">
+                                                查看详情
                                             </button>
                                         </div>
                                     </div>
@@ -1448,7 +1927,8 @@
                 pending: '待执行',
                 in_progress: '进行中',
                 completed: '已完成',
-                skipped: '已跳过'
+                cancelled: '已取消',
+                overdue: '已逾期'
             };
             return statusMap[status] || status;
         }
@@ -1472,104 +1952,338 @@
             renderTasks();
         }
 
-        // 更新任务状态
-        function updateTaskStatus(taskId) {
+        // 显示更新任务状态模态框
+        function showUpdateTaskModal(taskId) {
             const task = allTasks.find(t => t.id === taskId);
-            if (!task) return;
-
-            const statusFlow = {
-                'pending': 'in_progress',
-                'in_progress': 'completed',
-                'completed': 'completed',
-                'skipped': 'skipped'
-            };
-
-            // 简单的状态流转
-            if (task.status === 'pending') {
-                task.status = 'in_progress';
-            } else if (task.status === 'in_progress') {
-                task.status = 'completed';
-            } else {
-                UIUtils.notify('任务已完成', 'info');
+            if (!task) {
+                UIUtils.notify('任务不存在', 'error');
                 return;
             }
 
-            task.updatedAt = new Date().toISOString();
-            db.saveTask(task);
+            // 填充任务信息
+            document.getElementById('updateTaskId').value = task.id;
+            document.getElementById('updateTaskTitle').textContent = task.title || '未命名任务';
+            document.getElementById('updateTaskDescription').textContent = task.description || '暂无描述';
 
-            loadTasks();
-            UIUtils.notify(`任务状态已更新为${getTaskStatusText(task.status)}`, 'success');
-        }
+            // 显示日期信息
+            const dateText = task.due_date
+                ? DateUtils.format(new Date(task.due_date), 'YYYY-MM-DD')
+                : (task.scheduledDate || '-');
+            document.getElementById('updateTaskDateText').textContent = dateText;
 
-        // 加载对话历史
-        function loadChatHistory() {
-            const container = document.getElementById('chatMessagesContainer');
-            const chatHistory = currentCustomer.chatHistory || [];
+            // 显示当前状态
+            const statusEl = document.getElementById('updateTaskCurrentStatus');
+            statusEl.textContent = getTaskStatusText(task.status);
+            statusEl.className = `px-2 py-0.5 rounded text-xs font-medium task-status-${task.status}`;
 
-            if (chatHistory.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-gray-400 py-8">
-                        <i data-lucide="message-circle" class="w-12 h-12 mx-auto mb-2"></i>
-                        <p>暂无对话记录</p>
-                        <p class="text-sm mt-1">开始和AI美容助手对话吧</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
+            // 设置状态下拉框默认值
+            document.getElementById('newTaskStatus').value = task.status;
 
-            container.innerHTML = chatHistory.map(msg => `
-                <div class="chat-bubble ${msg.role}" style="display: flex; flex-direction: column; ${msg.role === 'user' ? 'align-items: flex-end;' : 'align-items: flex-start;'}">
-                    <p class="text-sm">${msg.content}</p>
-                    <span class="text-xs opacity-75 mt-1">${DateUtils.format(new Date(msg.timestamp), 'HH:mm')}</span>
-                </div>
-            `).join('');
+            // 清空备注
+            document.getElementById('taskCompletionNote').value = task.completion_note || '';
 
-            // 滚动到底部
-            container.scrollTop = container.scrollHeight;
+            // 显示模态框
+            document.getElementById('updateTaskModal').classList.remove('hidden');
+            document.body.classList.add('no-scroll');
+
+            // 重新创建图标
             lucide.createIcons();
         }
 
-        // 发送聊天消息
-        function sendChatMessage() {
+        // 关闭更新任务状态模态框
+        function closeUpdateTaskModal() {
+            document.getElementById('updateTaskModal').classList.add('hidden');
+            document.body.classList.remove('no-scroll');
+        }
+
+        // 确认更新任务状态
+        async function confirmUpdateTaskStatus() {
+            const taskId = document.getElementById('updateTaskId').value;
+            const newStatus = document.getElementById('newTaskStatus').value;
+            const completionNote = document.getElementById('taskCompletionNote').value;
+
+            if (!taskId || !newStatus) {
+                UIUtils.notify('请选择状态', 'warning');
+                return;
+            }
+
+            try {
+                console.log('📡 更新任务状态:', { taskId, newStatus, completionNote });
+
+                // 调用API更新任务状态
+                const response = await window.apiClient.patch(`/api/tasks/${taskId}`, {
+                    status: newStatus,
+                    completion_note: completionNote,
+                    updated_by: 1  // TODO: 获取当前登录用户ID
+                });
+
+                if (response.success) {
+                    UIUtils.notify(`任务状态已更新为"${getTaskStatusText(newStatus)}"`, 'success');
+                    closeUpdateTaskModal();
+
+                    // 重新加载任务列表
+                    await loadTasks();
+                } else {
+                    throw new Error(response.message || '更新任务状态失败');
+                }
+            } catch (error) {
+                console.error('❌ 更新任务状态失败:', error);
+                UIUtils.notify('更新失败: ' + error.message, 'error');
+            }
+        }
+
+        // 查看任务详情
+        function viewTaskDetail(taskId) {
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task) {
+                UIUtils.notify('任务不存在', 'error');
+                return;
+            }
+
+            // 构建详情HTML
+            const detailHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">${task.title || '未命名任务'}</h3>
+                        <p class="text-sm text-gray-600">${task.description || '暂无描述'}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">任务编号</div>
+                            <div class="text-sm font-medium text-gray-900">${task.task_no || '-'}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">任务状态</div>
+                            <span class="px-2 py-1 rounded text-xs font-medium task-status-${task.status}">${getTaskStatusText(task.status)}</span>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">截止日期</div>
+                            <div class="text-sm text-gray-900">${task.due_date ? DateUtils.format(new Date(task.due_date), 'YYYY-MM-DD') : '-'}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">提醒时间</div>
+                            <div class="text-sm text-gray-900">${task.reminder_time ? DateUtils.format(new Date(task.reminder_time), 'YYYY-MM-DD HH:mm') : '-'}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">优先级</div>
+                            <div class="text-sm text-gray-900">${task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低'}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">分配给</div>
+                            <div class="text-sm text-gray-900">${task.assigned_to_name || '-'}</div>
+                        </div>
+                    </div>
+
+                    ${task.completion_note ? `
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">完成备注</div>
+                            <div class="p-3 bg-blue-50 rounded-lg text-sm text-gray-900">${task.completion_note}</div>
+                        </div>
+                    ` : ''}
+
+                    <div class="grid grid-cols-2 gap-4 text-xs text-gray-500">
+                        <div>
+                            <div class="mb-1">创建时间</div>
+                            <div>${task.created_at ? DateUtils.format(new Date(task.created_at), 'YYYY-MM-DD HH:mm') : '-'}</div>
+                        </div>
+                        <div>
+                            <div class="mb-1">更新时间</div>
+                            <div>${task.updated_at ? DateUtils.format(new Date(task.updated_at), 'YYYY-MM-DD HH:mm') : '-'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 使用confirm样式的对话框显示详情
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
+                        <h2 class="text-xl font-bold text-gray-900">任务详情</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        ${detailHtml}
+                        <div class="mt-6 flex items-center justify-end space-x-3">
+                            <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                关闭
+                            </button>
+                            ${task.status !== 'completed' && task.status !== 'cancelled' ? `
+                                <button onclick="this.closest('.fixed').remove(); showUpdateTaskModal(${task.id})" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                    更新状态
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 加载对话历史 - 从真实数据库 API 加载,支持日期筛选
+        async function loadChatHistory() {
+            const container = document.getElementById('chatMessagesContainer');
+
+            try {
+                // 获取日期筛选条件
+                const startDate = document.getElementById('chatStartDate')?.value;
+                const endDate = document.getElementById('chatEndDate')?.value;
+
+                // 构建API查询参数
+                let apiUrl = `/api/chat-messages/${currentCustomer.id}`;
+                const params = [];
+
+                if (startDate) {
+                    params.push(`start_date=${startDate}`);
+                }
+                if (endDate) {
+                    // 结束日期加1天,以包含当天的所有消息
+                    const end = new Date(endDate);
+                    end.setDate(end.getDate() + 1);
+                    params.push(`end_date=${end.toISOString().split('T')[0]}`);
+                }
+
+                if (params.length > 0) {
+                    apiUrl += '?' + params.join('&');
+                }
+
+                console.log('📋 查询聊天历史:', apiUrl);
+
+                // 从数据库 API 获取聊天记录
+                const response = await window.apiClient.get(apiUrl);
+
+                if (!response.success) {
+                    throw new Error(response.error?.message || '加载聊天记录失败');
+                }
+
+                const chatHistory = response.data || [];
+
+                // 显示筛选结果提示
+                let filterText = '';
+                if (startDate || endDate) {
+                    filterText = ` (${startDate || '开始'} ~ ${endDate || '今天'})`;
+                }
+
+                if (chatHistory.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-gray-400 py-8">
+                            <i data-lucide="message-circle" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>暂无对话记录${filterText}</p>
+                            ${filterText ? '<p class="text-sm mt-1">尝试调整日期筛选条件</p>' : '<p class="text-sm mt-1">开始和AI美容助手对话吧</p>'}
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = chatHistory.map(msg => `
+                    <div class="chat-bubble ${msg.role}" style="display: flex; flex-direction: column; ${msg.role === 'user' ? 'align-items: flex-end;' : 'align-items: flex-start;'}">
+                        <p class="text-sm">${msg.content}</p>
+                        <span class="text-xs opacity-75 mt-1">${DateUtils.format(new Date(msg.created_at), 'MM-DD HH:mm')}</span>
+                    </div>
+                `).join('');
+
+                // 滚动到底部
+                container.scrollTop = container.scrollHeight;
+                lucide.createIcons();
+
+                console.log(`✅ 加载了 ${chatHistory.length} 条聊天记录${filterText}`);
+
+            } catch (error) {
+                console.error('❌ 加载聊天记录失败:', error);
+                container.innerHTML = `
+                    <div class="text-center text-red-400 py-8">
+                        <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-2"></i>
+                        <p>加载聊天记录失败</p>
+                        <p class="text-sm mt-1">${error.message}</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // 重置日期筛选
+        function resetChatDateFilter() {
+            document.getElementById('chatStartDate').value = '';
+            document.getElementById('chatEndDate').value = '';
+            loadChatHistory();
+        }
+
+        // 发送聊天消息 - 保存到真实数据库
+        async function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
 
             if (!message) return;
 
-            // 添加用户消息
-            if (!currentCustomer.chatHistory) {
-                currentCustomer.chatHistory = [];
-            }
-
-            currentCustomer.chatHistory.push({
-                role: 'user',
-                content: message,
-                timestamp: new Date().toISOString()
-            });
-
+            // 清空输入框
             input.value = '';
-            loadChatHistory();
 
-            // 模拟AI回复
-            setTimeout(() => {
-                const aiResponses = [
-                    '感谢您的咨询,我们的专业美容顾问会尽快为您解答。',
-                    '根据您的情况,我建议您可以尝试我们的深度清洁护理方案。',
-                    '为了给您更准确的建议,请问您目前主要关注哪方面的美容需求?',
-                    '您提到的问题很常见,通常我们会推荐结合内调和外养的方式来改善。',
-                    '这是一个很好的问题!让我为您详细解答一下...'
-                ];
+            // 禁用输入框,防止重复提交
+            input.disabled = true;
 
-                currentCustomer.chatHistory.push({
-                    role: 'ai',
-                    content: aiResponses[Math.floor(Math.random() * aiResponses.length)],
-                    timestamp: new Date().toISOString()
+            try {
+                // 保存用户消息到数据库
+                const userMessageResponse = await window.apiClient.post('/api/chat-messages', {
+                    customer_id: currentCustomer.id,
+                    org_id: currentCustomer.org_id,
+                    role: 'user',
+                    content: message,
+                    created_by: null  // 或者传入当前登录用户ID
                 });
 
-                saveCurrentCustomer();
-                loadChatHistory();
-            }, 1000);
+                if (!userMessageResponse.success) {
+                    throw new Error('保存用户消息失败');
+                }
+
+                // 刷新聊天记录显示
+                await loadChatHistory();
+
+                // 模拟AI回复
+                setTimeout(async () => {
+                    const aiResponses = [
+                        '感谢您的咨询,我们的专业美容顾问会尽快为您解答。',
+                        '根据您的情况,我建议您可以尝试我们的深度清洁护理方案。',
+                        '为了给您更准确的建议,请问您目前主要关注哪方面的美容需求?',
+                        '您提到的问题很常见,通常我们会推荐结合内调和外养的方式来改善。',
+                        '这是一个很好的问题!让我为您详细解答一下...'
+                    ];
+
+                    const aiMessage = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+
+                    // 保存AI回复到数据库
+                    const aiMessageResponse = await window.apiClient.post('/api/chat-messages', {
+                        customer_id: currentCustomer.id,
+                        org_id: currentCustomer.org_id,
+                        role: 'assistant',
+                        content: aiMessage,
+                        created_by: null
+                    });
+
+                    if (aiMessageResponse.success) {
+                        // 刷新聊天记录显示
+                        await loadChatHistory();
+                    }
+
+                    // 重新启用输入框
+                    input.disabled = false;
+                    input.focus();
+                }, 1000);
+
+            } catch (error) {
+                console.error('❌ 发送消息失败:', error);
+                UIUtils.notify('发送消息失败: ' + error.message, 'error');
+
+                // 重新启用输入框
+                input.disabled = false;
+                input.value = message;  // 恢复用户输入的内容
+            }
         }
 
         // 处理回车发送
@@ -1583,44 +2297,74 @@
         function clearChatHistory() {
             if (confirm('确定要清空所有对话记录吗?')) {
                 currentCustomer.chatHistory = [];
-                saveCurrentCustomer();
                 loadChatHistory();
                 UIUtils.notify('对话记录已清空', 'success');
             }
         }
 
         // 生成AI客户画像
-        function generateAIProfile() {
+        async function generateAIProfile() {
             document.getElementById('aiProfileModal').classList.remove('hidden');
 
-            // 模拟AI分析
-            setTimeout(() => {
-                const basicInfo = currentCustomer.data?.tpl_basic_info || {};
-                const skinInfo = currentCustomer.data?.tpl_basic_skin || {};
+            // 显示加载动画
+            const content = document.getElementById('aiProfileContent');
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-gray-600">AI 正在分析客户数据...</p>
+                    <p class="text-sm text-gray-500 mt-2">这可能需要20-30秒</p>
+                </div>
+            `;
 
-                const age = basicInfo.age || 30;
-                const skinType = skinInfo.skin_type || '混合性';
-                const concerns = skinInfo.concerns || '皮肤护理';
+            try {
+                console.log('📡 调用 AI 客户画像生成 API...');
 
-                const profile = {
-                    personalityType: age < 25 ? '年轻活力型,追求时尚' : age < 35 ? '成熟知性型,注重品质' : '优雅精致型,追求高端',
-                    beautyGoals: concerns ? [concerns, '皮肤改善', '提升气质'] : ['减重塑形', '皮肤改善', '抗衰老'],
-                    purchasePower: basicInfo.vip_level === '钻石会员' ? '高端消费' :
-                                   basicInfo.vip_level === '铂金会员' || basicInfo.vip_level === '金卡会员' ? '中高端消费' : '中端消费',
-                    preferences: `对${skinType}皮肤护理有需求,关注专业度和效果`,
-                    recommendedServices: [
-                        { name: 'HIFU超声刀', reason: '适合抗衰老需求,效果显著' },
-                        { name: '深层清洁护理', reason: `针对${skinType}肤质定制` },
-                        { name: '光子嫩肤', reason: '改善肤色暗沉,提亮肤色' }
-                    ],
-                    engagementStrategy: age < 30 ? '建议每月1-2次基础护理,配合家居产品' : '建议每周1次专业护理,定制化服务方案',
-                    riskLevel: '低流失风险',
-                    lifetimeValue: basicInfo.vip_level === '钻石会员' ? '预估50000-80000元' :
-                                   basicInfo.vip_level === '金卡会员' ? '预估30000-50000元' : '预估20000-30000元'
+                // 准备客户数据
+                const customerData = {
+                    name: currentCustomer.name,
+                    age: currentCustomer.age || 30,
+                    gender: currentCustomer.gender || 'female',
+                    tags: currentCustomer.tags || [],
+                    status: currentCustomer.status || 'active',
+                    org_id: currentCustomer.org_id || 1
                 };
 
-                displayAIProfile(profile);
-            }, 2000);
+                console.log('📋 客户数据:', customerData);
+
+                // 调用 AI 生成 API
+                const response = await window.apiClient.post('/api/ai/generate-customer-profile', {
+                    customer_id: currentCustomer.id,
+                    customer_data: customerData
+                });
+
+                console.log('✅ AI 画像生成成功:', response);
+
+                if (!response.success || !response.data) {
+                    throw new Error(response.message || 'AI 画像生成失败');
+                }
+
+                // 显示生成的画像
+                displayAIProfile(response.data);
+
+                // 显示"查看历史"按钮
+                document.getElementById('viewHistoryBtn').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('❌ AI 画像生成失败:', error);
+
+                content.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <i data-lucide="alert-circle" class="w-16 h-16 text-red-400 mb-4"></i>
+                        <p class="text-red-600 font-semibold mb-2">AI 画像生成失败</p>
+                        <p class="text-sm text-gray-600">${error.message}</p>
+                        <button onclick="generateAIProfile()" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            重新生成
+                        </button>
+                    </div>
+                `;
+
+                lucide.createIcons();
+            }
         }
 
         // 显示AI画像
@@ -1693,6 +2437,199 @@
         // 关闭AI画像模态框
         function closeAIProfileModal() {
             document.getElementById('aiProfileModal').classList.add('hidden');
+
+            // 重置视图状态
+            document.getElementById('aiProfileContent').classList.remove('hidden');
+            document.getElementById('aiProfileHistory').classList.add('hidden');
+            document.getElementById('viewHistoryText').textContent = '查看历史';
+            document.getElementById('viewHistoryBtn').classList.add('hidden');
+        }
+
+        // 切换当前画像和历史版本视图
+        function toggleProfileView() {
+            const currentView = document.getElementById('aiProfileContent');
+            const historyView = document.getElementById('aiProfileHistory');
+            const toggleBtn = document.getElementById('viewHistoryText');
+
+            if (currentView.classList.contains('hidden')) {
+                // 当前显示历史,切换到当前画像
+                currentView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+                toggleBtn.textContent = '查看历史';
+            } else {
+                // 当前显示画像,切换到历史
+                currentView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                toggleBtn.textContent = '返回当前';
+
+                // 加载历史版本
+                loadProfileHistory();
+            }
+
+            lucide.createIcons();
+        }
+
+        // 加载 AI 画像历史版本
+        async function loadProfileHistory() {
+            const container = document.getElementById('aiProfileHistory');
+
+            // 显示加载动画
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-gray-600">正在加载历史版本...</p>
+                </div>
+            `;
+
+            try {
+                console.log('📡 加载 AI 画像历史版本...');
+
+                // 调用历史版本 API
+                const response = await window.apiClient.get(`/api/ai/customer-profiles/${currentCustomer.id}/history`);
+
+                console.log('✅ 历史版本数据:', response);
+
+                if (!response.success || !response.data) {
+                    throw new Error(response.message || '加载历史版本失败');
+                }
+
+                const historyList = response.data;
+
+                if (historyList.length === 0) {
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-12 text-center">
+                            <i data-lucide="inbox" class="w-16 h-16 text-gray-300 mb-4"></i>
+                            <p class="text-gray-500">暂无历史版本</p>
+                            <p class="text-sm text-gray-400 mt-2">这是第一次生成 AI 客户画像</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // 显示历史版本列表
+                displayProfileHistory(historyList);
+
+            } catch (error) {
+                console.error('❌ 加载历史版本失败:', error);
+
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <i data-lucide="alert-circle" class="w-16 h-16 text-red-400 mb-4"></i>
+                        <p class="text-red-600 font-semibold mb-2">加载历史版本失败</p>
+                        <p class="text-sm text-gray-600">${error.message}</p>
+                        <button onclick="loadProfileHistory()" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            重新加载
+                        </button>
+                    </div>
+                `;
+
+                lucide.createIcons();
+            }
+        }
+
+        // 显示历史版本列表
+        function displayProfileHistory(historyList) {
+            const container = document.getElementById('aiProfileHistory');
+
+            const html = `
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">历史版本 (${historyList.length})</h4>
+                        <span class="text-sm text-gray-500">点击查看详情</span>
+                    </div>
+
+                    ${historyList.map((profile, index) => {
+                        const isLatest = profile.is_latest;
+                        const versionDate = new Date(profile.metadata.created_at);
+                        const responseTime = profile.metadata.response_time || 0;
+
+                        return `
+                            <div class="border ${isLatest ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white'} rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
+                                 onclick="viewHistoryVersion(${profile.id})">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-semibold text-gray-900">版本 ${profile.version}</span>
+                                        ${isLatest ? '<span class="badge badge-purple">最新</span>' : ''}
+                                    </div>
+                                    <span class="text-xs text-gray-500">
+                                        ${DateUtils.format(versionDate, 'YYYY-MM-DD HH:mm')}
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+                                        <span class="text-gray-600 truncate" title="${profile.personalityType}">
+                                            ${profile.personalityType.substring(0, 20)}...
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="dollar-sign" class="w-4 h-4 text-gray-400"></i>
+                                        <span class="text-gray-600">${profile.purchasePower}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="target" class="w-4 h-4 text-gray-400"></i>
+                                        <span class="text-gray-600">${profile.beautyGoals.length} 个目标</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
+                                        <span class="text-gray-600">${responseTime.toFixed(1)}s</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-3 h-3 rounded-full ${
+                                                profile.riskLevel === '高流失风险' ? 'bg-red-500' :
+                                                profile.riskLevel === '中流失风险' ? 'bg-yellow-500' :
+                                                'bg-green-500'
+                                            }"></div>
+                                            <span class="text-xs font-medium text-gray-700">${profile.riskLevel}</span>
+                                        </div>
+                                        <span class="text-xs text-purple-600">点击查看详情 →</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // 查看历史版本详细内容
+        async function viewHistoryVersion(profileId) {
+            try {
+                console.log('📡 加载历史版本详情:', profileId);
+
+                // 调用单个版本详情 API
+                const response = await window.apiClient.get(`/api/ai/customer-profiles/${profileId}`);
+
+                if (!response.success || !response.data) {
+                    throw new Error('加载版本详情失败');
+                }
+
+                const profile = response.data;
+                console.log('✅ 版本详情:', profile);
+
+                // 显示在当前画像区域
+                displayAIProfile(profile);
+
+                // 切换回当前画像视图
+                document.getElementById('aiProfileContent').classList.remove('hidden');
+                document.getElementById('aiProfileHistory').classList.add('hidden');
+                document.getElementById('viewHistoryText').textContent = '查看历史';
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载版本详情失败:', error);
+                UIUtils.notify('加载版本详情失败: ' + error.message, 'error');
+            }
         }
 
         // 用户菜单切换
@@ -1715,6 +2652,1291 @@
         document.getElementById('aiProfileModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeAIProfileModal();
+            }
+        });
+
+        // ========================================
+        // 诊断管理功能
+        // ========================================
+
+        // 存储诊断模板数据
+        let diagnosisTemplate = null;
+
+        // 加载诊断模板
+        async function loadDiagnosisTemplate() {
+            try {
+                console.log('📡 加载综合健康诊断模板...');
+                const response = await fetch(`${API_BASE_URL}/api/diagnosis-templates/2`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '加载诊断模板失败');
+                }
+
+                diagnosisTemplate = result.data;
+                console.log('✅ 诊断模板加载成功:', diagnosisTemplate.template_name);
+            } catch (error) {
+                console.error('❌ 加载诊断模板失败:', error);
+                UIUtils.notify('加载诊断模板失败', 'error');
+            }
+        }
+
+        // 显示新建诊断模态框
+        async function showNewDiagnosisModal() {
+            // 清除编辑状态
+            window.currentEditingDiagnosisId = null;
+
+            // 如果模板未加载，先加载模板
+            if (!diagnosisTemplate) {
+                await loadDiagnosisTemplate();
+                if (!diagnosisTemplate) {
+                    return; // 加载失败，不继续
+                }
+            }
+
+            // 设置默认诊断日期为今天
+            document.getElementById('diagnoseDate').valueAsDate = new Date();
+
+            // 设置默认诊断人（当前用户，这里暂时用固定值）
+            document.getElementById('diagnosedBy').value = '1';
+
+            // 渲染动态表单字段
+            renderDiagnosisFields(diagnosisTemplate.fields);
+
+            // 显示模态框
+            document.getElementById('diagnosisModal').classList.remove('hidden');
+
+            // 设置模态框标题为"新建诊断"
+            const modalTitle = document.querySelector('#diagnosisModal h2');
+            if (modalTitle) {
+                modalTitle.textContent = '新建诊断';
+            }
+
+            lucide.createIcons();
+        }
+
+        // 关闭诊断模态框
+        function closeDiagnosisModal() {
+            document.getElementById('diagnosisModal').classList.add('hidden');
+            document.getElementById('diagnosisForm').reset();
+
+            // 清除编辑状态
+            window.currentEditingDiagnosisId = null;
+
+            // 重置模态框标题
+            const modalTitle = document.querySelector('#diagnosisModal h2');
+            if (modalTitle) {
+                modalTitle.textContent = '新建诊断';
+            }
+        }
+
+        // 渲染诊断表单字段
+        function renderDiagnosisFields(fields) {
+            const container = document.getElementById('dynamicFieldsContainer');
+
+            // 按group分组
+            const groupedFields = {};
+            fields.forEach(field => {
+                if (!groupedFields[field.group]) {
+                    groupedFields[field.group] = [];
+                }
+                groupedFields[field.group].push(field);
+            });
+
+            // 渲染每个分组
+            container.innerHTML = Object.keys(groupedFields).map(groupName => {
+                const groupFields = groupedFields[groupName];
+
+                const fieldsHTML = groupFields.map(field => {
+                    return renderField(field);
+                }).join('');
+
+                return `
+                    <div class="space-y-4">
+                        <h4 class="text-md font-semibold text-gray-900 border-b border-gray-200 pb-2">${groupName}</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${fieldsHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 渲染单个字段
+        function renderField(field) {
+            const required = field.required ? 'required' : '';
+            const requiredMark = field.required ? '<span class="text-red-500">*</span>' : '';
+
+            switch (field.field_type) {
+                case 'text':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name}  ${requiredMark}
+                            </label>
+                            <input
+                                type="text"
+                                id="field_${field.field_key}"
+                                data-field-key="${field.field_key}"
+                                ${required}
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                placeholder="${field.placeholder || ''}"
+                            />
+                        </div>
+                    `;
+
+                case 'number':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <input
+                                type="number"
+                                id="field_${field.field_key}"
+                                data-field-key="${field.field_key}"
+                                ${required}
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                placeholder="${field.placeholder || ''}"
+                            />
+                        </div>
+                    `;
+
+                case 'textarea':
+                    return `
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <textarea
+                                id="field_${field.field_key}"
+                                data-field-key="${field.field_key}"
+                                ${required}
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                placeholder="${field.placeholder || ''}"
+                            ></textarea>
+                        </div>
+                    `;
+
+                case 'radio':
+                    return `
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                ${(field.options || []).map((option, idx) => `
+                                    <label class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input
+                                            type="radio"
+                                            name="field_${field.field_key}"
+                                            data-field-key="${field.field_key}"
+                                            value="${option}"
+                                            ${required && idx === 0 ? 'checked' : ''}
+                                            class="w-4 h-4 text-purple-600"
+                                        />
+                                        <span class="ml-2 text-sm text-gray-700">${option}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'checkbox':
+                    return `
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                ${(field.options || []).map(option => `
+                                    <label class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input
+                                            type="checkbox"
+                                            name="field_${field.field_key}"
+                                            data-field-key="${field.field_key}"
+                                            value="${option}"
+                                            class="w-4 h-4 text-purple-600 rounded"
+                                        />
+                                        <span class="ml-2 text-sm text-gray-700">${option}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'select':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <select
+                                id="field_${field.field_key}"
+                                data-field-key="${field.field_key}"
+                                ${required}
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            >
+                                <option value="">请选择</option>
+                                ${(field.options || []).map(option => `
+                                    <option value="${option}">${option}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+
+                default:
+                    return '';
+            }
+        }
+
+        // 保存诊断
+        async function saveDiagnosis() {
+            try {
+                // 验证必填字段
+                const diagnoseDate = document.getElementById('diagnoseDate').value;
+                const diagnosedBy = document.getElementById('diagnosedBy').value;
+
+                if (!diagnoseDate || !diagnosedBy) {
+                    UIUtils.notify('请填写诊断日期和诊断人', 'error');
+                    return;
+                }
+
+                // 收集表单数据
+                const diagnoseData = {};
+                const allFields = document.querySelectorAll('[data-field-key]');
+
+                allFields.forEach(field => {
+                    const fieldKey = field.dataset.fieldKey;
+
+                    if (field.type === 'checkbox') {
+                        // checkbox类型：收集所有选中的值
+                        const checkedValues = Array.from(
+                            document.querySelectorAll(`[name="field_${fieldKey}"]:checked`)
+                        ).map(cb => cb.value);
+
+                        if (checkedValues.length > 0) {
+                            diagnoseData[fieldKey] = checkedValues;
+                        }
+                    } else if (field.type === 'radio') {
+                        // radio类型：只收集选中的值
+                        const checkedRadio = document.querySelector(`[name="field_${fieldKey}"]:checked`);
+                        if (checkedRadio) {
+                            diagnoseData[fieldKey] = checkedRadio.value;
+                        }
+                    } else {
+                        // 其他类型：直接获取值
+                        if (field.value) {
+                            diagnoseData[fieldKey] = field.value;
+                        }
+                    }
+                });
+
+                // 获取诊断建议
+                const suggestions = document.getElementById('suggestions').value;
+
+                // 准备提交数据
+                const postData = {
+                    customer_id: parseInt(currentCustomer.id),
+                    org_id: currentCustomer.org_id || 1,
+                    diagnose_date: diagnoseDate,
+                    diagnosed_by: parseInt(diagnosedBy),
+                    diagnose_data: diagnoseData,
+                    suggestions: suggestions || null
+                };
+
+                console.log('📡 提交诊断数据:', postData);
+
+                // 判断是创建还是更新
+                const isEditing = window.currentEditingDiagnosisId;
+                const url = isEditing
+                    ? `${API_BASE_URL}/api/customer-diagnoses/${window.currentEditingDiagnosisId}`
+                    : `${API_BASE_URL}/api/customer-diagnoses`;
+                const method = isEditing ? 'PUT' : 'POST';
+
+                console.log(`📡 ${isEditing ? '更新' : '创建'}诊断记录...`);
+
+                // 提交到API
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '保存诊断失败');
+                }
+
+                console.log(`✅ 诊断记录${isEditing ? '更新' : '保存'}成功:`, result.data);
+                UIUtils.notify(`✅ 诊断记录${isEditing ? '更新' : '保存'}成功`, 'success');
+
+                // 关闭模态框
+                closeDiagnosisModal();
+
+                // 重新加载诊断历史
+                await loadDiagnosisHistory();
+
+            } catch (error) {
+                console.error('❌ 保存诊断失败:', error);
+                UIUtils.notify('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        // 查看诊断详情
+        async function viewDiagnosisDetail(diagnosisId) {
+            try {
+                console.log('📡 加载诊断详情:', diagnosisId);
+                const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses/${diagnosisId}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '加载诊断详情失败');
+                }
+
+                const diagnosis = result.data;
+                console.log('✅ 诊断详情加载成功:', diagnosis);
+
+                // 显示诊断详情（这里可以弹出一个详情模态框）
+                const diagnoseData = typeof diagnosis.diagnose_data === 'string'
+                    ? JSON.parse(diagnosis.diagnose_data)
+                    : diagnosis.diagnose_data || {};
+
+                let detailHtml = `
+                    <div class="space-y-4">
+                        <div><strong>诊断日期:</strong> ${diagnosis.diagnose_date}</div>
+                        ${diagnosis.diagnosed_by_name ? `<div><strong>诊断人:</strong> ${diagnosis.diagnosed_by_name}</div>` : ''}
+                        ${diagnosis.skin_type ? `<div><strong>肤质:</strong> ${translateSkinType(diagnosis.skin_type)}</div>` : ''}
+                        ${diagnosis.hair_type ? `<div><strong>发质:</strong> ${translateHairType(diagnosis.hair_type)}</div>` : ''}
+                `;
+
+                // 显示诊断数据
+                if (Object.keys(diagnoseData).length > 0) {
+                    detailHtml += '<div><strong>详细诊断数据:</strong></div><ul class="list-disc list-inside">';
+                    for (const [key, value] of Object.entries(diagnoseData)) {
+                        detailHtml += `<li>${key}: ${Array.isArray(value) ? value.join(', ') : value}</li>`;
+                    }
+                    detailHtml += '</ul>';
+                }
+
+                if (diagnosis.suggestions) {
+                    detailHtml += `<div><strong>诊断建议:</strong><p class="mt-2 text-gray-700">${diagnosis.suggestions}</p></div>`;
+                }
+
+                detailHtml += '</div>';
+
+                // 使用alert显示（实际项目中应该用更好的UI）
+                alert(detailHtml.replace(/<[^>]*>/g, '\n'));
+
+            } catch (error) {
+                console.error('❌ 加载诊断详情失败:', error);
+                UIUtils.notify('加载诊断详情失败', 'error');
+            }
+        }
+
+        // 删除诊断记录
+        async function deleteDiagnosis(diagnosisId) {
+            // 显示确认对话框
+            if (!confirm('确定要删除这条诊断记录吗？此操作不可恢复。')) {
+                return;
+            }
+
+            try {
+                console.log('📡 删除诊断记录:', diagnosisId);
+
+                // 调用删除API
+                const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses/${diagnosisId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '删除诊断记录失败');
+                }
+
+                console.log('✅ 诊断记录删除成功');
+                UIUtils.notify('诊断记录已删除', 'success');
+
+                // 重新加载诊断历史列表
+                await loadDiagnosisHistory();
+
+            } catch (error) {
+                console.error('❌ 删除诊断记录失败:', error);
+                UIUtils.notify('删除失败: ' + error.message, 'error');
+            }
+        }
+
+        // 显示诊断摘要
+        async function showDiagnosisSummary(diagnosisId) {
+            try {
+                console.log('📡 加载诊断摘要:', diagnosisId);
+                const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses/${diagnosisId}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '加载诊断摘要失败');
+                }
+
+                const diagnosis = result.data;
+                console.log('✅ 诊断摘要加载成功:', diagnosis);
+
+                // 解析诊断数据
+                const diagnoseData = typeof diagnosis.diagnose_data === 'string'
+                    ? JSON.parse(diagnosis.diagnose_data)
+                    : diagnosis.diagnose_data || {};
+
+                // 构建摘要内容
+                let summary = `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                summary += `📋 诊断记录摘要\n`;
+                summary += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                summary += `📅 诊断日期: ${DateUtils.format(new Date(diagnosis.diagnose_date), 'YYYY-MM-DD HH:mm')}\n`;
+                if (diagnosis.diagnosed_by_name) {
+                    summary += `👤 诊断人: ${diagnosis.diagnosed_by_name}\n`;
+                }
+                summary += `\n`;
+
+                // 显示肤质和发质
+                if (diagnosis.skin_type || diagnosis.hair_type) {
+                    summary += `━━━ 基本信息 ━━━\n`;
+                    if (diagnosis.skin_type) {
+                        summary += `• 肤质: ${translateSkinType(diagnosis.skin_type)}\n`;
+                    }
+                    if (diagnosis.hair_type) {
+                        summary += `• 发质: ${translateHairType(diagnosis.hair_type)}\n`;
+                    }
+                    summary += `\n`;
+                }
+
+                // 显示诊断数据摘要（只显示重要字段）
+                if (Object.keys(diagnoseData).length > 0) {
+                    summary += `━━━ 诊断数据 ━━━\n`;
+
+                    // 睡眠相关
+                    if (diagnoseData.wake_time || diagnoseData.sleep_time || diagnoseData.sleep_hours) {
+                        summary += `💤 睡眠情况:\n`;
+                        if (diagnoseData.wake_time) summary += `  • 起床时间: ${diagnoseData.wake_time}\n`;
+                        if (diagnoseData.sleep_time) summary += `  • 睡觉时间: ${diagnoseData.sleep_time}\n`;
+                        if (diagnoseData.sleep_hours) summary += `  • 睡眠时长: ${diagnoseData.sleep_hours}小时\n`;
+                        if (diagnoseData.sleep_status) {
+                            const status = Array.isArray(diagnoseData.sleep_status)
+                                ? diagnoseData.sleep_status.join('、')
+                                : diagnoseData.sleep_status;
+                            summary += `  • 睡眠状况: ${status}\n`;
+                        }
+                    }
+
+                    // 排便相关
+                    if (diagnoseData.bowel_frequency || diagnoseData.bowel_status) {
+                        summary += `\n🚽 排便情况:\n`;
+                        if (diagnoseData.bowel_frequency) summary += `  • 排便频率: ${diagnoseData.bowel_frequency}次/天\n`;
+                        if (diagnoseData.bowel_status) {
+                            const status = Array.isArray(diagnoseData.bowel_status)
+                                ? diagnoseData.bowel_status.join('、')
+                                : diagnoseData.bowel_status;
+                            summary += `  • 排便状态: ${status}\n`;
+                        }
+                    }
+
+                    // 月经相关
+                    if (diagnoseData.menstrual_cycle || diagnoseData.menstrual_status) {
+                        summary += `\n🩸 月经情况:\n`;
+                        if (diagnoseData.menstrual_cycle) summary += `  • 周期: ${diagnoseData.menstrual_cycle}天\n`;
+                        if (diagnoseData.menstrual_status) {
+                            const status = Array.isArray(diagnoseData.menstrual_status)
+                                ? diagnoseData.menstrual_status.join('、')
+                                : diagnoseData.menstrual_status;
+                            summary += `  • 状态: ${status}\n`;
+                        }
+                    }
+
+                    summary += `\n`;
+                }
+
+                // 显示诊断建议
+                if (diagnosis.suggestions) {
+                    summary += `━━━ 诊断建议 ━━━\n`;
+                    summary += `${diagnosis.suggestions}\n\n`;
+                }
+
+                summary += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                summary += `记录ID: ${diagnosis.id} | 共${Object.keys(diagnoseData).length}项数据`;
+
+                // 显示摘要
+                alert(summary);
+
+            } catch (error) {
+                console.error('❌ 加载诊断摘要失败:', error);
+                UIUtils.notify('加载诊断摘要失败: ' + error.message, 'error');
+            }
+        }
+
+        // 编辑诊断记录
+        async function editDiagnosis(diagnosisId) {
+            try {
+                console.log('📡 加载诊断记录进行编辑:', diagnosisId);
+
+                // 加载诊断模板（如果未加载）
+                if (!diagnosisTemplate) {
+                    await loadDiagnosisTemplate();
+                    if (!diagnosisTemplate) {
+                        return; // 加载失败，不继续
+                    }
+                }
+
+                // 获取诊断详情
+                const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses/${diagnosisId}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || '加载诊断记录失败');
+                }
+
+                const diagnosis = result.data;
+                console.log('✅ 诊断记录加载成功，准备编辑:', diagnosis);
+
+                // 解析诊断数据
+                const diagnoseData = typeof diagnosis.diagnose_data === 'string'
+                    ? JSON.parse(diagnosis.diagnose_data)
+                    : diagnosis.diagnose_data || {};
+
+                // 设置诊断日期
+                const diagnoseDate = new Date(diagnosis.diagnose_date);
+                document.getElementById('diagnoseDate').valueAsDate = diagnoseDate;
+
+                // 设置诊断人
+                document.getElementById('diagnosedBy').value = diagnosis.diagnosed_by;
+
+                // 渲染表单字段
+                renderDiagnosisFields(diagnosisTemplate.fields);
+
+                // 填充表单数据
+                for (const [fieldKey, fieldValue] of Object.entries(diagnoseData)) {
+                    const elements = document.querySelectorAll(`[data-field-key="${fieldKey}"]`);
+
+                    elements.forEach(element => {
+                        if (element.type === 'checkbox') {
+                            // checkbox类型：检查值是否在数组中
+                            if (Array.isArray(fieldValue) && fieldValue.includes(element.value)) {
+                                element.checked = true;
+                            }
+                        } else if (element.type === 'radio') {
+                            // radio类型：检查值是否匹配
+                            if (element.value === fieldValue) {
+                                element.checked = true;
+                            }
+                        } else {
+                            // 其他类型：直接设置值
+                            element.value = fieldValue;
+                        }
+                    });
+                }
+
+                // 设置诊断建议
+                document.getElementById('suggestions').value = diagnosis.suggestions || '';
+
+                // 存储当前编辑的诊断ID（用于保存时判断是创建还是更新）
+                window.currentEditingDiagnosisId = diagnosisId;
+
+                // 显示模态框
+                document.getElementById('diagnosisModal').classList.remove('hidden');
+
+                // 修改模态框标题为"编辑诊断"
+                const modalTitle = document.querySelector('#diagnosisModal h2');
+                if (modalTitle) {
+                    modalTitle.textContent = '编辑诊断';
+                }
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载诊断记录失败:', error);
+                UIUtils.notify('加载诊断记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 点击模态框外部关闭诊断模态框
+        document.getElementById('diagnosisModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDiagnosisModal();
+            }
+        });
+
+        // ========================================
+        // 生成订单功能
+        // ========================================
+
+        // 存储当前方案组数据
+        let currentSolutionGroup = null;
+
+        // 显示生成订单模态框
+        async function showGenerateOrderModal(planGroupId) {
+            try {
+                console.log('📡 加载方案组数据:', planGroupId);
+
+                // 获取方案组数据
+                const response = await window.apiClient.get('/api/customer-solutions', {
+                    customer_id: currentCustomer.id
+                });
+
+                if (!response.success) {
+                    throw new Error(response.message || '获取方案组失败');
+                }
+
+                // 找到对应的方案组
+                const groups = response.data || [];
+                currentSolutionGroup = groups.find(g => g.plan_group_id === planGroupId);
+
+                if (!currentSolutionGroup || !currentSolutionGroup.solutions) {
+                    throw new Error('未找到方案组数据');
+                }
+
+                console.log('✅ 方案组数据:', currentSolutionGroup);
+
+                // 渲染方案列表
+                renderOrderSolutions(currentSolutionGroup.solutions);
+
+                // 显示模态框
+                document.getElementById('generateOrderModal').classList.remove('hidden');
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载方案组失败:', error);
+                UIUtils.notify('加载方案组失败: ' + error.message, 'error');
+            }
+        }
+
+        // 渲染订单方案列表
+        function renderOrderSolutions(solutions) {
+            const container = document.getElementById('orderSolutionsContainer');
+
+            container.innerHTML = solutions.map((solution, index) => {
+                // 设置默认值
+                const courseDuration = solution.course_duration || '8-12周';
+                const treatmentTimes = 10; // 默认10次
+                const unitPrice = solution.estimated_price_min || 0;
+                const totalAmount = unitPrice * treatmentTimes;
+
+                return `
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200" data-solution-index="${index}">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-900">${solution.template_name}</h4>
+                                <p class="text-sm text-gray-600 mt-1">${solution.expected_effects || ''}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- 周期 -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">疗程周期</label>
+                                <input type="text"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                       value="${courseDuration}"
+                                       data-field="course_duration"
+                                       onchange="updateSolutionField(${index}, 'course_duration', this.value)">
+                            </div>
+
+                            <!-- 次数 -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">疗程次数</label>
+                                <input type="number"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                       value="${treatmentTimes}"
+                                       min="1"
+                                       data-field="treatment_times"
+                                       onchange="updateSolutionField(${index}, 'treatment_times', this.value)">
+                            </div>
+
+                            <!-- 单价 -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">单价（元）</label>
+                                <input type="number"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                       value="${unitPrice}"
+                                       min="0"
+                                       step="0.01"
+                                       data-field="unit_price"
+                                       onchange="updateSolutionField(${index}, 'unit_price', this.value)">
+                            </div>
+
+                            <!-- 总金额 -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">总金额（元）</label>
+                                <input type="number"
+                                       class="w-full px-3 py-2 bg-green-50 border border-green-300 rounded-lg text-sm font-semibold text-green-700"
+                                       value="${totalAmount.toFixed(2)}"
+                                       min="0"
+                                       step="0.01"
+                                       data-field="total_amount"
+                                       readonly>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 更新订单数量和总金额
+            updateOrderSummary();
+        }
+
+        // 更新方案字段
+        function updateSolutionField(index, field, value) {
+            const container = document.querySelector(`[data-solution-index="${index}"]`);
+
+            if (field === 'treatment_times' || field === 'unit_price') {
+                // 重新计算总金额
+                const times = parseFloat(container.querySelector('[data-field="treatment_times"]').value) || 0;
+                const price = parseFloat(container.querySelector('[data-field="unit_price"]').value) || 0;
+                const total = times * price;
+
+                container.querySelector('[data-field="total_amount"]').value = total.toFixed(2);
+            }
+
+            // 更新订单总金额
+            updateOrderSummary();
+        }
+
+        // 更新订单摘要
+        function updateOrderSummary() {
+            const containers = document.querySelectorAll('[data-solution-index]');
+            let totalAmount = 0;
+
+            containers.forEach(container => {
+                const amount = parseFloat(container.querySelector('[data-field="total_amount"]').value) || 0;
+                totalAmount += amount;
+            });
+
+            document.getElementById('totalAmount').textContent = `¥${totalAmount.toFixed(2)}`;
+            document.getElementById('orderCount').textContent = containers.length;
+        }
+
+        // 关闭生成订单模态框
+        function closeGenerateOrderModal() {
+            document.getElementById('generateOrderModal').classList.add('hidden');
+            currentSolutionGroup = null;
+        }
+
+        // 确认生成订单
+        async function confirmGenerateOrders() {
+            try {
+                if (!currentSolutionGroup) {
+                    throw new Error('方案组数据不存在');
+                }
+
+                console.log('📡 开始生成订单...');
+
+                // 收集所有方案的数据
+                const containers = document.querySelectorAll('[data-solution-index]');
+                const solutions = [];
+
+                containers.forEach((container, index) => {
+                    const solution = currentSolutionGroup.solutions[index];
+
+                    solutions.push({
+                        solution_id: solution.solution_template_id,
+                        solution_name: solution.template_name,
+                        category: solution.category,
+                        course_duration: container.querySelector('[data-field="course_duration"]').value,
+                        treatment_times: parseInt(container.querySelector('[data-field="treatment_times"]').value) || 1,
+                        unit_price: parseFloat(container.querySelector('[data-field="unit_price"]').value) || 0,
+                        total_amount: parseFloat(container.querySelector('[data-field="total_amount"]').value) || 0,
+                        remark: ''
+                    });
+                });
+
+                console.log('📋 订单数据:', solutions);
+
+                // 调用批量创建订单API
+                const response = await window.apiClient.post('/api/orders/batch-from-solutions', {
+                    customer_id: currentCustomer.id,
+                    customer_name: currentCustomer.name,
+                    customer_phone: currentCustomer.phone,
+                    org_id: currentCustomer.org_id || 7,
+                    store_id: currentCustomer.org_id || 7,
+                    created_by: 1, // TODO: 获取当前登录用户ID
+                    plan_group_id: currentSolutionGroup.plan_group_id,  // 添加方案组ID
+                    solutions: solutions
+                });
+
+                console.log('✅ 订单创建响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '创建订单失败');
+                }
+
+                UIUtils.notify(`✅ 成功创建 ${response.data.count} 个订单`, 'success');
+
+                // 关闭模态框
+                closeGenerateOrderModal();
+
+                // 重新加载方案组列表（更新按钮状态）
+                await loadCustomerSolutionGroups();
+
+                // 重新加载订单列表
+                await loadOrders();
+
+                // 切换到订单标签页
+                switchTab('orders');
+
+            } catch (error) {
+                console.error('❌ 创建订单失败:', error);
+                UIUtils.notify('创建订单失败: ' + error.message, 'error');
+            }
+        }
+
+        // 点击模态框外部关闭生成订单模态框
+        document.getElementById('generateOrderModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeGenerateOrderModal();
+            }
+        });
+
+        // ========================================
+        // 修改订单和确认订单功能
+        // ========================================
+
+        // 存储当前编辑的订单数据
+        let currentEditingOrder = null;
+
+        // 显示修改订单模态框
+        async function showEditOrderModal(orderId) {
+            try {
+                console.log('📡 加载订单数据:', orderId);
+
+                // 获取订单详情
+                const response = await window.apiClient.get(`/api/orders/${orderId}`);
+
+                if (!response.success || !response.data) {
+                    throw new Error(response.message || '获取订单详情失败');
+                }
+
+                currentEditingOrder = response.data;
+                console.log('✅ 订单数据:', currentEditingOrder);
+
+                // 填充表单
+                document.getElementById('editOrderId').value = currentEditingOrder.id;
+                document.getElementById('editServiceDate').value = currentEditingOrder.service_date || '';
+                document.getElementById('editServiceStartTime').value = currentEditingOrder.service_start_time || '';
+                document.getElementById('editServiceEndTime').value = currentEditingOrder.service_end_time || '';
+                document.getElementById('editOriginalAmount').value = currentEditingOrder.original_amount || 0;
+                document.getElementById('editDiscountAmount').value = currentEditingOrder.discount_amount || 0;
+                document.getElementById('editFinalAmount').value = currentEditingOrder.final_amount || 0;
+                document.getElementById('editRemark').value = currentEditingOrder.remark || '';
+
+                // 显示模态框
+                document.getElementById('editOrderModal').classList.remove('hidden');
+
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error('❌ 加载订单数据失败:', error);
+                UIUtils.notify('加载订单数据失败: ' + error.message, 'error');
+            }
+        }
+
+        // 关闭修改订单模态框
+        function closeEditOrderModal() {
+            document.getElementById('editOrderModal').classList.add('hidden');
+            document.getElementById('editOrderForm').reset();
+            currentEditingOrder = null;
+        }
+
+        // 计算最终金额
+        function calculateFinalAmount() {
+            const originalAmount = parseFloat(document.getElementById('editOriginalAmount').value) || 0;
+            const discountAmount = parseFloat(document.getElementById('editDiscountAmount').value) || 0;
+            const finalAmount = Math.max(0, originalAmount - discountAmount);
+            document.getElementById('editFinalAmount').value = finalAmount.toFixed(2);
+        }
+
+        // 保存订单修改
+        async function saveOrderEdit() {
+            try {
+                const orderId = document.getElementById('editOrderId').value;
+
+                if (!orderId) {
+                    throw new Error('订单ID不存在');
+                }
+
+                // 收集表单数据
+                const updateData = {
+                    customer_id: currentEditingOrder.customer_id,
+                    customer_name: currentEditingOrder.customer_name,
+                    customer_phone: currentEditingOrder.customer_phone,
+                    service_date: document.getElementById('editServiceDate').value || null,
+                    service_start_time: document.getElementById('editServiceStartTime').value || null,
+                    service_end_time: document.getElementById('editServiceEndTime').value || null,
+                    original_amount: parseFloat(document.getElementById('editOriginalAmount').value) || 0,
+                    discount_amount: parseFloat(document.getElementById('editDiscountAmount').value) || 0,
+                    final_amount: parseFloat(document.getElementById('editFinalAmount').value) || 0,
+                    remark: document.getElementById('editRemark').value || null,
+                    updated_by: 1  // TODO: 获取当前登录用户ID
+                };
+
+                console.log('📡 提交订单修改:', updateData);
+
+                // 调用更新订单API
+                const response = await window.apiClient.put(`/api/orders/${orderId}`, updateData);
+
+                if (!response.success) {
+                    throw new Error(response.message || '保存订单失败');
+                }
+
+                console.log('✅ 订单修改成功:', response.data);
+                UIUtils.notify('✅ 订单修改成功', 'success');
+
+                // 关闭模态框
+                closeEditOrderModal();
+
+                // 重新加载订单列表
+                await loadOrders();
+
+            } catch (error) {
+                console.error('❌ 保存订单失败:', error);
+                UIUtils.notify('保存订单失败: ' + error.message, 'error');
+            }
+        }
+
+        // 确认订单
+        async function confirmOrder(orderId) {
+            if (!confirm('确认此订单？确认后将无法修改。')) {
+                return;
+            }
+
+            try {
+                console.log('📡 确认订单:', orderId);
+
+                // 调用更新订单状态API
+                const response = await window.apiClient.patch(`/api/orders/${orderId}/status`, {
+                    order_status: 'confirmed',
+                    updated_by: 1  // TODO: 获取当前登录用户ID
+                });
+
+                if (!response.success) {
+                    throw new Error(response.message || '确认订单失败');
+                }
+
+                console.log('✅ 订单确认成功:', response.data);
+                UIUtils.notify('✅ 订单已确认', 'success');
+
+                // 重新加载订单列表
+                await loadOrders();
+
+            } catch (error) {
+                console.error('❌ 确认订单失败:', error);
+                UIUtils.notify('确认订单失败: ' + error.message, 'error');
+            }
+        }
+
+        // ========================================
+        // 生成任务相关功能
+        // ========================================
+
+        // 任务模板分类映射
+        const CATEGORY_MAP = {
+            'customer_follow_up': '客户跟进',
+            'service_process': '服务流程',
+            'quality_check': '质量检查',
+            'inventory': '库存管理',
+            'training': '培训',
+            'nutrition_intervention': '营养干预',
+            'care_service': '护理服务',
+            'service_execution': '服务执行',
+            'other': '其他'
+        };
+
+        // 服务类型关键词映射（用于智能推荐）
+        const SERVICE_KEYWORDS_MAP = {
+            '减重': ['SERVICE_WEIGHT_LOSS', 'PHLEGM_DAMP', 'SPLEEN_DEFICIENCY', 'LIVER_QI', 'SPLEEN_KIDNEY_YANG'],
+            '减肥': ['SERVICE_WEIGHT_LOSS', 'PHLEGM_DAMP', 'SPLEEN_DEFICIENCY', 'LIVER_QI', 'SPLEEN_KIDNEY_YANG'],
+            '瘦身': ['SERVICE_WEIGHT_LOSS', 'PRE_WEDDING_RAPID_SLIM'],
+            '婚前': ['PRE_WEDDING_RAPID_SLIM'],
+            '塑形': ['LOCAL_SHAPING'],
+            '产后': ['POSTPARTUM_RECOVERY'],
+            '修复': ['POSTPARTUM_RECOVERY'],
+            '营养': ['NUTRITION_PLAN', 'NUTRITION_FOLLOWUP'],
+            '护理': ['DAILY_CARE_GUIDANCE', 'CARE_EFFECT_ASSESSMENT']
+        };
+
+        // 显示生成任务模态框
+        async function showGenerateTaskModal(orderId) {
+            try {
+                console.log('📋 显示生成任务模态框，订单ID:', orderId);
+
+                // 获取订单信息
+                const order = await getOrderById(orderId);
+                if (!order) {
+                    UIUtils.notify('订单不存在', 'error');
+                    return;
+                }
+
+                currentGeneratingOrder = order;
+
+                // 显示模态框
+                document.getElementById('generateTaskModal').classList.remove('hidden');
+                document.body.classList.add('no-scroll');
+
+                // 显示订单信息
+                const serviceName = order.service_name || order.solution_name || '未知服务';
+                const serviceDate = order.service_date ? new Date(order.service_date).toLocaleDateString('zh-CN') : '未设置';
+                document.getElementById('orderServiceName').textContent = serviceName;
+                document.getElementById('orderServiceDate').textContent = serviceDate;
+
+                // 加载任务模板
+                await loadTaskTemplatesForOrder(order);
+
+                lucide.createIcons();
+            } catch (error) {
+                console.error('❌ 显示生成任务模态框失败:', error);
+                UIUtils.notify('加载失败: ' + error.message, 'error');
+            }
+        }
+
+        // 为订单加载任务模板
+        async function loadTaskTemplatesForOrder(order) {
+            try {
+                console.log('🔄 开始加载任务模板...');
+
+                // 显示加载状态
+                document.getElementById('taskTemplatesLoading').classList.remove('hidden');
+                document.getElementById('recommendedTemplates').classList.add('hidden');
+                document.getElementById('otherTemplates').classList.add('hidden');
+                document.getElementById('noTemplatesMessage').classList.add('hidden');
+
+                // 获取所有可用的任务模板
+                const orgId = parseInt(localStorage.getItem('currentOrgId')) || currentCustomer.org_id || 1;
+                const apiUrl = `/api/task-templates?org_id=${orgId}&status=active`;
+                console.log('📡 API请求:', apiUrl);
+
+                const response = await window.apiClient.get(apiUrl);
+                console.log('📦 API响应:', response);
+
+                if (!response.success || !response.data || response.data.length === 0) {
+                    console.warn('⚠️ 没有可用的任务模板');
+                    // 显示空状态
+                    document.getElementById('taskTemplatesLoading').classList.add('hidden');
+                    document.getElementById('noTemplatesMessage').classList.remove('hidden');
+                    return;
+                }
+
+                const templates = response.data;
+                console.log('✅ 成功加载任务模板:', templates.length, '个');
+                console.log('📋 模板列表:', templates.map(t => t.template_name));
+
+                // 根据订单服务内容智能推荐模板
+                const { recommended, others } = categorizeTemplates(templates, order);
+                console.log('⭐ 推荐模板数量:', recommended.length);
+                console.log('📚 其他模板数量:', others.length);
+
+                // 隐藏加载状态
+                document.getElementById('taskTemplatesLoading').classList.add('hidden');
+
+                // 渲染推荐模板
+                if (recommended.length > 0) {
+                    console.log('🎨 渲染推荐模板...');
+                    renderTemplateList('recommendedTemplatesList', recommended, true);
+                    document.getElementById('recommendedTemplates').classList.remove('hidden');
+                }
+
+                // 渲染其他模板
+                if (others.length > 0) {
+                    console.log('🎨 渲染其他模板...');
+                    renderTemplateList('otherTemplatesList', others, false);
+                    document.getElementById('otherTemplates').classList.remove('hidden');
+                }
+
+                // 如果没有任何模板，显示空状态
+                if (recommended.length === 0 && others.length === 0) {
+                    document.getElementById('noTemplatesMessage').classList.remove('hidden');
+                }
+
+                // 更新选中计数
+                updateSelectedTemplateCount();
+
+                lucide.createIcons();
+                console.log('✨ 任务模板加载完成');
+            } catch (error) {
+                console.error('❌ 加载任务模板失败:', error);
+                document.getElementById('taskTemplatesLoading').classList.add('hidden');
+                document.getElementById('noTemplatesMessage').classList.remove('hidden');
+            }
+        }
+
+        // 根据订单内容分类模板（智能推荐）
+        function categorizeTemplates(templates, order) {
+            const serviceName = (order.service_name || order.solution_name || '').toLowerCase();
+            const recommended = [];
+            const others = [];
+
+            // 总是推荐的通用模板
+            const alwaysRecommended = ['SERVICE_REMINDER', 'SERVICE_FOLLOWUP', 'NEXT_APPOINTMENT_REMINDER'];
+
+            templates.forEach(template => {
+                let isRecommended = false;
+
+                // 1. 检查是否是通用推荐模板
+                if (alwaysRecommended.includes(template.template_code)) {
+                    isRecommended = true;
+                }
+
+                // 2. 根据服务名称关键词推荐
+                if (!isRecommended) {
+                    for (const [keyword, codes] of Object.entries(SERVICE_KEYWORDS_MAP)) {
+                        if (serviceName.includes(keyword)) {
+                            for (const code of codes) {
+                                if (template.template_code.includes(code)) {
+                                    isRecommended = true;
+                                    break;
+                                }
+                            }
+                            if (isRecommended) break;
+                        }
+                    }
+                }
+
+                if (isRecommended) {
+                    recommended.push(template);
+                } else {
+                    others.push(template);
+                }
+            });
+
+            return { recommended, others };
+        }
+
+        // 渲染模板列表
+        function renderTemplateList(containerId, templates, defaultChecked = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            templates.forEach(template => {
+                const categoryName = CATEGORY_MAP[template.category] || template.category;
+                const estimatedTime = template.estimated_duration ? `约${template.estimated_duration}分钟` : '';
+
+                const templateCard = document.createElement('label');
+                templateCard.className = 'flex items-start gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-purple-300 transition-all';
+                templateCard.innerHTML = `
+                    <input type="checkbox"
+                           class="task-template-checkbox mt-1 w-5 h-5 text-purple-600 rounded"
+                           value="${template.template_code}"
+                           data-template-id="${template.id}"
+                           ${defaultChecked ? 'checked' : ''}
+                           onchange="updateSelectedTemplateCount()">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="font-medium text-gray-900">${template.template_name}</div>
+                            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">${categoryName}</span>
+                            ${estimatedTime ? `<span class="text-xs text-gray-500">${estimatedTime}</span>` : ''}
+                        </div>
+                        <div class="text-sm text-gray-600">${template.description || '无描述'}</div>
+                    </div>
+                `;
+
+                container.appendChild(templateCard);
+            });
+        }
+
+        // 更新选中的模板计数
+        function updateSelectedTemplateCount() {
+            const checkboxes = document.querySelectorAll('.task-template-checkbox:checked');
+            const count = checkboxes.length;
+            document.getElementById('selectedTemplateCount').textContent = count;
+        }
+
+        // 根据订单ID获取订单信息
+        async function getOrderById(orderId) {
+            try {
+                const response = await window.apiClient.get(`/api/orders/${orderId}`);
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ 获取订单失败:', error);
+                return null;
+            }
+        }
+
+        // 关闭生成任务模态框
+        function closeGenerateTaskModal() {
+            document.getElementById('generateTaskModal').classList.add('hidden');
+            document.body.classList.remove('no-scroll');
+            currentGeneratingOrder = null;
+        }
+
+        // 确认生成任务
+        async function confirmGenerateTasks() {
+            try {
+                if (!currentGeneratingOrder) {
+                    UIUtils.notify('订单信息丢失', 'error');
+                    return;
+                }
+
+                // 收集选中的任务模板
+                const checkboxes = document.querySelectorAll('.task-template-checkbox:checked');
+                const selectedTemplates = Array.from(checkboxes).map(cb => cb.value);
+
+                if (selectedTemplates.length === 0) {
+                    UIUtils.notify('请至少选择一个任务模板', 'warning');
+                    return;
+                }
+
+                console.log('📡 生成任务，订单ID:', currentGeneratingOrder.id);
+                console.log('📋 选中的任务模板:', selectedTemplates);
+
+                // 获取当前机构ID
+                const currentOrgId = parseInt(localStorage.getItem('currentOrgId')) || currentCustomer.org_id || 1;
+
+                // 调用API生成任务
+                const response = await window.apiClient.post('/api/tasks/generate-from-order', {
+                    order_id: currentGeneratingOrder.id,
+                    customer_id: currentCustomer.id,
+                    org_id: currentOrgId,
+                    template_codes: selectedTemplates,
+                    created_by: 1  // TODO: 获取当前登录用户ID
+                });
+
+                console.log('✅ 任务生成响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '生成任务失败');
+                }
+
+                UIUtils.notify(`✅ 成功生成 ${selectedTemplates.length} 个任务`, 'success');
+
+                // 关闭模态框
+                closeGenerateTaskModal();
+
+                // 重新加载任务列表
+                await loadTasks();
+
+            } catch (error) {
+                console.error('❌ 生成任务失败:', error);
+                UIUtils.notify('生成任务失败: ' + error.message, 'error');
+            }
+        }
+
+        // 点击模态框外部关闭生成任务模态框
+        document.getElementById('generateTaskModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeGenerateTaskModal();
+            }
+        });
+
+        // 点击模态框外部关闭修改订单模态框
+        document.getElementById('editOrderModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeEditOrderModal();
             }
         });
     </script>
@@ -1748,5 +3970,11 @@
             </button>
         </div>
     </div>
+
+    <script>
+        // 页面版本标识 - 用于调试缓存问题
+        console.log('📦 客户详情页面版本: v2.0-任务模板选择器');
+        console.log('🕐 加载时间:', new Date().toLocaleString('zh-CN'));
+    </script>
 </body>
 </html>
