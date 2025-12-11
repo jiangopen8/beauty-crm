@@ -232,9 +232,9 @@
         </div>
     </nav>
 
-    <div class="flex h-screen pt-14 md:pt-16">        <!-- 侧边栏 -->
-        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static h-full z-40 closed md:block">
-            <div class="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+    <div class="flex h-screen pt-20 md:pt-16">        <!-- 侧边栏 -->
+        <aside id="sidebar" class="sidebar w-64 bg-white shadow-sm border-r border-gray-200 fixed md:static top-0 md:top-auto bottom-0 md:bottom-auto h-screen md:h-full z-40 closed md:block">
+            <div class="p-4 md:p-6 pt-20 md:pt-6 space-y-4 md:space-y-6 overflow-y-auto h-full pb-6">
                 <!-- 快速统计 -->
                 <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
                     <h3 class="text-sm font-medium text-purple-900 mb-3">今日概览</h3>
@@ -354,13 +354,13 @@
         <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" onclick="toggleSidebar()"></div>
 
         <!-- 主要内容区域 -->
-        <main class="flex-1 overflow-auto p-4 md:p-6">
+        <main class="flex-1 overflow-auto p-3 md:p-6">
             <!-- 页面标题和操作 -->
-            <div class="mb-6">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                    <div class="mb-4 md:mb-0">
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center">
-                            <i data-lucide="check-square" class="w-7 h-7 md:w-8 md:h-8 mr-2 text-blue-600"></i>
+            <div class="mb-4 md:mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-3 md:mb-4">
+                    <div class="mb-3 md:mb-0">
+                        <h1 class="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2 flex items-center">
+                            <i data-lucide="check-square" class="w-6 h-6 md:w-8 md:h-8 mr-2 text-blue-600"></i>
                             任务管理
                         </h1>
                         <p class="text-sm md:text-base text-gray-600">高效管理客户任务,PDCA循环优化</p>
@@ -642,14 +642,20 @@
     </div>
 
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/core/ApiClient.js"></script>
+    <script src="js/core/ApiModules.js"></script>
     <script>
         // 初始化
         lucide.createIcons();
 
+        // 获取当前机构ID
+        const currentOrgId = parseInt(localStorage.getItem('currentOrgId')) || 1;
+        const currentOrgName = localStorage.getItem('currentOrgName') || '';
+
         // 更新顶部标题栏显示当前组织名称
         function updateHeaderOrgName() {
             const headerOrgNameEl = document.getElementById('header-org-name');
-            const currentOrgName = localStorage.getItem('currentOrgName');
             if (headerOrgNameEl && currentOrgName) {
                 headerOrgNameEl.textContent = ' - ' + currentOrgName;
             }
@@ -658,82 +664,9 @@
         // 页面加载时更新标题
         updateHeaderOrgName();
 
-
-        // 任务数据
-        let tasks = [
-            {
-                id: '1',
-                customer: '张小姐',
-                customerId: 'customer1',
-                type: 'meal',
-                title: '早餐：低卡营养餐',
-                description: '燕麦+水煮蛋+牛奶',
-                status: 'pending',
-                scheduledDate: '2024-11-28',
-                scheduledTime: '08:00',
-                reminderEnabled: true
-            },
-            {
-                id: '2',
-                customer: '王女士',
-                customerId: 'customer2',
-                type: 'exercise',
-                title: '有氧运动30分钟',
-                description: '慢跑或快走',
-                status: 'inprogress',
-                scheduledDate: '2024-11-28',
-                scheduledTime: '10:00',
-                reminderEnabled: true
-            },
-            {
-                id: '3',
-                customer: '李小姐',
-                customerId: 'customer3',
-                type: 'treatment',
-                title: '面部护理',
-                description: '深层清洁+补水',
-                status: 'completed',
-                scheduledDate: '2024-11-27',
-                scheduledTime: '14:00',
-                reminderEnabled: false
-            },
-            {
-                id: '4',
-                customer: '张小姐',
-                customerId: 'customer1',
-                type: 'weight',
-                title: '记录体重',
-                description: '早晨空腹称重',
-                status: 'pending',
-                scheduledDate: '2024-11-28',
-                scheduledTime: '07:00',
-                reminderEnabled: true
-            },
-            {
-                id: '5',
-                customer: '王女士',
-                customerId: 'customer2',
-                type: 'sleep',
-                title: '保证睡眠8小时',
-                description: '23:00前入睡',
-                status: 'pending',
-                scheduledDate: '2024-11-28',
-                scheduledTime: '23:00',
-                reminderEnabled: true
-            },
-            {
-                id: '6',
-                customer: '李小姐',
-                customerId: 'customer3',
-                type: 'checkup',
-                title: '定期复查',
-                description: '皮肤状态评估',
-                status: 'inprogress',
-                scheduledDate: '2024-11-29',
-                scheduledTime: '15:00',
-                reminderEnabled: true
-            }
-        ];
+        // 任务数据（从API加载）
+        let tasks = [];
+        let allCustomers = []; // 所有客户列表
 
         let currentView = 'board';
         let currentFilter = { type: 'all', customer: 'all' };
@@ -750,19 +683,149 @@
             custom: { label: '自定义', color: 'gray' }
         };
 
-        // 任务状态配置
+        // 任务状态配置（匹配数据库ENUM）
         const taskStatusConfig = {
             pending: { label: '待执行', color: 'yellow' },
-            inprogress: { label: '进行中', color: 'blue' },
+            in_progress: { label: '进行中', color: 'blue' },
             completed: { label: '已完成', color: 'green' },
+            cancelled: { label: '已取消', color: 'gray' },
             overdue: { label: '已逾期', color: 'red' }
         };
 
+        // 从API加载任务数据
+        async function loadTasks() {
+            try {
+                console.log('📡 从API加载任务数据...');
+
+                const response = await window.apiClient.get('/api/tasks', {
+                    org_id: currentOrgId,
+                    page: 1,
+                    pageSize: 1000  // 获取所有任务
+                });
+
+                console.log('✅ 任务API响应:', response);
+
+                if (response.success && response.data && response.data.list) {
+                    // 转换API数据格式为页面需要的格式
+                    tasks = response.data.list.map(task => ({
+                        id: task.id.toString(),
+                        customer: task.customer_name || '未知客户',
+                        customerId: task.customer_id ? task.customer_id.toString() : '',
+                        type: mapTaskType(task.task_type),
+                        title: task.title || '未命名任务',
+                        description: task.description || '',
+                        status: task.status || 'pending',
+                        scheduledDate: task.due_date || new Date().toISOString().split('T')[0],
+                        scheduledTime: task.reminder_time ? new Date(task.reminder_time).toTimeString().slice(0, 5) : '',
+                        reminderEnabled: !!task.reminder_time,
+                        createdAt: task.created_at || new Date().toISOString()
+                    }));
+
+                    // 按创建时间倒序排列（最新的在前）
+                    tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                    console.log(`✅ 成功加载 ${tasks.length} 个任务（已按创建时间倒序排列）`);
+                } else {
+                    console.warn('⚠️ API返回数据格式异常:', response);
+                    tasks = [];
+                }
+
+                renderTasks();
+                updateStats();
+                populateCustomerFilter();
+
+            } catch (error) {
+                console.error('❌ 加载任务失败:', error);
+                showNotification('加载任务失败: ' + error.message, 'error');
+                tasks = [];
+            }
+        }
+
+        // 从API加载客户列表
+        async function loadCustomers() {
+            try {
+                console.log('📡 从API加载客户列表...');
+
+                const response = await window.apiClient.get('/api/customers', {
+                    org_id: currentOrgId,
+                    page: 1,
+                    pageSize: 1000
+                });
+
+                if (response.success && response.data) {
+                    allCustomers = response.data.map(c => ({
+                        id: c.id.toString(),
+                        name: c.name
+                    }));
+
+                    // 填充客户选择下拉框
+                    const taskCustomerSelect = document.getElementById('task-customer');
+                    taskCustomerSelect.innerHTML = '<option value="">选择客户</option>';
+
+                    allCustomers.forEach(customer => {
+                        const option = document.createElement('option');
+                        option.value = customer.id;
+                        option.textContent = customer.name;
+                        taskCustomerSelect.appendChild(option);
+                    });
+
+                    console.log(`✅ 成功加载 ${allCustomers.length} 个客户`);
+                }
+            } catch (error) {
+                console.error('❌ 加载客户列表失败:', error);
+            }
+        }
+
+        // 加载侧边栏统计数据
+        async function loadSidebarStatistics() {
+            try {
+                // 1. 客户总数
+                const customersResponse = await window.apiClient.get('/api/customers', {
+                    org_id: currentOrgId,
+                    page: 1,
+                    pageSize: 1
+                });
+
+                if (customersResponse.success && customersResponse.pagination) {
+                    const totalCustomers = customersResponse.pagination.total || 0;
+                    document.getElementById('totalCustomers').textContent = totalCustomers;
+                }
+
+                // 2. 本月订单
+                const now = new Date();
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                const ordersResponse = await window.apiClient.get('/api/orders', {
+                    org_id: currentOrgId,
+                    service_date_from: firstDayOfMonth,
+                    page: 1,
+                    pageSize: 1
+                });
+
+                if (ordersResponse.success && ordersResponse.data && ordersResponse.data.pagination) {
+                    const monthlyOrders = ordersResponse.data.pagination.total || 0;
+                    document.getElementById('monthlyOrders').textContent = monthlyOrders;
+                }
+
+            } catch (error) {
+                console.error('❌ 加载侧边栏统计数据失败:', error);
+            }
+        }
+
+        // 映射任务类型
+        function mapTaskType(apiTaskType) {
+            const typeMap = {
+                'follow_up': 'custom',
+                'reminder': 'treatment',
+                'appointment': 'checkup'
+            };
+            return typeMap[apiTaskType] || 'custom';
+        }
+
         // 初始化页面
-        function initPage() {
-            renderTasks();
-            updateStats();
-            populateCustomerFilter();
+        async function initPage() {
+            await loadSidebarStatistics();
+            await loadCustomers();
+            await loadTasks();
             initCalendar();
         }
 
@@ -787,26 +850,32 @@
             document.getElementById('completed-tasks').innerHTML = '';
 
             // 统计各状态数量
-            let counts = { pending: 0, inprogress: 0, completed: 0 };
+            let counts = { pending: 0, in_progress: 0, completed: 0 };
 
             filteredTasks.forEach(task => {
                 const card = createTaskCard(task);
-                const container = document.getElementById(`${task.status}-tasks`);
+                // 处理状态名称映射
+                const statusKey = task.status === 'in_progress' ? 'inprogress' : task.status;
+                const container = document.getElementById(`${statusKey}-tasks`);
                 if (container) {
                     container.appendChild(card);
-                    counts[task.status]++;
+                    if (task.status === 'in_progress') {
+                        counts.in_progress++;
+                    } else {
+                        counts[task.status]++;
+                    }
                 }
             });
 
             // 更新计数
             document.getElementById('pending-count').textContent = counts.pending;
-            document.getElementById('inprogress-count').textContent = counts.inprogress;
+            document.getElementById('inprogress-count').textContent = counts.in_progress;
             document.getElementById('completed-count').textContent = counts.completed;
 
             // 如果列为空,显示提示
             ['pending', 'inprogress', 'completed'].forEach(status => {
                 const container = document.getElementById(`${status}-tasks`);
-                if (container.children.length === 0) {
+                if (container && container.children.length === 0) {
                     container.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">暂无任务</p>';
                 }
             });
@@ -843,7 +912,7 @@
                 ${task.status !== 'completed' ? `
                     <div class="flex gap-2">
                         ${task.status === 'pending' ? `
-                            <button onclick="updateTaskStatus('${task.id}', 'inprogress')" class="flex-1 px-2 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            <button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="flex-1 px-2 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                                 开始
                             </button>
                         ` : ''}
@@ -912,7 +981,7 @@
                         ${task.status !== 'completed' ? `
                             <div class="flex gap-2">
                                 ${task.status === 'pending' ? `
-                                    <button onclick="updateTaskStatus('${task.id}', 'inprogress')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
+                                    <button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
                                         开始
                                     </button>
                                 ` : ''}
@@ -1085,14 +1154,14 @@
             const stats = {
                 total: filteredTasks.length,
                 pending: filteredTasks.filter(t => t.status === 'pending').length,
-                inprogress: filteredTasks.filter(t => t.status === 'inprogress').length,
+                in_progress: filteredTasks.filter(t => t.status === 'in_progress').length,
                 completed: filteredTasks.filter(t => t.status === 'completed').length,
                 overdue: filteredTasks.filter(t => t.status === 'overdue').length
             };
 
             document.getElementById('stat-total').textContent = stats.total;
             document.getElementById('stat-pending').textContent = stats.pending;
-            document.getElementById('stat-inprogress').textContent = stats.inprogress;
+            document.getElementById('stat-inprogress').textContent = stats.in_progress;
             document.getElementById('stat-completed').textContent = stats.completed;
             document.getElementById('stat-overdue').textContent = stats.overdue;
         }
@@ -1100,13 +1169,19 @@
         // 填充客户筛选器
         function populateCustomerFilter() {
             const select = document.getElementById('filter-customer');
-            const customers = [...new Set(tasks.map(t => ({ id: t.customerId, name: t.customer })))];
+            // 清空现有选项（保留"所有客户"）
+            select.innerHTML = '<option value="all">所有客户</option>';
+
+            // 从任务中提取唯一客户
+            const customers = [...new Map(tasks.map(t => [t.customerId, { id: t.customerId, name: t.customer }])).values()];
 
             customers.forEach(customer => {
-                const option = document.createElement('option');
-                option.value = customer.id;
-                option.textContent = customer.name;
-                select.appendChild(option);
+                if (customer.id) {
+                    const option = document.createElement('option');
+                    option.value = customer.id;
+                    option.textContent = customer.name;
+                    select.appendChild(option);
+                }
             });
         }
 
@@ -1191,21 +1266,42 @@
         }
 
         // 更新任务状态
-        function updateTaskStatus(taskId, newStatus) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
+        async function updateTaskStatus(taskId, newStatus) {
+            try {
+                console.log('📡 更新任务状态:', { taskId, newStatus });
 
-            task.status = newStatus;
-            renderTasks();
-            updateStats();
+                // 调用API更新任务状态
+                const response = await window.apiClient.patch(`/api/tasks/${taskId}`, {
+                    status: newStatus,
+                    updated_by: 1  // TODO: 获取当前登录用户ID
+                });
 
-            const statusLabels = {
-                'inprogress': '已开始',
-                'completed': '已完成',
-                'pending': '待执行'
-            };
+                if (response.success) {
+                    // 更新本地任务数据
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = newStatus;
+                    }
 
-            showNotification(`任务${statusLabels[newStatus]}`, 'success');
+                    renderTasks();
+                    updateStats();
+
+                    const statusLabels = {
+                        'in_progress': '已开始',
+                        'completed': '已完成',
+                        'pending': '待执行',
+                        'cancelled': '已取消'
+                    };
+
+                    showNotification(`任务${statusLabels[newStatus] || '已更新'}`, 'success');
+                } else {
+                    throw new Error(response.message || '更新任务状态失败');
+                }
+
+            } catch (error) {
+                console.error('❌ 更新任务状态失败:', error);
+                showNotification('更新失败: ' + error.message, 'error');
+            }
         }
 
         // 格式化日期
