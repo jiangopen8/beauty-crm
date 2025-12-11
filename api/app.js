@@ -65,7 +65,8 @@ app.get('/api', (req, res) => {
             auth: '/api/auth',
             customerProfileTemplates: '/api/customer-profile-templates',
             diagnosisTemplates: '/api/diagnosis-templates',
-            taskTemplates: '/api/task-templates'
+            taskTemplates: '/api/task-templates',
+            chatMessages: '/api/chat-messages'
         }
     });
 });
@@ -83,11 +84,13 @@ app.use('/api/diagnosis-templates', require('./routes/diagnosis-templates'));
 app.use('/api/task-templates', require('./routes/task-templates'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/customer-profiles', require('./routes/customer-profiles'));
+app.use('/api/customers', require('./routes/customers'));
+app.use('/api/customer-diagnoses', require('./routes/customer-diagnoses'));
+app.use('/api/customer-solutions', require('./routes/customer-solutions'));
+app.use('/api/chat-messages', require('./routes/chat-messages'));
+app.use('/api/tasks', require('./routes/tasks'));
 
 // TODO: 添加其他路由
-// app.use('/api/customers', require('./routes/customers'));
-// app.use('/api/orders', require('./routes/orders'));
-// app.use('/api/tasks', require('./routes/tasks'));
 // app.use('/api/auth', require('./routes/auth'));
 
 // ============================================
