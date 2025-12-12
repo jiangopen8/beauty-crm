@@ -557,10 +557,16 @@
                     <div id="diagnosisTab" class="tab-content">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-gray-900">诊断历史记录</h3>
-                            <button onclick="showNewDiagnosisModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
-                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
-                                新建诊断
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="showNewDiagnosisModal()" class="px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors text-sm">
+                                    <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                                    新建诊断
+                                </button>
+                                <button onclick="showCreateDiagnosisGroupModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                                    <i data-lucide="layers" class="w-4 h-4 inline mr-1"></i>
+                                    创建诊断组
+                                </button>
+                            </div>
                         </div>
                         <div id="diagnosisHistoryContainer">
                             <!-- 动态加载诊断历史 -->
@@ -720,6 +726,62 @@
         </div>
     </div>
 
+    <!-- 诊断组选择模态框 -->
+    <div id="diagnosisGroupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+            <!-- 模态框头部 -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">创建诊断组</h2>
+                    <p class="text-sm text-gray-500 mt-1">选择多个诊断模板，一次性构建诊断组</p>
+                </div>
+                <button onclick="closeDiagnosisGroupModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- 推荐模板区 -->
+                <div id="recommendedTemplatesSection" class="mb-8">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="star" class="w-5 h-5 text-amber-500"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">推荐模板</h3>
+                    </div>
+                    <div id="recommendedTemplatesList" class="space-y-2">
+                        <!-- 动态生成推荐模板复选框列表 -->
+                    </div>
+                </div>
+
+                <!-- 其他模板区 -->
+                <div id="otherTemplatesSection">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="list" class="w-5 h-5 text-gray-400"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">其他模板</h3>
+                    </div>
+                    <div id="otherTemplatesList" class="space-y-2">
+                        <!-- 动态生成其他模板复选框列表 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="p-6 border-t border-gray-200 bg-gray-50 flex justify-between">
+                <div class="text-sm text-gray-600">
+                    已选择 <span id="selectedDiagnosisTemplatesCount" class="font-semibold text-purple-600">0</span> 个模板
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeDiagnosisGroupModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button onclick="confirmCreateDiagnosisGroup()" id="createDiagnosisGroupBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        创建并填写诊断
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 新建诊断模态框 -->
     <div id="diagnosisModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
@@ -771,6 +833,59 @@
                 <button onclick="saveDiagnosis()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                     保存诊断
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 诊断组填写模态框 -->
+    <div id="diagnosisGroupFillModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- 头部：标题和进度 -->
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">填写诊断组</h2>
+                <div class="flex items-center gap-4 mt-3">
+                    <div class="text-sm text-gray-600">
+                        进度: <span id="diagnosisGroupProgressCount" class="font-semibold text-purple-600">0 / 0</span>
+                    </div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                        <div id="diagnosisGroupProgressBar" class="bg-purple-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab导航 -->
+            <div class="px-6 pt-4 border-b overflow-x-auto">
+                <div id="diagnosisGroupTabsContainer" class="flex gap-2 pb-2">
+                    <!-- 动态生成Tab按钮 -->
+                </div>
+            </div>
+
+            <!-- 内容区 -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="diagnosisGroupFormsContainer">
+                    <!-- 动态生成每个诊断表单 -->
+                </div>
+            </div>
+
+            <!-- 底部操作按钮 -->
+            <div class="p-6 border-t border-gray-200 bg-gray-50 flex justify-between">
+                <button onclick="closeDiagnosisGroupFillModal()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <div class="flex items-center gap-3">
+                    <button onclick="skipCurrentDiagnosisInGroup()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i data-lucide="skip-forward" class="w-4 h-4 inline mr-1"></i>
+                        跳过此项
+                    </button>
+                    <button onclick="saveCurrentDiagnosisInGroup()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i data-lucide="save" class="w-4 h-4 inline mr-1"></i>
+                        保存当前
+                    </button>
+                    <button onclick="completeAllDiagnoses()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>
+                        完成所有
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1293,75 +1408,53 @@
             const container = document.getElementById('diagnosisHistoryContainer');
 
             try {
-                // 从API获取客户诊断历史
-                console.log('📡 从真实数据库 API 加载诊断历史...');
-                const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses?customer_id=${currentCustomer.id}`);
-                const result = await response.json();
+                console.log('📡 加载诊断历史...');
 
-                if (!result.success) {
-                    throw new Error(result.message || '加载诊断历史失败');
-                }
+                // 1. 加载单独诊断记录
+                const diagnosisResponse = await fetch(`${API_BASE_URL}/api/customer-diagnoses?customer_id=${currentCustomer.id}`);
+                const diagnosisResult = await diagnosisResponse.json();
+                const singleDiagnoses = (diagnosisResult.success ? diagnosisResult.data : [])
+                    .filter(d => !d.diagnosis_group_id); // 只显示没有诊断组的单独诊断
 
-                const history = result.data || [];
-                console.log(`✅ 成功加载 ${history.length} 条诊断记录`);
+                // 2. 加载诊断组
+                const groupResponse = await fetch(`${API_BASE_URL}/api/customer-diagnosis-groups?customer_id=${currentCustomer.id}`);
+                const groupResult = await groupResponse.json();
+                const diagnosisGroups = groupResult.success ? groupResult.data : [];
 
-                if (history.length === 0) {
+                console.log(`✅ 加载完成: ${singleDiagnoses.length} 条单独诊断, ${diagnosisGroups.length} 个诊断组`);
+
+                // 3. 合并并排序
+                const allItems = [
+                    ...singleDiagnoses.map((d, i) => ({ type: 'single', data: d, index: i })),
+                    ...diagnosisGroups.map((g, i) => ({ type: 'group', data: g, index: i }))
+                ];
+
+                // 按日期倒序排列
+                allItems.sort((a, b) => {
+                    const dateA = new Date(a.data.diagnose_date || a.data.created_at || 0);
+                    const dateB = new Date(b.data.diagnose_date || b.data.created_at || 0);
+                    return dateB - dateA;
+                });
+
+                if (allItems.length === 0) {
                     container.innerHTML = `
                         <div class="text-center text-gray-400 py-8 bg-white rounded-lg border border-gray-200">
                             <i data-lucide="stethoscope" class="w-12 h-12 mx-auto mb-2"></i>
                             <p class="text-sm">暂无诊断记录</p>
-                            <p class="text-xs mt-2 text-gray-500">点击"新建诊断"开始记录客户健康信息</p>
+                            <p class="text-xs mt-2 text-gray-500">点击"新建诊断"或"创建诊断组"开始记录</p>
                         </div>
                     `;
                     lucide.createIcons();
                     return;
                 }
 
-                // 渲染诊断历史列表
-                container.innerHTML = history.map((record, index) => {
-                    const diagnoseData = typeof record.diagnose_data === 'string'
-                        ? JSON.parse(record.diagnose_data)
-                        : record.diagnose_data || {};
-
-                    return `
-                        <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow relative">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-900">
-                                    ${DateUtils.format(new Date(record.diagnose_date), 'YYYY-MM-DD HH:mm')}
-                                </span>
-                                <div class="flex items-center space-x-1">
-                                    <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                                        综合诊断
-                                    </span>
-                                    <button onclick="showDiagnosisSummary(${record.id})"
-                                            class="text-blue-500 hover:text-blue-700 transition-colors p-1"
-                                            title="查看摘要">
-                                        <i data-lucide="file-text" class="w-4 h-4"></i>
-                                    </button>
-                                    <button onclick="editDiagnosis(${record.id})"
-                                            class="text-green-500 hover:text-green-700 transition-colors p-1"
-                                            title="编辑诊断">
-                                        <i data-lucide="edit" class="w-4 h-4"></i>
-                                    </button>
-                                    <button onclick="deleteDiagnosis(${record.id})"
-                                            class="text-red-500 hover:text-red-700 transition-colors p-1"
-                                            title="删除诊断记录">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="text-xs text-gray-600 space-y-1">
-                                ${record.skin_type ? `<div>肤质: ${translateSkinType(record.skin_type)}</div>` : ''}
-                                ${record.hair_type ? `<div>发质: ${translateHairType(record.hair_type)}</div>` : ''}
-                                ${Object.keys(diagnoseData).length > 0 ? `<div>记录项: ${Object.keys(diagnoseData).length} 项</div>` : ''}
-                            </div>
-                            ${record.suggestions ? `
-                                <div class="text-xs text-gray-500 mt-2 line-clamp-2">
-                                    ${record.suggestions}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                // 4. 渲染所有项
+                container.innerHTML = allItems.map((item, index) => {
+                    if (item.type === 'single') {
+                        return renderSingleDiagnosisCard(item.data, allItems.length - index);
+                    } else {
+                        return renderDiagnosisGroupCard(item.data, allItems.length - index);
+                    }
                 }).join('');
 
                 lucide.createIcons();
@@ -1375,6 +1468,199 @@
                     </div>
                 `;
                 lucide.createIcons();
+            }
+        }
+
+        // 渲染单独诊断卡片
+        function renderSingleDiagnosisCard(record, serialNumber) {
+            const diagnoseData = typeof record.diagnose_data === 'string'
+                ? JSON.parse(record.diagnose_data)
+                : record.diagnose_data || {};
+
+            return `
+                <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-900">
+                            ${DateUtils.format(new Date(record.diagnose_date), 'YYYY-MM-DD HH:mm')}
+                        </span>
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                                综合诊断
+                            </span>
+                            <button onclick="showDiagnosisSummary(${record.id})"
+                                    class="text-blue-500 hover:text-blue-700 transition-colors p-1"
+                                    title="查看摘要">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="editDiagnosis(${record.id})"
+                                    class="text-green-500 hover:text-green-700 transition-colors p-1"
+                                    title="编辑诊断">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteDiagnosis(${record.id})"
+                                    class="text-red-500 hover:text-red-700 transition-colors p-1"
+                                    title="删除诊断记录">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-600 space-y-1">
+                        ${record.skin_type ? `<div>肤质: ${translateSkinType(record.skin_type)}</div>` : ''}
+                        ${record.hair_type ? `<div>发质: ${translateHairType(record.hair_type)}</div>` : ''}
+                        ${Object.keys(diagnoseData).length > 0 ? `<div>记录项: ${Object.keys(diagnoseData).length} 项</div>` : ''}
+                    </div>
+                    ${record.suggestions ? `
+                        <div class="text-xs text-gray-500 mt-2 line-clamp-2">
+                            ${record.suggestions}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // 渲染诊断组卡片（折叠式）
+        function renderDiagnosisGroupCard(group, serialNumber) {
+            const groupDate = new Date(group.created_at).toLocaleDateString('zh-CN');
+            const templateCount = group.templates ? group.templates.length : 0;
+
+            return `
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-300 p-4 hover:shadow-md transition-shadow">
+                    <!-- 组头部 -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3 flex-1">
+                            <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                诊断组 #${serialNumber}
+                            </div>
+                            <span class="text-sm text-gray-700 font-medium">${groupDate}</span>
+                            <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                                ${templateCount} 个模板
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleDiagnosisGroupDetail('${group.group_id}')"
+                                    class="text-gray-600 hover:text-purple-600 transition-colors p-1"
+                                    title="展开/折叠">
+                                <i data-lucide="chevron-down" class="w-5 h-5 diagnosis-group-chevron-${group.group_id}" style="transition: transform 0.3s;"></i>
+                            </button>
+                            <button onclick="deleteDiagnosisGroup('${group.group_id}')"
+                                    class="text-red-500 hover:text-red-700 transition-colors p-1"
+                                    title="删除诊断组">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 模板标签 -->
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        ${(group.templates || []).map(t => `
+                            <span class="px-2 py-1 bg-white border border-purple-200 rounded text-xs text-gray-700">
+                                ${t.template_name}
+                            </span>
+                        `).join('')}
+                    </div>
+
+                    <!-- 展开的诊断详情 -->
+                    <div id="diagnosisGroupDetail_${group.group_id}" class="hidden mt-4 border-t border-purple-200 pt-4 space-y-3">
+                        <!-- 动态加载诊断内容 -->
+                        <div class="text-center py-4 text-gray-500">
+                            <i data-lucide="loader" class="w-5 h-5 animate-spin inline"></i> 加载中...
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 切换诊断组展开/折叠
+        async function toggleDiagnosisGroupDetail(groupId) {
+            const detailDiv = document.getElementById(`diagnosisGroupDetail_${groupId}`);
+            const chevron = document.querySelector(`.diagnosis-group-chevron-${groupId}`);
+
+            if (detailDiv.classList.contains('hidden')) {
+                // 展开：加载诊断详情
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses?diagnosis_group_id=${groupId}`);
+                    const result = await response.json();
+
+                    if (result.success && result.data && result.data.length > 0) {
+                        const diagnoses = result.data;
+                        detailDiv.innerHTML = diagnoses.map(diagnosis => {
+                            const diagnoseData = typeof diagnosis.diagnose_data === 'string'
+                                ? JSON.parse(diagnosis.diagnose_data)
+                                : diagnosis.diagnose_data || {};
+
+                            return `
+                                <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">${diagnosis.template_name || '诊断'}</h4>
+                                            <p class="text-xs text-gray-500 mt-1">${DateUtils.format(new Date(diagnosis.diagnose_date), 'YYYY-MM-DD HH:mm')}</p>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="editDiagnosis(${diagnosis.id})"
+                                                    class="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                                                    title="编辑">
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="deleteDiagnosis(${diagnosis.id})"
+                                                    class="text-red-600 hover:text-red-800 transition-colors p-1"
+                                                    title="删除">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-gray-600 space-y-1">
+                                        ${diagnosis.skin_type ? `<div>肤质: ${translateSkinType(diagnosis.skin_type)}</div>` : ''}
+                                        ${diagnosis.hair_type ? `<div>发质: ${translateHairType(diagnosis.hair_type)}</div>` : ''}
+                                        ${Object.keys(diagnoseData).length > 0 ? `<div>记录项: ${Object.keys(diagnoseData).length} 项</div>` : ''}
+                                    </div>
+                                    ${diagnosis.suggestions ? `
+                                        <div class="text-xs text-gray-500 mt-2 line-clamp-2">
+                                            <strong>建议:</strong> ${diagnosis.suggestions}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('');
+                        lucide.createIcons();
+                    } else {
+                        detailDiv.innerHTML = '<p class="text-gray-500 text-center py-4">暂无诊断记录</p>';
+                    }
+                } catch (error) {
+                    console.error('加载诊断组详情失败:', error);
+                    detailDiv.innerHTML = `<p class="text-red-500 text-center py-4">加载失败: ${error.message}</p>`;
+                }
+
+                detailDiv.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                // 折叠
+                detailDiv.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // 删除诊断组
+        async function deleteDiagnosisGroup(groupId) {
+            if (!confirm('确定要删除这个诊断组吗？组内所有诊断记录都将被删除。')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/customer-diagnosis-groups/group/${groupId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('✅ 诊断组已删除');
+                    UIUtils.notify('诊断组已删除', 'success');
+                    await loadDiagnosisHistory();
+                } else {
+                    throw new Error(result.message || '删除失败');
+                }
+            } catch (error) {
+                console.error('❌ 删除诊断组失败:', error);
+                UIUtils.notify('删除失败: ' + error.message, 'error');
             }
         }
 
@@ -3267,6 +3553,695 @@
         document.getElementById('diagnosisModal').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeDiagnosisModal();
+            }
+        });
+
+        // ========================================
+        // 诊断组功能
+        // ========================================
+
+        // 存储诊断组的模板数据
+        let currentDiagnosisGroupData = null;
+
+        // 显示创建诊断组模态框
+        async function showCreateDiagnosisGroupModal() {
+            try {
+                console.log('🔄 加载诊断模板...');
+
+                // 显示模态框
+                document.getElementById('diagnosisGroupModal').classList.remove('hidden');
+
+                // 显示加载状态
+                document.getElementById('recommendedTemplatesList').innerHTML = '<p class="text-gray-500">加载中...</p>';
+                document.getElementById('otherTemplatesList').innerHTML = '<p class="text-gray-500">加载中...</p>';
+
+                // 加载所有激活的诊断模板
+                const response = await window.apiClient.get('/api/diagnosis-templates', {
+                    status: 'active'
+                });
+
+                console.log('✅ 模板加载响应:', response);
+
+                if (!response.success || !response.data) {
+                    throw new Error(response.message || '加载诊断模板失败');
+                }
+
+                const templates = response.data;
+                console.log('📋 加载了', templates.length, '个诊断模板');
+
+                if (templates.length === 0) {
+                    document.getElementById('recommendedTemplatesList').innerHTML = '<p class="text-gray-500">暂无可用的诊断模板</p>';
+                    return;
+                }
+
+                // 分类：推荐vs其他
+                const recommended = templates.filter(t =>
+                    t.apply_scene === 'new_customer' ||
+                    t.template_code === 'COMPREHENSIVE_HEALTH_DIAGNOSIS' ||
+                    t.category === 'routine'
+                );
+                const others = templates.filter(t => !recommended.includes(t));
+
+                console.log('⭐ 推荐模板:', recommended.length, '个');
+                console.log('📚 其他模板:', others.length, '个');
+
+                // 渲染推荐模板
+                if (recommended.length > 0) {
+                    renderDiagnosisTemplateCheckboxes('recommendedTemplatesList', recommended, true);
+                    document.getElementById('recommendedTemplatesSection').classList.remove('hidden');
+                } else {
+                    document.getElementById('recommendedTemplatesSection').classList.add('hidden');
+                }
+
+                // 渲染其他模板
+                if (others.length > 0) {
+                    renderDiagnosisTemplateCheckboxes('otherTemplatesList', others, false);
+                    document.getElementById('otherTemplatesSection').classList.remove('hidden');
+                } else {
+                    document.getElementById('otherTemplatesSection').classList.add('hidden');
+                }
+
+                // 更新计数
+                updateSelectedDiagnosisTemplatesCount();
+
+                lucide.createIcons();
+                console.log('✨ 诊断组选择模态框渲染完成');
+
+            } catch (error) {
+                console.error('❌ 加载诊断模板失败:', error);
+                UIUtils.notify('加载模板失败: ' + error.message, 'error');
+                document.getElementById('diagnosisGroupModal').classList.add('hidden');
+            }
+        }
+
+        // 渲染诊断模板复选框列表
+        function renderDiagnosisTemplateCheckboxes(containerId, templates, defaultChecked = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            templates.forEach(template => {
+                // 计算字段数
+                const fieldCount = Array.isArray(template.fields)
+                    ? template.fields.length
+                    : (template.fields ? JSON.parse(template.fields).length : 0);
+
+                const label = document.createElement('label');
+                label.className = 'flex items-start gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-purple-300 transition-all';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'diagnosis-group-template-checkbox mt-1 w-5 h-5 text-purple-600 rounded';
+                checkbox.value = template.id;
+                checkbox.dataset.templateName = template.template_name;
+                checkbox.dataset.templateCode = template.template_code;
+                checkbox.dataset.templateFields = JSON.stringify(template.fields || []);
+                if (defaultChecked) checkbox.checked = true;
+                checkbox.onchange = updateSelectedDiagnosisTemplatesCount;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'flex-1 min-w-0';
+
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'flex items-center gap-2 mb-1 flex-wrap';
+                titleDiv.innerHTML = `
+                    <div class="font-medium text-gray-900">${template.template_name}</div>
+                    <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">${fieldCount} 个字段</span>
+                    ${template.apply_scene ? `<span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">${template.apply_scene}</span>` : ''}
+                `;
+
+                const descDiv = document.createElement('div');
+                descDiv.className = 'text-sm text-gray-600';
+                descDiv.textContent = template.description || '无描述';
+
+                contentDiv.appendChild(titleDiv);
+                contentDiv.appendChild(descDiv);
+
+                label.appendChild(checkbox);
+                label.appendChild(contentDiv);
+                container.appendChild(label);
+            });
+        }
+
+        // 更新选中的诊断模板计数
+        function updateSelectedDiagnosisTemplatesCount() {
+            const checkboxes = document.querySelectorAll('.diagnosis-group-template-checkbox:checked');
+            const count = checkboxes.length;
+
+            document.getElementById('selectedDiagnosisTemplatesCount').textContent = count;
+
+            // 启用/禁用创建按钮
+            const createBtn = document.getElementById('createDiagnosisGroupBtn');
+            if (count > 0) {
+                createBtn.disabled = false;
+                createBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                createBtn.disabled = true;
+                createBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // 关闭诊断组选择模态框
+        function closeDiagnosisGroupModal() {
+            console.log('关闭诊断组选择模态框');
+            document.getElementById('diagnosisGroupModal').classList.add('hidden');
+
+            // 重置选中状态
+            document.querySelectorAll('.diagnosis-group-template-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            updateSelectedDiagnosisTemplatesCount();
+
+            currentDiagnosisGroupData = null;
+        }
+
+        // 确认创建诊断组
+        async function confirmCreateDiagnosisGroup() {
+            try {
+                const checkboxes = document.querySelectorAll('.diagnosis-group-template-checkbox:checked');
+                const selectedTemplateIds = Array.from(checkboxes).map(cb => ({
+                    id: parseInt(cb.value),
+                    name: cb.dataset.templateName,
+                    code: cb.dataset.templateCode,
+                    fields: JSON.parse(cb.dataset.templateFields)
+                }));
+
+                if (selectedTemplateIds.length === 0) {
+                    UIUtils.notify('请至少选择一个诊断模板', 'warning');
+                    return;
+                }
+
+                console.log('📡 创建诊断组，选中的模板:', selectedTemplateIds);
+
+                // 调用API创建诊断组
+                const response = await window.apiClient.post('/api/customer-diagnosis-groups', {
+                    customer_id: parseInt(currentCustomer.id),
+                    org_id: currentCustomer.org_id || 1,
+                    diagnosis_template_ids: selectedTemplateIds.map(t => t.id),
+                    created_by: 1  // TODO: 获取当前登录用户ID
+                });
+
+                console.log('✅ 诊断组创建响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '创建诊断组失败');
+                }
+
+                UIUtils.notify(`✅ 成功创建诊断组，包含 ${selectedTemplateIds.length} 个模板`, 'success');
+
+                // 保存诊断组数据
+                currentDiagnosisGroupData = {
+                    group_id: response.data.group_id,
+                    templates: selectedTemplateIds
+                };
+
+                console.log('💾 诊断组数据已保存:', currentDiagnosisGroupData);
+
+                // 关闭选择模态框
+                closeDiagnosisGroupModal();
+
+                // 打开诊断填写模态框
+                showDiagnosisGroupFillModal();
+
+            } catch (error) {
+                console.error('❌ 创建诊断组失败:', error);
+                UIUtils.notify('创建失败: ' + error.message, 'error');
+            }
+        }
+
+        // 存储诊断组填写状态
+        let diagnosisGroupFillState = {
+            group_id: null,
+            templates: [],
+            currentIndex: 0,
+            completedIndexes: [],
+            formData: {}  // 存储每个表单的诊断数据
+        };
+
+        // 显示诊断组填写模态框
+        function showDiagnosisGroupFillModal() {
+            if (!currentDiagnosisGroupData || currentDiagnosisGroupData.templates.length === 0) {
+                UIUtils.notify('诊断组数据丢失', 'error');
+                return;
+            }
+
+            console.log('📋 显示诊断组填写模态框，包含', currentDiagnosisGroupData.templates.length, '个模板');
+
+            // 初始化填写状态
+            diagnosisGroupFillState = {
+                group_id: currentDiagnosisGroupData.group_id,
+                templates: currentDiagnosisGroupData.templates,
+                currentIndex: 0,
+                completedIndexes: [],
+                formData: {}
+            };
+
+            // 渲染Tab导航
+            renderDiagnosisGroupTabs();
+
+            // 渲染所有诊断表单
+            renderDiagnosisGroupForms();
+
+            // 更新进度
+            updateDiagnosisGroupProgress();
+
+            // 显示模态框
+            document.getElementById('diagnosisGroupFillModal').classList.remove('hidden');
+            document.body.classList.add('no-scroll');
+
+            // 激活第一个Tab
+            switchDiagnosisGroupTab(0);
+
+            lucide.createIcons();
+        }
+
+        // 渲染Tab导航
+        function renderDiagnosisGroupTabs() {
+            const container = document.getElementById('diagnosisGroupTabsContainer');
+            container.innerHTML = diagnosisGroupFillState.templates.map((template, index) => `
+                <button
+                    id="diagnosisGroupTab_${index}"
+                    onclick="switchDiagnosisGroupTab(${index})"
+                    class="diagnosis-group-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium transition-colors whitespace-nowrap ${index === 0 ? 'border-purple-600 text-purple-600' : 'text-gray-600 hover:text-gray-900'}">
+                    ${template.name}
+                    ${diagnosisGroupFillState.completedIndexes.includes(index) ? '<i data-lucide="check" class="w-4 h-4 inline ml-1 text-green-600"></i>' : ''}
+                </button>
+            `).join('');
+        }
+
+        // 渲染诊断组表单
+        function renderDiagnosisGroupForms() {
+            const container = document.getElementById('diagnosisGroupFormsContainer');
+
+            container.innerHTML = diagnosisGroupFillState.templates.map((template, index) => {
+                // 解析字段
+                const fields = typeof template.fields === 'string'
+                    ? JSON.parse(template.fields)
+                    : template.fields || [];
+
+                // 按group分组
+                const groupedFields = {};
+                fields.forEach(field => {
+                    const group = field.group || '未分组';
+                    if (!groupedFields[group]) groupedFields[group] = [];
+                    groupedFields[group].push(field);
+                });
+
+                return `
+                    <div id="diagnosisGroupForm_${index}" class="diagnosis-group-form ${index === 0 ? '' : 'hidden'}">
+                        <h3 class="text-xl font-bold mb-2">${template.name}</h3>
+                        <p class="text-sm text-gray-600 mb-6">${template.description || '暂无描述'}</p>
+
+                        <form id="diagnosisGroupFormElement_${index}" class="space-y-6">
+                            <!-- 基本信息 -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">诊断日期 *</label>
+                                    <input type="date"
+                                           id="diagnosisGroupDate_${index}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                           value="${new Date().toISOString().split('T')[0]}"
+                                           required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">诊断人 *</label>
+                                    <select id="diagnosisGroupDiagnosedBy_${index}"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                            required>
+                                        <option value="1">李美容师</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">模板</label>
+                                    <input type="text"
+                                           class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600"
+                                           value="${template.code || template.name}"
+                                           disabled>
+                                </div>
+                            </div>
+
+                            <!-- 动态字段 -->
+                            <div id="diagnosisGroupDynamicFields_${index}" class="space-y-6">
+                                ${Object.entries(groupedFields).map(([groupName, groupFields]) => `
+                                    <div class="border-l-4 border-purple-500 pl-4">
+                                        <h4 class="font-semibold text-gray-900 mb-3">${groupName}</h4>
+                                        <div class="space-y-4">
+                                            ${groupFields.map(field => renderDiagnosisGroupField(field, index)).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- 诊断建议 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">诊断建议</label>
+                                <textarea id="diagnosisGroupSuggestions_${index}"
+                                          rows="4"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                          placeholder="记录诊断建议和注意事项..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 渲染单个诊断字段
+        function renderDiagnosisGroupField(field, templateIndex) {
+            const required = field.required ? 'required' : '';
+            const requiredMark = field.required ? '<span class="text-red-500">*</span>' : '';
+            const fieldId = `diagnosisGroupField_${templateIndex}_${field.field_key}`;
+
+            switch (field.field_type) {
+                case 'text':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <input type="text"
+                                   id="${fieldId}"
+                                   data-field-key="${field.field_key}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                   placeholder="${field.placeholder || ''}"
+                                   ${required}>
+                        </div>
+                    `;
+
+                case 'number':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <input type="number"
+                                   id="${fieldId}"
+                                   data-field-key="${field.field_key}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                   placeholder="${field.placeholder || ''}"
+                                   ${required}>
+                        </div>
+                    `;
+
+                case 'date':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <input type="date"
+                                   id="${fieldId}"
+                                   data-field-key="${field.field_key}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                   ${required}>
+                        </div>
+                    `;
+
+                case 'textarea':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <textarea id="${fieldId}"
+                                      data-field-key="${field.field_key}"
+                                      rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                      placeholder="${field.placeholder || ''}"
+                                      ${required}></textarea>
+                        </div>
+                    `;
+
+                case 'select':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <select id="${fieldId}"
+                                    data-field-key="${field.field_key}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                    ${required}>
+                                <option value="">请选择</option>
+                                ${(field.options || []).map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+
+                case 'radio':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                ${(field.options || []).map((opt, idx) => `
+                                    <label class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio"
+                                               name="diagnosisGroupRadio_${templateIndex}_${field.field_key}"
+                                               data-field-key="${field.field_key}"
+                                               value="${opt}"
+                                               class="w-4 h-4 text-purple-600"
+                                               ${idx === 0 && required ? 'checked' : ''}>
+                                        <span class="ml-2 text-sm text-gray-700">${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'checkbox':
+                    return `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                ${field.field_name} ${requiredMark}
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                ${(field.options || []).map(opt => `
+                                    <label class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox"
+                                               name="diagnosisGroupCheckbox_${templateIndex}_${field.field_key}"
+                                               data-field-key="${field.field_key}"
+                                               value="${opt}"
+                                               class="w-4 h-4 text-purple-600 rounded">
+                                        <span class="ml-2 text-sm text-gray-700">${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return '';
+            }
+        }
+
+        // 切换诊断组Tab
+        function switchDiagnosisGroupTab(index) {
+            diagnosisGroupFillState.currentIndex = index;
+
+            // 更新Tab样式
+            document.querySelectorAll('.diagnosis-group-tab').forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('border-purple-600', 'text-purple-600');
+                    tab.classList.remove('border-transparent', 'text-gray-600');
+                } else {
+                    tab.classList.remove('border-purple-600', 'text-purple-600');
+                    tab.classList.add('border-transparent', 'text-gray-600');
+                }
+            });
+
+            // 切换表单显示
+            document.querySelectorAll('.diagnosis-group-form').forEach((form, i) => {
+                if (i === index) {
+                    form.classList.remove('hidden');
+                } else {
+                    form.classList.add('hidden');
+                }
+            });
+
+            console.log('切换到Tab', index, ':', diagnosisGroupFillState.templates[index].name);
+        }
+
+        // 保存当前诊断
+        async function saveCurrentDiagnosisInGroup() {
+            const index = diagnosisGroupFillState.currentIndex;
+            const template = diagnosisGroupFillState.templates[index];
+
+            console.log('💾 保存诊断组中的诊断', index, ':', template.name);
+
+            try {
+                // 验证必填字段
+                const diagnoseDate = document.getElementById(`diagnosisGroupDate_${index}`).value;
+                const diagnosedBy = document.getElementById(`diagnosisGroupDiagnosedBy_${index}`).value;
+
+                if (!diagnoseDate || !diagnosedBy) {
+                    UIUtils.notify('请填写诊断日期和诊断人', 'error');
+                    return;
+                }
+
+                // 收集表单数据
+                const diagnoseData = {};
+                const formElement = document.getElementById(`diagnosisGroupFormElement_${index}`);
+
+                // 处理所有输入字段
+                const allFields = formElement.querySelectorAll('[data-field-key]');
+                allFields.forEach(field => {
+                    const fieldKey = field.dataset.fieldKey;
+
+                    if (field.type === 'checkbox') {
+                        // 复选框：收集所有选中的值
+                        const checkedValues = Array.from(
+                            formElement.querySelectorAll(`[name*="${fieldKey}"]:checked`)
+                        ).map(cb => cb.value);
+                        if (checkedValues.length > 0) {
+                            diagnoseData[fieldKey] = checkedValues;
+                        }
+                    } else if (field.type === 'radio') {
+                        // 单选框：只收集选中的值
+                        const checkedRadio = formElement.querySelector(`[name*="${fieldKey}"]:checked`);
+                        if (checkedRadio) {
+                            diagnoseData[fieldKey] = checkedRadio.value;
+                        }
+                    } else {
+                        // 其他类型：直接获取值
+                        if (field.value) {
+                            diagnoseData[fieldKey] = field.value;
+                        }
+                    }
+                });
+
+                const suggestions = document.getElementById(`diagnosisGroupSuggestions_${index}`).value;
+
+                console.log('📋 收集的诊断数据:', diagnoseData);
+
+                // 调用API保存诊断
+                const response = await window.apiClient.post('/api/customer-diagnoses', {
+                    customer_id: parseInt(currentCustomer.id),
+                    org_id: currentCustomer.org_id || 1,
+                    diagnosis_group_id: diagnosisGroupFillState.group_id,
+                    diagnosis_template_id: template.id,
+                    diagnose_date: diagnoseDate,
+                    diagnosed_by: parseInt(diagnosedBy),
+                    diagnose_data: diagnoseData,
+                    suggestions: suggestions || null,
+                    created_by: 1
+                });
+
+                console.log('✅ 诊断保存成功:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '保存诊断失败');
+                }
+
+                // 标记为已完成
+                if (!diagnosisGroupFillState.completedIndexes.includes(index)) {
+                    diagnosisGroupFillState.completedIndexes.push(index);
+                }
+
+                // 更新Tab显示
+                renderDiagnosisGroupTabs();
+                updateDiagnosisGroupProgress();
+
+                UIUtils.notify(`✅ ${template.name} 诊断已保存`, 'success');
+
+                // 自动切换到下一个未完成的Tab
+                const nextIndex = findNextIncompleteDiagnosisInGroup();
+                if (nextIndex !== -1) {
+                    switchDiagnosisGroupTab(nextIndex);
+                }
+
+            } catch (error) {
+                console.error('❌ 保存诊断失败:', error);
+                UIUtils.notify('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        // 跳过当前诊断
+        function skipCurrentDiagnosisInGroup() {
+            const nextIndex = findNextIncompleteDiagnosisInGroup();
+            if (nextIndex !== -1) {
+                switchDiagnosisGroupTab(nextIndex);
+            } else {
+                UIUtils.notify('没有更多未完成的诊断', 'info');
+            }
+        }
+
+        // 查找下一个未完成的诊断索引
+        function findNextIncompleteDiagnosisInGroup() {
+            const total = diagnosisGroupFillState.templates.length;
+
+            // 从当前位置之后查找
+            for (let i = diagnosisGroupFillState.currentIndex + 1; i < total; i++) {
+                if (!diagnosisGroupFillState.completedIndexes.includes(i)) {
+                    return i;
+                }
+            }
+
+            // 如果没找到，从头开始查找
+            for (let i = 0; i < diagnosisGroupFillState.currentIndex; i++) {
+                if (!diagnosisGroupFillState.completedIndexes.includes(i)) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        // 完成所有诊断
+        async function completeAllDiagnoses() {
+            const total = diagnosisGroupFillState.templates.length;
+            const completed = diagnosisGroupFillState.completedIndexes.length;
+
+            if (completed < total) {
+                const userConfirm = confirm(
+                    `还有 ${total - completed} 个诊断未填写，确定要结束吗？`
+                );
+                if (!userConfirm) return;
+            }
+
+            console.log('✅ 诊断组填写完成');
+
+            // 关闭模态框
+            closeDiagnosisGroupFillModal();
+
+            // 重新加载诊断历史
+            await loadDiagnosisHistory();
+
+            UIUtils.notify('诊断组填写完成！', 'success');
+        }
+
+        // 更新诊断组进度
+        function updateDiagnosisGroupProgress() {
+            const total = diagnosisGroupFillState.templates.length;
+            const completed = diagnosisGroupFillState.completedIndexes.length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('diagnosisGroupProgressCount').textContent = `${completed} / ${total}`;
+            document.getElementById('diagnosisGroupProgressBar').style.width = `${percent}%`;
+        }
+
+        // 关闭诊断组填写模态框
+        function closeDiagnosisGroupFillModal() {
+            console.log('关闭诊断组填写模态框');
+            document.getElementById('diagnosisGroupFillModal').classList.add('hidden');
+            document.body.classList.remove('no-scroll');
+
+            // 重置状态
+            diagnosisGroupFillState = {
+                group_id: null,
+                templates: [],
+                currentIndex: 0,
+                completedIndexes: [],
+                formData: {}
+            };
+
+            currentDiagnosisGroupData = null;
+        }
+
+        // 点击模态框外部关闭诊断组选择模态框
+        document.getElementById('diagnosisGroupModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDiagnosisGroupModal();
             }
         });
 
