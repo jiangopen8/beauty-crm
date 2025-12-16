@@ -562,9 +562,13 @@
                                     <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
                                     新建诊断
                                 </button>
+                                <button onclick="createEmptyDiagnosisGroup()" class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
+                                    <i data-lucide="folder-plus" class="w-4 h-4 inline mr-1"></i>
+                                    创建空诊断组
+                                </button>
                                 <button onclick="showCreateDiagnosisGroupModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
                                     <i data-lucide="layers" class="w-4 h-4 inline mr-1"></i>
-                                    创建诊断组
+                                    快速创建诊断组
                                 </button>
                             </div>
                         </div>
@@ -1522,6 +1526,7 @@
         function renderDiagnosisGroupCard(group, serialNumber) {
             const groupDate = new Date(group.created_at).toLocaleDateString('zh-CN');
             const templateCount = group.templates ? group.templates.length : 0;
+            const groupDisplayName = group.group_name || `诊断组 #${serialNumber}`;
 
             return `
                 <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-300 p-4 hover:shadow-md transition-shadow">
@@ -1529,7 +1534,7 @@
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-3 flex-1">
                             <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                诊断组 #${serialNumber}
+                                ${groupDisplayName}
                             </div>
                             <span class="text-sm text-gray-700 font-medium">${groupDate}</span>
                             <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
@@ -1537,6 +1542,11 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
+                            <button onclick="editDiagnosisGroupInfo('${group.group_id}', '${(group.group_name || '').replace(/'/g, "\\'")}')"
+                                    class="text-blue-500 hover:text-blue-700 transition-colors p-1"
+                                    title="编辑诊断组信息">
+                                <i data-lucide="edit-3" class="w-5 h-5"></i>
+                            </button>
                             <button onclick="toggleDiagnosisGroupDetail('${group.group_id}')"
                                     class="text-gray-600 hover:text-purple-600 transition-colors p-1"
                                     title="展开/折叠">
@@ -1557,6 +1567,7 @@
                                 ${t.template_name}
                             </span>
                         `).join('')}
+                        ${templateCount === 0 ? '<span class="text-xs text-gray-500 italic">空诊断组</span>' : ''}
                     </div>
 
                     <!-- 展开的诊断详情 -->
@@ -1576,14 +1587,65 @@
             const chevron = document.querySelector(`.diagnosis-group-chevron-${groupId}`);
 
             if (detailDiv.classList.contains('hidden')) {
-                // 展开：加载诊断详情
+                // 展开：加载诊断详情和进度信息
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/customer-diagnoses?diagnosis_group_id=${groupId}`);
-                    const result = await response.json();
+                    // 并行加载诊断详情和统计信息
+                    const [diagnosisResponse, statsResponse] = await Promise.all([
+                        fetch(`${API_BASE_URL}/api/customer-diagnoses?diagnosis_group_id=${groupId}`),
+                        fetch(`${API_BASE_URL}/api/customer-diagnosis-groups/stats/${groupId}`)
+                    ]);
 
-                    if (result.success && result.data && result.data.length > 0) {
-                        const diagnoses = result.data;
-                        detailDiv.innerHTML = diagnoses.map(diagnosis => {
+                    const diagnosisResult = await diagnosisResponse.json();
+                    const statsResult = await statsResponse.json();
+
+                    // 构建内容HTML
+                    let contentHTML = '';
+
+                    // 添加进度条（如果有模板）
+                    if (statsResult.success && statsResult.data.total_templates > 0) {
+                        const { total_templates, completed_diagnoses, pending_diagnoses } = statsResult.data;
+                        const progressPercent = Math.round((completed_diagnoses / total_templates) * 100);
+
+                        contentHTML += `
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 mb-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700">完成进度</span>
+                                    <span class="text-sm text-gray-600">${completed_diagnoses}/${total_templates} (${progressPercent}%)</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-300"
+                                         style="width: ${progressPercent}%"></div>
+                                </div>
+                                ${pending_diagnoses > 0 ? `
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <i data-lucide="alert-circle" class="w-3 h-3 inline"></i>
+                                        还有 ${pending_diagnoses} 个诊断待完成
+                                    </p>
+                                ` : `
+                                    <p class="text-xs text-green-600 mt-2">
+                                        <i data-lucide="check-circle" class="w-3 h-3 inline"></i>
+                                        所有诊断已完成
+                                    </p>
+                                `}
+                            </div>
+                        `;
+                    }
+
+                    // 添加诊断按钮
+                    contentHTML += `
+                        <div class="flex justify-end mb-3">
+                            <button onclick="showAddDiagnosisToGroupModal('${groupId}')"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                                添加诊断
+                            </button>
+                        </div>
+                    `;
+
+                    // 添加诊断列表
+                    if (diagnosisResult.success && diagnosisResult.data && diagnosisResult.data.length > 0) {
+                        const diagnoses = diagnosisResult.data;
+                        contentHTML += diagnoses.map(diagnosis => {
                             const diagnoseData = typeof diagnosis.diagnose_data === 'string'
                                 ? JSON.parse(diagnosis.diagnose_data)
                                 : diagnosis.diagnose_data || {};
@@ -1621,10 +1683,13 @@
                                 </div>
                             `;
                         }).join('');
-                        lucide.createIcons();
                     } else {
-                        detailDiv.innerHTML = '<p class="text-gray-500 text-center py-4">暂无诊断记录</p>';
+                        contentHTML += '<p class="text-gray-500 text-center py-4">暂无诊断记录，点击"添加诊断"开始填写</p>';
                     }
+
+                    detailDiv.innerHTML = contentHTML;
+                    lucide.createIcons();
+
                 } catch (error) {
                     console.error('加载诊断组详情失败:', error);
                     detailDiv.innerHTML = `<p class="text-red-500 text-center py-4">加载失败: ${error.message}</p>`;
@@ -3563,6 +3628,176 @@
         // 存储诊断组的模板数据
         let currentDiagnosisGroupData = null;
 
+        // 创建空诊断组
+        async function createEmptyDiagnosisGroup() {
+            try {
+                // 弹出对话框询问诊断组名称
+                const groupName = prompt('请输入诊断组名称（可选）:', '');
+
+                // 如果用户点击取消，则不创建
+                if (groupName === null) {
+                    console.log('用户取消创建空诊断组');
+                    return;
+                }
+
+                console.log('🔄 正在创建空诊断组...');
+                UIUtils.notify('正在创建空诊断组...', 'info');
+
+                // 调用API创建空诊断组
+                const response = await window.apiClient.post('/api/customer-diagnosis-groups', {
+                    customer_id: parseInt(currentCustomer.id),
+                    org_id: currentCustomer.org_id || 1,
+                    diagnosis_template_ids: [],  // 空数组表示创建空诊断组
+                    group_name: groupName || null,
+                    group_description: null,
+                    created_by: 1
+                });
+
+                console.log('✅ 创建空诊断组响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '创建空诊断组失败');
+                }
+
+                UIUtils.notify(groupName ? `诊断组"${groupName}"创建成功！` : '空诊断组创建成功！', 'success');
+
+                // 刷新诊断历史列表
+                await loadDiagnosisHistory();
+
+            } catch (error) {
+                console.error('❌ 创建空诊断组失败:', error);
+                UIUtils.notify('创建失败: ' + error.message, 'error');
+            }
+        }
+
+        // 编辑诊断组信息
+        async function editDiagnosisGroupInfo(groupId, currentName) {
+            try {
+                // 弹出对话框输入新名称
+                const newName = prompt('请输入诊断组名称:', currentName || '');
+
+                // 如果用户点击取消或输入为空，则不更新
+                if (newName === null) {
+                    console.log('用户取消编辑诊断组');
+                    return;
+                }
+
+                console.log('🔄 正在更新诊断组信息...', groupId, newName);
+                UIUtils.notify('正在更新诊断组信息...', 'info');
+
+                // 调用API更新诊断组
+                const response = await window.apiClient.put(`/api/customer-diagnosis-groups/${groupId}`, {
+                    group_name: newName || null
+                });
+
+                console.log('✅ 更新诊断组响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '更新诊断组失败');
+                }
+
+                UIUtils.notify('诊断组信息已更新！', 'success');
+
+                // 刷新诊断历史列表
+                await loadDiagnosisHistory();
+
+            } catch (error) {
+                console.error('❌ 更新诊断组失败:', error);
+                UIUtils.notify('更新失败: ' + error.message, 'error');
+            }
+        }
+
+        // 向诊断组添加诊断
+        let currentAddToGroupId = null;  // 存储当前要添加诊断的组ID
+
+        async function showAddDiagnosisToGroupModal(groupId) {
+            try {
+                currentAddToGroupId = groupId;
+                console.log('🔄 准备向诊断组添加诊断:', groupId);
+
+                // 复用现有的诊断组选择模态框
+                await showCreateDiagnosisGroupModal();
+
+                // 修改模态框标题
+                const modalTitle = document.querySelector('#diagnosisGroupModal h3');
+                if (modalTitle) {
+                    modalTitle.textContent = '选择要添加的诊断模板';
+                }
+
+                // 修改确认按钮文案
+                const confirmBtn = document.querySelector('#diagnosisGroupModal button[onclick*="confirmCreateDiagnosisGroup"]');
+                if (confirmBtn) {
+                    confirmBtn.setAttribute('onclick', 'confirmAddTemplatesToGroup()');
+                    confirmBtn.innerHTML = '<i data-lucide="plus" class="w-4 h-4 inline mr-1"></i> 添加到诊断组';
+                    lucide.createIcons();
+                }
+
+            } catch (error) {
+                console.error('❌ 显示添加诊断对话框失败:', error);
+                UIUtils.notify('打开对话框失败: ' + error.message, 'error');
+            }
+        }
+
+        // 确认向诊断组添加模板
+        async function confirmAddTemplatesToGroup() {
+            try {
+                // 获取所有选中的模板
+                const checkboxes = document.querySelectorAll('.diagnosis-group-template-checkbox:checked');
+
+                if (checkboxes.length === 0) {
+                    UIUtils.notify('请至少选择一个诊断模板', 'error');
+                    return;
+                }
+
+                const selectedTemplateIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+                console.log('🔄 正在向诊断组添加模板:', currentAddToGroupId, selectedTemplateIds);
+                UIUtils.notify('正在添加诊断模板...', 'info');
+
+                // 调用API向诊断组添加模板
+                const response = await window.apiClient.post(
+                    `/api/customer-diagnosis-groups/${currentAddToGroupId}/templates`,
+                    {
+                        diagnosis_template_ids: selectedTemplateIds,
+                        created_by: 1
+                    }
+                );
+
+                console.log('✅ 添加模板响应:', response);
+
+                if (!response.success) {
+                    throw new Error(response.message || '添加模板失败');
+                }
+
+                UIUtils.notify(`成功添加 ${response.data.added_count} 个模板到诊断组！`, 'success');
+
+                // 关闭模态框并重置状态
+                closeDiagnosisGroupModal(true);
+
+                // 刷新诊断历史列表
+                await loadDiagnosisHistory();
+
+                // 可选：打开填写界面
+                if (confirm('是否立即填写新添加的诊断？')) {
+                    // 转换数据格式以匹配填写界面的期望格式
+                    currentDiagnosisGroupData = {
+                        group_id: response.data.group_id,
+                        templates: response.data.templates.map(t => ({
+                            id: t.template_id,
+                            name: t.template_name,
+                            code: t.template_code,
+                            fields: typeof t.fields === 'string' ? JSON.parse(t.fields) : t.fields
+                        }))
+                    };
+                    showDiagnosisGroupFillModal();
+                }
+
+            } catch (error) {
+                console.error('❌ 添加模板到诊断组失败:', error);
+                UIUtils.notify('添加失败: ' + error.message, 'error');
+            }
+        }
+
         // 显示创建诊断组模态框
         async function showCreateDiagnosisGroupModal() {
             try {
@@ -3701,8 +3936,9 @@
         }
 
         // 关闭诊断组选择模态框
-        function closeDiagnosisGroupModal() {
-            console.log('关闭诊断组选择模态框');
+        // @param {boolean} clearData - 是否清空诊断组数据，默认true
+        function closeDiagnosisGroupModal(clearData = true) {
+            console.log('关闭诊断组选择模态框, clearData:', clearData);
             document.getElementById('diagnosisGroupModal').classList.add('hidden');
 
             // 重置选中状态
@@ -3711,7 +3947,24 @@
             });
             updateSelectedDiagnosisTemplatesCount();
 
-            currentDiagnosisGroupData = null;
+            // 重置模态框标题和按钮
+            const modalTitle = document.querySelector('#diagnosisGroupModal h3');
+            if (modalTitle) {
+                modalTitle.textContent = '选择诊断模板';
+            }
+
+            const confirmBtn = document.querySelector('#diagnosisGroupModal button[onclick*="confirmAddTemplatesToGroup"], #diagnosisGroupModal button[onclick*="confirmCreateDiagnosisGroup"]');
+            if (confirmBtn) {
+                confirmBtn.setAttribute('onclick', 'confirmCreateDiagnosisGroup()');
+                confirmBtn.innerHTML = '<i data-lucide="layers" class="w-4 h-4 inline mr-1"></i> 创建诊断组';
+                lucide.createIcons();
+            }
+
+            // 只有明确需要清空数据时才清空
+            if (clearData) {
+                currentDiagnosisGroupData = null;
+                currentAddToGroupId = null;
+            }
         }
 
         // 确认创建诊断组
@@ -3748,16 +4001,26 @@
 
                 UIUtils.notify(`✅ 成功创建诊断组，包含 ${selectedTemplateIds.length} 个模板`, 'success');
 
-                // 保存诊断组数据
+                // 保存诊断组数据 - 使用API返回的完整模板数据
+                console.log('API返回的响应:', response);
+                console.log('API返回的模板数据:', response.data.templates);
+
                 currentDiagnosisGroupData = {
                     group_id: response.data.group_id,
-                    templates: selectedTemplateIds
+                    templates: response.data.templates && response.data.templates.length > 0
+                        ? response.data.templates.map(t => ({
+                            id: t.template_id || t.id,
+                            name: t.template_name || t.name,
+                            code: t.template_code || t.code,
+                            fields: t.fields || []
+                          }))
+                        : selectedTemplateIds
                 };
 
                 console.log('💾 诊断组数据已保存:', currentDiagnosisGroupData);
 
-                // 关闭选择模态框
-                closeDiagnosisGroupModal();
+                // 关闭选择模态框（不清空数据，因为接下来要使用）
+                closeDiagnosisGroupModal(false);
 
                 // 打开诊断填写模态框
                 showDiagnosisGroupFillModal();
